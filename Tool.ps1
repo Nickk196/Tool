@@ -173,20 +173,21 @@ try {
 
     $global:CurrentCmd = ""
 
-    # --- Tool Data (Fixed Quotes using Single Quotes for outer strings) ---
+    # --- Tool Data ---
+    # Used double quotes for outer strings and escaped inner quotes for stability in IEX
     $tools = @(
-        @{Name="Meow Mod Analyzer"; Desc="Advanced Minecraft mod analysis utility."; Cmd='powershell -ExecutionPolicy Bypass -Command "Invoke-Expression (Invoke-RestMethod ''https://raw.githubusercontent.com/MeowTonynoh/MeowModAnalyzer/main/MeowModAnalyzer.ps1'')"'},
-        @{Name="Macro Detector"; Desc="Detects mouse macros and autoclickers."; Cmd='powershell -ExecutionPolicy Bypass -Command "Invoke-Expression (Invoke-RestMethod ''https://raw.githubusercontent.com/Nickk196/MacroDetector/refs/heads/main/MacroDetector.ps1'')"'},
-        @{Name="Service Checker"; Desc="Analyzes running system services for anomalies."; Cmd='powershell Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass ; powershell Invoke-Expression (Invoke-RestMethod https://raw.githubusercontent.com/praiselily/lilith-ps/refs/heads/main/Services.ps1)'},
-        @{Name="Schedule Tasks"; Desc="Lists and checks signed scheduled tasks."; Cmd='powershell -Command "Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass; Invoke-Expression (Invoke-RestMethod ''https://raw.githubusercontent.com/praiselily/lilith-ps/refs/heads/main/Signed-Scheduled-Tasks'')"'},
-        @{Name="Faker Detection"; Desc="Identifies VPN and hotspot usage."; Cmd='powershell -ExecutionPolicy Bypass -Command "iwr https://raw.githubusercontent.com/praiselily/WeHateFakers/refs/heads/main/HotspotLogs.ps1 | iex"'},
-        @{Name="Directory Scanner"; Desc="Scans common directories for specific files."; Cmd='powershell -Command "Set-ExecutionPolicy Bypass -Scope Process; Invoke-Expression (Invoke-RestMethod ''https://raw.githubusercontent.com/praiselily/lilith-ps/refs/heads/main/CommonDirectories.ps1'')"'},
-        @{Name="NicTool Downloader"; Desc="Downloads SSTool, System Informer, and other utilities to C:\SS."; Cmd='CUSTOM_NIC_DOWNLOADER'},
-        @{Name="JAR Scanner"; Desc="Scans JAR files for malicious content."; Cmd='powershell -ExecutionPolicy Bypass -Command "iwr https://raw.githubusercontent.com/praiselily/JARScanner/refs/heads/main/JARScanner.ps1 | iex"'},
-        @{Name="Alt Detector"; Desc="Identifies alternative accounts and identifiers."; Cmd='powershell -ExecutionPolicy Bypass -Command "Invoke-Expression (Invoke-RestMethod ''https://raw.githubusercontent.com/Enr1c0o/Powershell-Scripts/refs/heads/main/Alt-Detector.ps1'')"'},
-        @{Name="Dqrkis Finder"; Desc="Locates Dqrkis in active sessions."; Cmd='powershell -ExecutionPolicy Bypass -Command "Invoke-Expression (Invoke-RestMethod ''https://raw.githubusercontent.com/cheesecatlol/DQRKIS-FUCKER/refs/heads/main/DqrkisFucker.ps1'')"'},
-        @{Name="Signature"; Desc="Signature Checker."; Cmd='powershell -ExecutionPolicy Bypass -Command "Invoke-Expression (Invoke-RestMethod ''https://raw.githubusercontent.com/bacanoicua/Screenshare/main/RedLotusSignatures.ps1'')"'},
-        @{Name="BAM"; Desc="Backround Activity Monitoring."; Cmd='powershell -ExecutionPolicy Bypass -Command "Invoke-Expression (Invoke-RestMethod ''https://raw.githubusercontent.com/PureIntent/ScreenShare/main/RedLotusBam.ps1'')"'}
+        @{Name="Meow Mod Analyzer"; Desc="Advanced Minecraft mod analysis utility."; Cmd="powershell -ExecutionPolicy Bypass -Command `"Invoke-Expression (Invoke-RestMethod 'https://raw.githubusercontent.com/MeowTonynoh/MeowModAnalyzer/main/MeowModAnalyzer.ps1')`""},
+        @{Name="Macro Detector"; Desc="Detects mouse macros and autoclickers."; Cmd="powershell -ExecutionPolicy Bypass -Command `"Invoke-Expression (Invoke-RestMethod 'https://raw.githubusercontent.com/Nickk196/MacroDetector/refs/heads/main/MacroDetector.ps1')`""},
+        @{Name="Service Checker"; Desc="Analyzes running system services for anomalies."; Cmd="powershell Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass ; powershell Invoke-Expression (Invoke-RestMethod https://raw.githubusercontent.com/praiselily/lilith-ps/refs/heads/main/Services.ps1)"},
+        @{Name="Schedule Tasks"; Desc="Lists and checks signed scheduled tasks."; Cmd="powershell -Command `"Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass; Invoke-Expression (Invoke-RestMethod 'https://raw.githubusercontent.com/praiselily/lilith-ps/refs/heads/main/Signed-Scheduled-Tasks')`""},
+        @{Name="Faker Detection"; Desc="Identifies VPN and hotspot usage."; Cmd="powershell -ExecutionPolicy Bypass -Command `"iwr https://raw.githubusercontent.com/praiselily/WeHateFakers/refs/heads/main/HotspotLogs.ps1 | iex`""},
+        @{Name="Directory Scanner"; Desc="Scans common directories for specific files."; Cmd="powershell -Command `"Set-ExecutionPolicy Bypass -Scope Process; Invoke-Expression (Invoke-RestMethod 'https://raw.githubusercontent.com/praiselily/lilith-ps/refs/heads/main/CommonDirectories.ps1')`""},
+        @{Name="NicTool Downloader"; Desc="Downloads SSTool, System Informer, and other utilities to C:\SS."; Cmd="CUSTOM_NIC_DOWNLOADER"},
+        @{Name="JAR Scanner"; Desc="Scans JAR files for malicious content."; Cmd="powershell -ExecutionPolicy Bypass -Command `"iwr https://raw.githubusercontent.com/praiselily/JARScanner/refs/heads/main/JARScanner.ps1 | iex`""},
+        @{Name="Alt Detector"; Desc="Identifies alternative accounts and identifiers."; Cmd="powershell -ExecutionPolicy Bypass -Command `"Invoke-Expression (Invoke-RestMethod 'https://raw.githubusercontent.com/Enr1c0o/Powershell-Scripts/refs/heads/main/Alt-Detector.ps1')`""},
+        @{Name="Dqrkis Finder"; Desc="Locates Dqrkis in active sessions."; Cmd="powershell -ExecutionPolicy Bypass -Command `"Invoke-Expression (Invoke-RestMethod 'https://raw.githubusercontent.com/cheesecatlol/DQRKIS-FUCKER/refs/heads/main/DqrkisFucker.ps1')`""},
+        @{Name="Signature"; Desc="Signature Checker."; Cmd="powershell -ExecutionPolicy Bypass -Command `"Invoke-Expression (Invoke-RestMethod 'https://raw.githubusercontent.com/bacanoicua/Screenshare/main/RedLotusSignatures.ps1')`""},
+        @{Name="BAM"; Desc="Backround Activity Monitoring."; Cmd="powershell -ExecutionPolicy Bypass -Command `"Invoke-Expression (Invoke-RestMethod 'https://raw.githubusercontent.com/PureIntent/ScreenShare/main/RedLotusBam.ps1')`""}
     )
 
     function Create-SidebarButton {
@@ -280,51 +281,47 @@ try {
                 $tempFileName = [Guid]::NewGuid().ToString() + ".ps1"
                 $tempFilePath = Join-Path $env:TEMP $tempFileName
                 
-                # NicTool Downloader Script (Embedded safely)
+                # NicTool Downloader Script (Embedded directly here)
                 if ($global:CurrentCmd -eq "CUSTOM_NIC_DOWNLOADER") {
-                    $scriptContent = @'
+                    $scriptContent = @"
 Write-Host "NicToolDownloader" -ForegroundColor Cyan
- $downloadDir = "C:\SS"
-if (!(Test-Path -Path $downloadDir)) {
-    try { New-Item -ItemType Directory -Path $downloadDir -Force | Out-Null; Write-Host "[INFO] Created directory at $downloadDir" -ForegroundColor Green }
+Write-Host "==================" -ForegroundColor Cyan
+Write-Host ""
+`$downloadDir = "C:\SS"
+if (!(Test-Path -Path `$downloadDir)) {
+    try { New-Item -ItemType Directory -Path `$downloadDir -Force | Out-Null; Write-Host "[INFO] Created directory at `$downloadDir" -ForegroundColor Green }
     catch { Write-Host "[ERROR] Failed to create directory." -ForegroundColor Red; Read-Host; exit }
-} else { Write-Host "[INFO] Directory already exists at $downloadDir" -ForegroundColor Gray }
+} else { Write-Host "[INFO] Directory already exists at `$downloadDir" -ForegroundColor Gray }
 Write-Host "[AUTO] Searching for latest System Informer version..." -ForegroundColor Cyan
- $siUrl = $null
+`$siUrl = `$null
 try {
-    $apiUrl = "https://api.github.com/repos/winsiderss/systeminformer/releases"
-    $response = Invoke-RestMethod -Uri $apiUrl -Headers @{"Accept"="application/vnd.github.v3+json"} -ErrorAction Stop
-    $asset = $response[0].assets | Where-Object { $_.name -match "systeminformer-.*-setup\.exe" } | Select-Object -First 1
-    if ($asset) { $siUrl = $asset.browser_download_url; Write-Host "[AUTO] Found Latest: $($asset.name)" -ForegroundColor Green }
+    `$apiUrl = "https://api.github.com/repos/winsiderss/systeminformer/releases"
+    `$response = Invoke-RestMethod -Uri `$apiUrl -Headers @{"Accept"="application/vnd.github.v3+json"} -ErrorAction Stop
+    `$asset = `$response[0].assets | Where-Object { `$_ -match "systeminformer-.*-setup\.exe" } | Select-Object -First 1
+    if (`$asset) { `$siUrl = `$asset.browser_download_url; Write-Host "[AUTO] Found Latest: " + `$asset.name -ForegroundColor Green }
     else { Write-Host "[WARN] Could not find setup file." -ForegroundColor Yellow }
 } catch { Write-Host "[WARN] Failed to fetch from GitHub." -ForegroundColor Yellow }
-if (-not $siUrl) { Write-Host "[FALLBACK] Using specific version." -ForegroundColor DarkGray; $siUrl = "https://github.com/winsiderss/systeminformer/releases/download/v4.0.26144/systeminformer-4.0.26144-setup.exe" }
- $urls = @(
+if (-not `$siUrl) { Write-Host "[FALLBACK] Using specific version." -ForegroundColor DarkGray; `$siUrl = "https://github.com/winsiderss/systeminformer/releases/download/v4.0.26144/systeminformer-4.0.26144-setup.exe" }
+`$urls = @(
     "https://github.com/Orbdiff/SSTool/releases/download/yay/SSTool.exe",
     "https://github.com/MeowTonynoh/MeowDoomsdayFucker/releases/download/V.1.2/MeowDoomsdayFucker.exe",
     "https://github.com/MeowTonynoh/MeowImportsChecker/releases/download/MeowImportsChecker/MeowImportsChecker.exe",
     "https://github.com/MeowTonynoh/MeowResolver/releases/download/MeowResolver/MeowResolver.exe",
-    $siUrl,
+    `$siUrl,
     "https://www.nirsoft.net/utils/winprefetchview.zip"
 )
 Write-Host "[START] Downloading files..." -ForegroundColor Cyan
-foreach ($url in $urls) {
-    $fileName = Split-Path $url -Leaf; $destination = Join-Path -Path $downloadDir -ChildPath $fileName
-    Write-Host "Downloading $fileName..." -NoNewline
-    try { Invoke-WebRequest -Uri $url -OutFile $destination -UseBasicParsing; Write-Host " [DONE]" -ForegroundColor Green }
+foreach (`$url in `$urls) {
+    `$fileName = Split-Path `$url -Leaf; `$destination = Join-Path -Path `$downloadDir -ChildPath `$fileName
+    Write-Host "Downloading `$fileName..." -NoNewline
+    try { Invoke-WebRequest -Uri `$url -OutFile `$destination -UseBasicParsing; Write-Host " [DONE]" -ForegroundColor Green }
     catch { Write-Host " [FAILED]" -ForegroundColor Red }
 }
 Write-Host "[FINISH] All tasks completed." -ForegroundColor Cyan
- $sumSep = "=" * 40
-Write-Host "  Created by  : " -NoNewline -ForegroundColor DarkGray; Write-Host "cheese cat" -ForegroundColor Yellow
-Write-Host "  Discord     : " -NoNewline -ForegroundColor DarkGray; Write-Host "cheese_cat0" -ForegroundColor Yellow
-Write-Host "  GitHub      : " -NoNewline -ForegroundColor DarkGray; Write-Host "github.com/cheesecatlol" -ForegroundColor Yellow
-Write-Host "  Created by  : " -NoNewline -ForegroundColor DarkGray; Write-Host "nic" -ForegroundColor Yellow
-Write-Host "  Discord     : " -NoNewline -ForegroundColor DarkGray; Write-Host "mecz.exe" -ForegroundColor Yellow
-Write-Host "  GitHub      : " -NoNewline -ForegroundColor DarkGray; Write-Host "github.com/Nickk196" -ForegroundColor Yellow
-Write-Host $sumSep -ForegroundColor DarkYellow
+Write-Host "  Created by  : cheese cat" -ForegroundColor Yellow
+Write-Host "  Created by  : nic" -ForegroundColor Yellow
 Read-Host "  Press Enter to exit"
-'@
+"@
                     $scriptContent | Out-File -FilePath $tempFilePath -Encoding UTF8
                     $LogPreview.Text = "Running NicTool Downloader..."
                 }
@@ -341,7 +338,7 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
                 Start-Process "cmd.exe" -ArgumentList $psiArgs
             }
         }
-        catch { [System.Windows.MessageBox]::Show("Launcher Error: $_"); $LogPreview.Text = "Error occurred." }
+        catch { [System.Windows.MessageBox]::Show("Launcher Error: `$_"); $LogPreview.Text = "Error occurred." }
     })
 
     $MinBtn.Add_Click({ $window.WindowState = [Windows.WindowState]::Minimized })

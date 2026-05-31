@@ -1,7 +1,7 @@
 Add-Type -AssemblyName PresentationFramework
 Add-Type -AssemblyName System.Windows.Forms
 
-# --- XAML GUI Definition (Simplified for Compatibility) ---
+# --- XAML GUI Definition (Safe/Compatible) ---
 [xml]$xaml = @"
 <Window 
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -17,7 +17,7 @@ Add-Type -AssemblyName System.Windows.Forms
     Topmost="False">
 
     <Window.Resources>
-        <!-- Simplified Button Style (No complex templates, just triggers) -->
+        <!-- Simplified Button Style -->
         <Style x:Key="NeonButton" TargetType="Button">
             <Setter Property="Background" Value="#0A0A0A"/>
             <Setter Property="Foreground" Value="#00FFCC"/>
@@ -147,11 +147,25 @@ try {
         $LogConsole.ScrollToEnd()
     }
 
-    # Tool Launcher Helper
+    # Tool Launcher Helper (FIXED: Uses Temp File to avoid length limit)
     function Invoke-Tool {
         param([string]$Name, [string]$Command)
         Write-Log "INITIATING: $Name..." "Cyan"
-        Start-Process powershell.exe -ArgumentList "-NoExit", "-Command", $Command
+        
+        # 1. Create a temporary .ps1 file
+        $tempFileName = [Guid]::NewGuid().ToString() + ".ps1"
+        $tempFilePath = Join-Path $env:TEMP $tempFileName
+        
+        # 2. Write the command to the file
+        # We add Set-ExecutionPolicy locally to the file just to be safe
+        $fileContent = @"
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+ $Command
+"@
+        Set-Content -Path $tempFilePath -Value $fileContent
+        
+        # 3. Execute the file
+        Start-Process powershell.exe -ArgumentList "-NoExit", "-File", `"$tempFilePath`"
     }
 
     # --- Event Hooks ---
@@ -211,6 +225,5 @@ try {
 
 } catch {
     Write-Host "CRITICAL ERROR: $_" -ForegroundColor Red
-    Write-Host "If you see a 'Setter' error, your .NET version is outdated." -ForegroundColor Yellow
     Read-Host "Press Enter to exit"
 }

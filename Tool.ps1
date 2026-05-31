@@ -7,8 +7,8 @@ Add-Type -AssemblyName System.Windows.Forms
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     Title="Obsidian Dashboard"
-    Width="1000"
-    Height="650"
+    Width="1050"
+    Height="700"
     WindowStartupLocation="CenterScreen"
     WindowStyle="None"
     AllowsTransparency="True"
@@ -26,13 +26,16 @@ Add-Type -AssemblyName System.Windows.Forms
             <Setter Property="FontWeight" Value="Normal"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="HorizontalContentAlignment" Value="Left"/>
-            <Setter Property="Padding" Value="20,15"/>
+            <Setter Property="Padding" Value="20,10"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
                         <Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
-                            <ContentPresenter/>
+                            <TextBlock Text="{TemplateBinding Content}" 
+                                       TextWrapping="Wrap" 
+                                       TextAlignment="Left" 
+                                       VerticalAlignment="Center"/>
                         </Border>
                     </ControlTemplate>
                 </Setter.Value>
@@ -93,8 +96,8 @@ Add-Type -AssemblyName System.Windows.Forms
         <Border Background="#DD1a1a2e" CornerRadius="15" BorderBrush="#e94560" BorderThickness="1">
             <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="220"/> <!-- Sidebar -->
-                    <ColumnDefinition Width="*"/>     <!-- Content -->
+                    <ColumnDefinition Width="260"/>
+                    <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
                 <!-- Sidebar (Left) -->
@@ -111,9 +114,7 @@ Add-Type -AssemblyName System.Windows.Forms
 
                         <!-- Tool List Buttons -->
                         <ScrollViewer VerticalScrollBarVisibility="Auto">
-                            <StackPanel Name="SidebarList">
-                                <!-- Buttons are generated/controlled by PowerShell -->
-                            </StackPanel>
+                            <StackPanel Name="SidebarList"/>
                         </ScrollViewer>
                         
                         <!-- Extras Button -->
@@ -127,9 +128,9 @@ Add-Type -AssemblyName System.Windows.Forms
                 <!-- Dashboard (Right) -->
                 <Grid Grid.Column="1" Margin="40">
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/> <!-- Header -->
-                        <RowDefinition Height="*"/>     <!-- Info Display -->
-                        <RowDefinition Height="Auto"/> <!-- Action Area -->
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
                     <!-- Window Controls (Top Right) -->
@@ -141,13 +142,11 @@ Add-Type -AssemblyName System.Windows.Forms
                     <!-- Tool Display Info -->
                     <StackPanel Grid.Row="1" VerticalAlignment="Center">
                         <TextBlock Text="SELECT A TOOL" Foreground="#e94560" FontSize="14" FontWeight="Bold"/>
-                        
                         <TextBlock Name="DisplayTitle" Text="Welcome" FontSize="48" FontWeight="Light" Foreground="White" Margin="0,10,0,10" FontFamily="Segoe UI">
                             <TextBlock.Effect>
                                 <DropShadowEffect Color="#e94560" BlurRadius="10" ShadowDepth="0" Opacity="0.3"/>
                             </TextBlock.Effect>
                         </TextBlock>
-                        
                         <TextBlock Name="DisplayDesc" Text="Select a module from the sidebar to view details and execute." FontSize="16" Foreground="#8892b0" Width="500" TextWrapping="Wrap" Margin="0,0,0,30"/>
                     </StackPanel>
 
@@ -156,7 +155,6 @@ Add-Type -AssemblyName System.Windows.Forms
                         <Button Name="MainLaunchBtn" Content="LAUNCH TOOL" Style="{StaticResource LaunchButton}" IsEnabled="False" Opacity="0.5"/>
                         <TextBlock Name="LogPreview" Text="Ready..." Foreground="#444" FontSize="11" Margin="10,10,0,0" FontFamily="Consolas"/>
                     </StackPanel>
-
                 </Grid>
             </Grid>
         </Border>
@@ -184,20 +182,17 @@ Add-Type -AssemblyName System.Windows.Forms
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-
             <TextBlock Text="EXTERNAL APPS" FontSize="18" Foreground="White" FontWeight="Bold" Margin="0,0,0,20"/>
-
             <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
                 <StackPanel Name="ExtrasList"/>
             </ScrollViewer>
-
             <Button Grid.Row="2" Content="CLOSE" Background="#333" Foreground="White" BorderThickness="0" Height="30" Cursor="Hand" Name="CloseExtrasBtn" Margin="0,20,0,0"/>
         </Grid>
     </Border>
 </Window>
 "@
 
-# --- Custom Downloader Script (Cleaned for GUI Integration) ---
+# --- Custom Downloader Script ---
  $script_NicToolDownloader = @'
 # NicToolDownloader Integrated Script
 Write-Host "NicToolDownloader" -ForegroundColor Cyan
@@ -408,30 +403,44 @@ try {
 
     # Main Launch Function
     $MainLaunchBtn.Add_Click({
-        if($global:CurrentCmd) {
-            $LogPreview.Text = "Initializing..."
-            
-            # --- SPECIAL HANDLING FOR NIC TOOL DOWNLOADER ---
-            if ($global:CurrentCmd -eq "CUSTOM_NIC_DOWNLOADER") {
-                $tempFileName = [Guid]::NewGuid().ToString() + ".ps1"
-                $tempFilePath = Join-Path $env:TEMP $tempFileName
-                $script_NicToolDownloader | Out-File -FilePath $tempFilePath -Encoding UTF8
-                Start-Process powershell.exe -ArgumentList "-NoExit", "-ExecutionPolicy", "Bypass", "-File", `"$tempFilePath`"`
-                $LogPreview.Text = "Running NicTool Downloader..."
-            }
-            # --- STANDARD WEB SCRIPTS ---
-            else {
-                $tempFileName = [Guid]::NewGuid().ToString() + ".ps1"
-                $tempFilePath = Join-Path $env:TEMP $tempFileName
+        try {
+            if($global:CurrentCmd) {
+                $LogPreview.Text = "Initializing..."
                 
-                $fileContent = @"
+                # --- SPECIAL HANDLING FOR NIC TOOL DOWNLOADER ---
+                if ($global:CurrentCmd -eq "CUSTOM_NIC_DOWNLOADER") {
+                    $tempFileName = [Guid]::NewGuid().ToString() + ".ps1"
+                    $tempFilePath = Join-Path $env:TEMP $tempFileName
+                    
+                    # Try to write the file
+                    try {
+                        $script_NicToolDownloader | Out-File -FilePath $tempFilePath -Encoding UTF8
+                        Start-Process powershell.exe -ArgumentList "-NoExit", "-ExecutionPolicy", "Bypass", "-File", `"$tempFilePath`""
+                        $LogPreview.Text = "Running NicTool Downloader..."
+                    }
+                    catch {
+                        [System.Windows.MessageBox]::Show("Error preparing NicTool Downloader: $_")
+                    }
+                }
+                # --- STANDARD WEB SCRIPTS ---
+                else {
+                    $tempFileName = [Guid]::NewGuid().ToString() + ".ps1"
+                    $tempFilePath = Join-Path $env:TEMP $tempFileName
+                    
+                    $fileContent = @"
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
  $global:CurrentCmd
 "@
-                Set-Content -Path $tempFilePath -Value $fileContent
-                Start-Process cmd.exe -ArgumentList "/k", "powershell -NoExit -ExecutionPolicy Bypass -File `"$tempFilePath`""
-                $LogPreview.Text = "Process started."
+                    Set-Content -Path $tempFilePath -Value $fileContent
+                    Start-Process cmd.exe -ArgumentList "/k", "powershell -NoExit -ExecutionPolicy Bypass -File `"$tempFilePath`""
+                    $LogPreview.Text = "Process started."
+                }
             }
+        }
+        catch {
+            # Catch any crash and show error
+            [System.Windows.MessageBox]::Show("Launcher Error: $_`n`nPlease check permissions or temporary folder access.")
+            $LogPreview.Text = "Error occurred."
         }
     })
 

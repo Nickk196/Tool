@@ -1,7 +1,7 @@
 Add-Type -AssemblyName PresentationFramework
 Add-Type -AssemblyName System.Windows.Forms
 
-# --- XAML GUI Definition (Modern Glass/Obsidian Style) ---
+# --- XAML GUI Definition (Modern Glass/Obsidian Style - FIXED) ---
 [xml]$xaml = @"
 <Window 
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -15,14 +15,6 @@ Add-Type -AssemblyName System.Windows.Forms
     Background="Transparent"
     ResizeMode="NoResize"
     Topmost="False">
-
-    <!-- Background Gradient -->
-    <Window.Background>
-        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-            <GradientStop Color="#1a1a2e" Offset="0"/>
-            <GradientStop Color="#16213e" Offset="1"/>
-        </LinearGradientBrush>
-    </Window.Background>
 
     <Window.Resources>
         <!-- Modern Card Button Style -->
@@ -84,8 +76,14 @@ Add-Type -AssemblyName System.Windows.Forms
     </Window.Resources>
 
     <Grid Margin="10">
-        <!-- Main Border -->
-        <Border Background="#DD1a1a2e" CornerRadius="15" BorderBrush="#e94560" BorderThickness="1">
+        <!-- Main Border with Gradient Background -->
+        <Border CornerRadius="15" BorderBrush="#e94560" BorderThickness="1">
+            <Border.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                    <GradientStop Color="#1a1a2e" Offset="0"/>
+                    <GradientStop Color="#16213e" Offset="1"/>
+                </LinearGradientBrush>
+            </Border.Background>
             
             <Grid Margin="20">
                 <Grid.RowDefinitions>
@@ -126,11 +124,11 @@ Add-Type -AssemblyName System.Windows.Forms
                     <Button Name="BtnDown" Content="Tool Downloader" Style="{StaticResource ModernCard}"/>
                     <Button Name="BtnJar" Content="JAR Parser" Style="{StaticResource ModernCard}"/>
                     
-                    <!-- Spacer or Extra Info -->
-                    <Border Background="#0f3460" CornerRadius="8" Margin="10" BorderBrush="#333" BorderThickness="1">
+                    <!-- Placeholder for Alt Detector -->
+                    <Border Background="#0f3460" CornerRadius="8" Margin="10" BorderBrush="#333" BorderThickness="1" Opacity="0.5">
                         <Grid>
-                            <TextBlock Text="ALT DETECTOR" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="#555" FontFamily="Segoe UI" FontWeight="Bold"/>
-                            <TextBlock Text="(No Command)" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,20,0,0" Foreground="#444" FontSize="10"/>
+                            <TextBlock Text="ALT DETECTOR" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="#888" FontFamily="Segoe UI" FontWeight="Bold"/>
+                            <TextBlock Text="(Command Missing)" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,20,0,0" Foreground="#666" FontSize="10"/>
                         </Grid>
                     </Border>
                 </UniformGrid>

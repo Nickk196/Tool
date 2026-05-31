@@ -1,13 +1,13 @@
 Add-Type -AssemblyName PresentationFramework
 Add-Type -AssemblyName System.Windows.Forms
 
-# --- XAML GUI Definition (Purple & Black Theme) ---
+# --- XAML GUI Definition (Professional Clean Theme) ---
 [xml]$xaml = @"
 <Window 
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    Title="Obsidian Dashboard"
-    Width="1050"
+    Title="Tool Launcher"
+    Width="1000"
     Height="700"
     WindowStartupLocation="CenterScreen"
     WindowStyle="None"
@@ -17,17 +17,25 @@ Add-Type -AssemblyName System.Windows.Forms
     Topmost="False">
 
     <Window.Resources>
-        <!-- Sidebar Button Style -->
+        <!-- Clean Sidebar Button Style -->
         <Style x:Key="SidebarButton" TargetType="Button">
             <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Foreground" Value="#a0a0a0"/>
+            <Setter Property="Foreground" Value="#CCCCCC"/>
             <Setter Property="FontFamily" Value="Segoe UI"/>
             <Setter Property="FontSize" Value="14"/>
             <Setter Property="FontWeight" Value="Normal"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="HorizontalContentAlignment" Value="Left"/>
-            <Setter Property="Padding" Value="20,10"/>
+            <Setter Property="Padding" Value="20,12"/>
             <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
+            
+            <Setter Property="RenderTransform">
+                <Setter.Value>
+                    <ScaleTransform ScaleX="1" ScaleY="1"/>
+                </Setter.Value>
+            </Setter>
+            
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
@@ -40,77 +48,83 @@ Add-Type -AssemblyName System.Windows.Forms
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
+            
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#22ffffff"/>
+                    <Setter Property="Background" Value="#333333"/>
                     <Setter Property="Foreground" Value="White"/>
+                    <Setter Property="RenderTransform">
+                        <Setter.Value>
+                            <ScaleTransform ScaleX="1.03" ScaleY="1.03"/>
+                        </Setter.Value>
+                    </Setter>
                 </Trigger>
             </Style.Triggers>
         </Style>
 
         <!-- Active Sidebar Button Style -->
         <Style x:Key="ActiveSidebarButton" TargetType="Button" BasedOn="{StaticResource SidebarButton}">
-            <Setter Property="Background" Value="#9D00FF"/>
+            <Setter Property="Background" Value="#007ACC"/> <!-- VS Code Blue -->
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
         </Style>
         
-        <!-- Big Launch Button Style -->
+        <!-- Professional Launch Button Style -->
         <Style x:Key="LaunchButton" TargetType="Button">
-            <Setter Property="Background" Value="#9D00FF"/>
+            <Setter Property="Background" Value="#007ACC"/>
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="FontFamily" Value="Segoe UI"/>
             <Setter Property="FontSize" Value="16"/>
-            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Height" Value="50"/>
-            <Setter Property="Width" Value="200"/>
+            <Setter Property="Width" Value="220"/>
+            <Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
+            
+            <Setter Property="RenderTransform">
+                <Setter.Value>
+                    <ScaleTransform ScaleX="1" ScaleY="1"/>
+                </Setter.Value>
+            </Setter>
+            
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}" CornerRadius="25">
-                            <Border.Effect>
-                                <DropShadowEffect Color="#9D00FF" BlurRadius="10" ShadowDepth="0" Opacity="0.4"/>
-                            </Border.Effect>
+                        <Border Background="{TemplateBinding Background}" CornerRadius="4">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#B533FF"/>
-                                <Setter Property="RenderTransform">
-                                    <Setter.Value>
-                                        <ScaleTransform ScaleX="1.05" ScaleY="1.05"/>
-                                    </Setter.Value>
-                                </Setter>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
+            
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#1E90FF"/>
+                    <Setter Property="RenderTransform">
+                        <Setter.Value>
+                            <ScaleTransform ScaleX="1.05" ScaleY="1.05"/>
+                        </Setter.Value>
+                    </Setter>
+                </Trigger>
+            </Style.Triggers>
         </Style>
     </Window.Resources>
 
-    <Grid Margin="10">
+    <Grid Margin="5">
         <!-- Main Border -->
-        <Border Background="#DD0F0518" CornerRadius="15" BorderBrush="#9D00FF" BorderThickness="1">
+        <Border Background="#DD1E1E1E" CornerRadius="8" BorderBrush="#333333" BorderThickness="1">
             <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="260"/>
+                    <ColumnDefinition Width="220"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
                 <!-- Sidebar (Left) -->
-                <Border Grid.Column="0" Background="#1A0B2E" CornerRadius="15,0,0,15" BorderBrush="#3A1C5E" BorderThickness="0,0,1,0">
+                <Border Grid.Column="0" Background="#252526" CornerRadius="8,0,0,8">
                     <StackPanel>
-                        <!-- Logo Area -->
-                        <StackPanel Margin="20,30,20,20">
-                            <Border Width="50" Height="50" Background="#9D00FF" CornerRadius="25" HorizontalAlignment="Left">
-                                <TextBlock Text="O" Foreground="White" FontSize="30" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
-                            <TextBlock Text="OBSIDIAN" Foreground="White" FontSize="18" FontWeight="SemiBold" Margin="0,10,0,0" FontFamily="Segoe UI"/>
-                            <TextBlock Text="Launcher" Foreground="#888" FontSize="12" Margin="0,0,0,5" FontFamily="Segoe UI"/>
-                        </StackPanel>
+                        <!-- Clean Label -->
+                        <TextBlock Text="TOOLS" Foreground="#888" FontSize="12" FontWeight="Bold" Margin="20,25,0,10" FontFamily="Segoe UI"/>
 
                         <!-- Tool List Buttons -->
                         <ScrollViewer VerticalScrollBarVisibility="Auto">
@@ -118,15 +132,12 @@ Add-Type -AssemblyName System.Windows.Forms
                         </ScrollViewer>
                         
                         <!-- Extras Button -->
-                        <Button Name="ExtrasBtn" Content="Extras / EXEs" Foreground="#9D00FF" Background="Transparent" BorderThickness="0" HorizontalAlignment="Center" Margin="0,10,0,0" Cursor="Hand" FontSize="12" FontWeight="Bold"/>
-
-                        <!-- Footer in Sidebar -->
-                        <TextBlock Text="v2.1 Stable" Foreground="#444" FontSize="10" HorizontalAlignment="Center" Margin="0,20,0,20"/>
+                        <Button Name="ExtrasBtn" Content="System Apps" Foreground="#007ACC" Background="Transparent" BorderThickness="0" HorizontalAlignment="Left" Margin="20,10,0,20" Cursor="Hand" FontSize="12" FontWeight="SemiBold" Padding="20,10"/>
                     </StackPanel>
                 </Border>
 
                 <!-- Dashboard (Right) -->
-                <Grid Grid.Column="1" Margin="40">
+                <Grid Grid.Column="1" Margin="30">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
@@ -135,25 +146,20 @@ Add-Type -AssemblyName System.Windows.Forms
 
                     <!-- Window Controls (Top Right) -->
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,-10,0,0" ZIndex="10">
-                        <Button Content="−" Width="30" Height="30" Background="Transparent" Foreground="#888" FontSize="18" BorderThickness="0" Cursor="Hand" Name="MinBtn" Margin="0,0,5,0"/>
-                        <Button Content="✕" Width="30" Height="30" Background="Transparent" Foreground="#888" FontSize="16" BorderThickness="0" Cursor="Hand" Name="CloseBtn"/>
+                        <Button Content="─" Width="30" Height="30" Background="Transparent" Foreground="#888" FontSize="16" BorderThickness="0" Cursor="Hand" Name="MinBtn" Margin="0,0,5,0"/>
+                        <Button Content="✕" Width="30" Height="30" Background="Transparent" Foreground="#888" FontSize="12" BorderThickness="0" Cursor="Hand" Name="CloseBtn"/>
                     </StackPanel>
 
                     <!-- Tool Display Info -->
                     <StackPanel Grid.Row="1" VerticalAlignment="Center">
-                        <TextBlock Text="SELECT A TOOL" Foreground="#9D00FF" FontSize="14" FontWeight="Bold"/>
-                        <TextBlock Name="DisplayTitle" Text="Welcome" FontSize="48" FontWeight="Light" Foreground="White" Margin="0,10,0,10" FontFamily="Segoe UI">
-                            <TextBlock.Effect>
-                                <DropShadowEffect Color="#9D00FF" BlurRadius="10" ShadowDepth="0" Opacity="0.3"/>
-                            </TextBlock.Effect>
-                        </TextBlock>
-                        <TextBlock Name="DisplayDesc" Text="Select a module from the sidebar to view details and execute." FontSize="16" Foreground="#8892b0" Width="500" TextWrapping="Wrap" Margin="0,0,0,30"/>
+                        <TextBlock Name="DisplayTitle" Text="SELECT TOOL" FontSize="36" FontWeight="Light" Foreground="White" Margin="0,0,0,5" FontFamily="Segoe UI"/>
+                        <TextBlock Name="DisplayDesc" Text="Choose a tool from the sidebar to begin." FontSize="14" Foreground="#888" Width="600" TextWrapping="Wrap" Margin="0,0,0,40"/>
                     </StackPanel>
 
                     <!-- Launch Button -->
                     <StackPanel Grid.Row="2" HorizontalAlignment="Left" Margin="0,0,0,40">
-                        <Button Name="MainLaunchBtn" Content="LAUNCH TOOL" Style="{StaticResource LaunchButton}" IsEnabled="False" Opacity="0.5"/>
-                        <TextBlock Name="LogPreview" Text="Ready..." Foreground="#444" FontSize="11" Margin="10,10,0,0" FontFamily="Consolas"/>
+                        <Button Name="MainLaunchBtn" Content="LAUNCH" Style="{StaticResource LaunchButton}" IsEnabled="False" Opacity="0.5"/>
+                        <TextBlock Name="LogPreview" Text="Ready" Foreground="#444" FontSize="11" Margin="10,10,0,0" FontFamily="Consolas"/>
                     </StackPanel>
                 </Grid>
             </Grid>
@@ -166,27 +172,27 @@ Add-Type -AssemblyName System.Windows.Forms
 [xml]$extrasXaml = @"
 <Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="External Tools"
-        Width="350"
-        Height="500"
+        Title="System Apps"
+        Width="300"
+        Height="400"
         WindowStartupLocation="CenterScreen"
         WindowStyle="None"
         ResizeMode="NoResize"
-        Background="#0F0518"
+        Background="#1E1E1E"
         Topmost="False">
     
-    <Border Background="#DD0F0518" CornerRadius="10" BorderBrush="#9D00FF" BorderThickness="1" Margin="10">
+    <Border Background="#DD1E1E1E" CornerRadius="8" BorderBrush="#333" BorderThickness="1" Margin="10">
         <Grid Margin="20">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-            <TextBlock Text="EXTERNAL APPS" FontSize="18" Foreground="White" FontWeight="Bold" Margin="0,0,0,20"/>
+            <TextBlock Text="APPLICATIONS" FontSize="14" Foreground="White" FontWeight="SemiBold" Margin="0,0,0,20"/>
             <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
                 <StackPanel Name="ExtrasList"/>
             </ScrollViewer>
-            <Button Grid.Row="2" Content="CLOSE" Background="#240046" Foreground="White" BorderThickness="0" Height="30" Cursor="Hand" Name="CloseExtrasBtn" Margin="0,20,0,0"/>
+            <Button Grid.Row="2" Content="CLOSE" Background="#333" Foreground="White" BorderThickness="0" Height="30" Cursor="Hand" Name="CloseExtrasBtn" Margin="0,20,0,0"/>
         </Grid>
     </Border>
 </Window>
@@ -321,12 +327,12 @@ try {
     $tools = @(
         @{Name="Meow Mod Analyzer"; Desc="Advanced Minecraft mod analysis utility."; Cmd="powershell -ExecutionPolicy Bypass -Command `"Invoke-Expression (Invoke-RestMethod 'https://raw.githubusercontent.com/MeowTonynoh/MeowModAnalyzer/main/MeowModAnalyzer.ps1')`""},
         @{Name="Macro Detector"; Desc="Detects mouse macros and autoclickers."; Cmd="powershell -ExecutionPolicy Bypass -Command `"Invoke-Expression (Invoke-RestMethod 'https://raw.githubusercontent.com/Nickk196/MacroDetector/refs/heads/main/MacroDetector.ps1')`""},
-        @{Name="Service Checker"; Desc="Analyzes running system services for anomalies."; Cmd="powershell Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass ; powershell Invoke-Expression (Invoke-RestMethod 'https://raw.githubusercontent.com/praiselily/lilith-ps/refs/heads/main/Services.ps1')"},
+        @{Name="Service Checker"; Desc="Analyzes running system services for anomalies."; Cmd="powershell Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass ; powershell Invoke-Expression (Invoke-RestMethod https://raw.githubusercontent.com/praiselily/lilith-ps/refs/heads/main/Services.ps1)"},
         @{Name="Schedule Tasks"; Desc="Lists and checks signed scheduled tasks."; Cmd="powershell -Command `"Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass; Invoke-Expression (Invoke-RestMethod 'https://raw.githubusercontent.com/praiselily/lilith-ps/refs/heads/main/Signed-Scheduled-Tasks')`""},
         @{Name="Faker Detection"; Desc="Identifies VPN and hotspot usage."; Cmd="powershell -ExecutionPolicy Bypass -Command `"iwr https://raw.githubusercontent.com/praiselily/WeHateFakers/refs/heads/main/HotspotLogs.ps1 | iex`""},
         @{Name="Directory Scanner"; Desc="Scans common directories for specific files."; Cmd="powershell -Command `"Set-ExecutionPolicy Bypass -Scope Process; Invoke-Expression (Invoke-RestMethod 'https://raw.githubusercontent.com/praiselily/lilith-ps/refs/heads/main/CommonDirectories.ps1')`""},
         @{Name="NicTool Downloader"; Desc="Downloads SSTool, System Informer, and other utilities to C:\SS."; Cmd="CUSTOM_NIC_DOWNLOADER"},
-        @{Name="JAR Scanner"; Desc="Parses Java JAR files for metadata."; Cmd="powershell Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass ; powershell Invoke-Expression (Invoke-RestMethod  https://raw.githubusercontent.com/praiselily/JARScanner/refs/heads/main/JARScanner.ps1 | iex)"},
+        @{Name="JAR Parser"; Desc="Parses Java JAR files for metadata."; Cmd="powershell Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass ; powershell Invoke-Expression (Invoke-RestMethod https://raw.githubusercontent.com/NoDiff-del/JARParser/refs/heads/main/JARParser.ps1)"},
         @{Name="Alt Detector"; Desc="Identifies alternative accounts and identifiers."; Cmd="powershell -ExecutionPolicy Bypass -Command `"Invoke-Expression (Invoke-RestMethod 'https://raw.githubusercontent.com/Enr1c0o/Powershell-Scripts/refs/heads/main/Alt-Detector.ps1')`""},
         @{Name="Dqrkis Finder"; Desc="Locates Dqrkis in active sessions."; Cmd="powershell -ExecutionPolicy Bypass -Command `"Invoke-Expression (Invoke-RestMethod 'https://raw.githubusercontent.com/cheesecatlol/DQRKIS-FUCKER/refs/heads/main/DqrkisFucker.ps1')`""},
         @{Name="Signature"; Desc="Signature Checker."; Cmd="powershell -ExecutionPolicy Bypass -Command `"Invoke-Expression (Invoke-RestMethod 'https://raw.githubusercontent.com/bacanoicua/Screenshare/main/RedLotusSignatures.ps1')`""},
@@ -352,7 +358,7 @@ try {
                 if($child -is [System.Windows.Controls.Button]) { $child.Style = $window.FindResource("SidebarButton") }
              }
              $sender.Style = $window.FindResource("ActiveSidebarButton")
-             $DisplayTitle.Text = $sender.Content.ToString().ToUpper()
+             $DisplayTitle.Text = $sender.Content.ToString()
              $DisplayDesc.Text = $sender.DescData
              $global:CurrentCmd = $sender.CmdData
              $MainLaunchBtn.IsEnabled = $true
@@ -385,15 +391,41 @@ try {
         foreach ($exe in $myExes) {
             $btn = New-Object System.Windows.Controls.Button
             $btn.Content = $exe.Name
-            $btn.Background = "#240046"
-            $btn.Foreground = "White"
+            $btn.Background = "Transparent"
+            $btn.Foreground = "#CCC"
             $btn.Margin = "0,5"
             $btn.Height = "35"
             $btn.FontFamily = "Segoe UI"
             $btn.Cursor = "Hand"
+            $btn.HorizontalContentAlignment = "Left"
+            $btn.Padding = "10,0"
+            
+            # Add Mouse Effect to Extras Buttons too
+            $btn.RenderTransformOrigin = "0.5,0.5"
+            $btn.RenderTransform = [Windows.Media.ScaleTransform]::new(1,1)
+            
             $btn.Add_Click({
                 try { Start-Process $this.Path } catch { [System.Windows.MessageBox]::Show("Could not launch: " + $this.Path) }
             }.GetNewClosure())
+            
+            $btn.Add_MouseEnter({
+                $this.Foreground = "White"
+                $this.Background = "#333"
+                $scale = [Windows.Media.ScaleTransform]::new(1.05, 1.05)
+                $scale.CenterX = 0.5
+                $scale.CenterY = 0.5
+                $this.RenderTransform = $scale
+            })
+            
+            $btn.Add_MouseLeave({
+                $this.Foreground = "#CCC"
+                $this.Background = "Transparent"
+                $scale = [Windows.Media.ScaleTransform]::new(1,1)
+                $scale.CenterX = 0.5
+                $scale.CenterY = 0.5
+                $this.RenderTransform = $scale
+            })
+            
             $btn | Add-Member -MemberType NoteProperty -Name "Path" -Value $exe.Path
             $listExtras.Children.Add($btn)
         }

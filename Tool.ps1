@@ -135,7 +135,7 @@ Add-Type -AssemblyName System.Windows.Forms
 
                     <!-- Tool Display Info -->
                     <StackPanel Grid.Row="1" VerticalAlignment="Center">
-                        <TextBlock Text="SELECT A TOOL" Foreground="#e94560" FontSize="14" FontWeight="Bold" LetterSpacing="2"/>
+                        <TextBlock Text="SELECT A TOOL" Foreground="#e94560" FontSize="14" FontWeight="Bold"/>
                         
                         <TextBlock Name="DisplayTitle" Text="Welcome" FontSize="48" FontWeight="Light" Foreground="White" Margin="0,10,0,10" FontFamily="Segoe UI">
                             <TextBlock.Effect>

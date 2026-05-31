@@ -116,8 +116,11 @@ Add-Type -AssemblyName System.Windows.Forms
                             </StackPanel>
                         </ScrollViewer>
                         
+                        <!-- Extras Button -->
+                        <Button Name="ExtrasBtn" Content="Extras / EXEs" Foreground="#e94560" Background="Transparent" BorderThickness="0" HorizontalAlignment="Center" Margin="0,10,0,0" Cursor="Hand" FontSize="12" FontWeight="Bold"/>
+
                         <!-- Footer in Sidebar -->
-                        <TextBlock Text="v2.0 Stable" Foreground="#444" FontSize="10" HorizontalAlignment="Center" Margin="0,20,0,20"/>
+                        <TextBlock Text="v2.1 Stable" Foreground="#444" FontSize="10" HorizontalAlignment="Center" Margin="0,20,0,20"/>
                     </StackPanel>
                 </Border>
 
@@ -129,9 +132,11 @@ Add-Type -AssemblyName System.Windows.Forms
                         <RowDefinition Height="Auto"/> <!-- Action Area -->
                     </Grid.RowDefinitions>
 
-                    <!-- Close Button (Absolute Position) -->
-                    <Button Content="✕" Width="30" Height="30" Background="Transparent" Foreground="#666" FontSize="16" BorderThickness="0" Cursor="Hand" HorizontalAlignment="Right" VerticalAlignment="Top" Name="CloseBtn" Margin="0,-10,0,0"/>
-                    <Button Content="−" Width="30" Height="30" Background="Transparent" Foreground="#666" FontSize="18" BorderThickness="0" Cursor="Hand" HorizontalAlignment="Right" VerticalAlignment="Top" Name="MinBtn" Margin="0,-10,35,0"/>
+                    <!-- Window Controls (Top Right) -->
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,-10,0,0" ZIndex="10">
+                        <Button Content="−" Width="30" Height="30" Background="Transparent" Foreground="#666" FontSize="18" BorderThickness="0" Cursor="Hand" Name="MinBtn" Margin="0,0,5,0"/>
+                        <Button Content="✕" Width="30" Height="30" Background="Transparent" Foreground="#666" FontSize="16" BorderThickness="0" Cursor="Hand" Name="CloseBtn"/>
+                    </StackPanel>
 
                     <!-- Tool Display Info -->
                     <StackPanel Grid.Row="1" VerticalAlignment="Center">
@@ -159,20 +164,163 @@ Add-Type -AssemblyName System.Windows.Forms
 </Window>
 "@
 
+# --- XAML for Extras Window ---
+[xml]$extrasXaml = @"
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="External Tools"
+        Width="350"
+        Height="500"
+        WindowStartupLocation="CenterScreen"
+        WindowStyle="None"
+        ResizeMode="NoResize"
+        Background="#1a1a2e"
+        Topmost="False">
+    
+    <Border Background="#DD1a1a2e" CornerRadius="10" BorderBrush="#e94560" BorderThickness="1" Margin="10">
+        <Grid Margin="20">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <TextBlock Text="EXTERNAL APPS" FontSize="18" Foreground="White" FontWeight="Bold" Margin="0,0,0,20"/>
+
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                <StackPanel Name="ExtrasList"/>
+            </ScrollViewer>
+
+            <Button Grid.Row="2" Content="CLOSE" Background="#333" Foreground="White" BorderThickness="0" Height="30" Cursor="Hand" Name="CloseExtrasBtn" Margin="0,20,0,0"/>
+        </Grid>
+    </Border>
+</Window>
+"@
+
+# --- Custom Downloader Script (Cleaned for GUI Integration) ---
+ $script_NicToolDownloader = @'
+# NicToolDownloader Integrated Script
+Write-Host "NicToolDownloader" -ForegroundColor Cyan
+Write-Host "==================" -ForegroundColor Cyan
+Write-Host ""
+
+# Configuration
+ $downloadDir = "C:\SS"
+
+# Create the directory if it does not exist
+if (!(Test-Path -Path $downloadDir)) {
+    try {
+        New-Item -ItemType Directory -Path $downloadDir -Force | Out-Null
+        Write-Host "[INFO] Created directory at $downloadDir" -ForegroundColor Green
+    }
+    catch {
+        Write-Host "[ERROR] Failed to create directory. Please check permissions." -ForegroundColor Red
+        Read-Host "Press Enter to exit"
+        exit
+    }
+}
+else {
+    Write-Host "[INFO] Directory already exists at $downloadDir" -ForegroundColor Gray
+}
+Write-Host ""
+
+# Automatic System Informer Logic
+Write-Host "[AUTO] Searching for latest System Informer version..." -ForegroundColor Cyan
+ $siUrl = $null
+try {
+    $apiUrl = "https://api.github.com/repos/winsiderss/systeminformer/releases"
+    $response = Invoke-RestMethod -Uri $apiUrl -Headers @{"Accept"="application/vnd.github.v3+json"} -ErrorAction Stop
+    $latestRelease = $response[0]
+    $asset = $latestRelease.assets | Where-Object { $_.name -match "systeminformer-.*-setup\.exe" } | Select-Object -First 1
+    
+    if ($asset) {
+        $siUrl = $asset.browser_download_url
+        Write-Host "[AUTO] Found Latest: $($asset.name)" -ForegroundColor Green
+    }
+    else {
+        Write-Host "[WARN] Could not find setup file in latest release." -ForegroundColor Yellow
+    }
+}
+catch {
+    Write-Host "[WARN] Failed to fetch from GitHub API (Network/Rate-Limit)." -ForegroundColor Yellow
+}
+
+# Fallback
+if (-not $siUrl) {
+    Write-Host "[FALLBACK] Using specific System Informer version." -ForegroundColor DarkGray
+    $siUrl = "https://github.com/winsiderss/systeminformer/releases/download/v4.0.26144/systeminformer-4.0.26144-setup.exe"
+}
+
+# Download Links
+ $urls = @(
+    "https://github.com/Orbdiff/SSTool/releases/download/yay/SSTool.exe",
+    "https://github.com/MeowTonynoh/MeowDoomsdayFucker/releases/download/V.1.2/MeowDoomsdayFucker.exe",
+    "https://github.com/MeowTonynoh/MeowImportsChecker/releases/download/MeowImportsChecker/MeowImportsChecker.exe",
+    "https://github.com/MeowTonynoh/MeowResolver/releases/download/MeowResolver/MeowResolver.exe",
+    $siUrl,
+    "https://www.nirsoft.net/utils/winprefetchview.zip"
+)
+
+# Download Loop
+Write-Host "[START] Downloading files..." -ForegroundColor Cyan
+Write-Host ""
+
+foreach ($url in $urls) {
+    $fileName = Split-Path $url -Leaf
+    $destination = Join-Path -Path $downloadDir -ChildPath $fileName
+    Write-Host "Downloading $fileName..." -NoNewline
+    
+    try {
+        Invoke-WebRequest -Uri $url -OutFile $destination -UseBasicParsing
+        Write-Host " [DONE]" -ForegroundColor Green
+    }
+    catch {
+        Write-Host " [FAILED]" -ForegroundColor Red
+        Write-Host "  Error: $($_.Exception.Message)" -ForegroundColor DarkRed
+    }
+}
+
+Write-Host ""
+Write-Host "[FINISH] All tasks completed." -ForegroundColor Cyan
+Write-Host ""
+
+# Credits
+ $sumSep = "=" * 40
+Write-Host "  Created by  : " -NoNewline -ForegroundColor DarkGray
+Write-Host "cheese cat" -ForegroundColor Yellow
+Write-Host "  Discord     : " -NoNewline -ForegroundColor DarkGray
+Write-Host "cheese_cat0" -ForegroundColor Yellow
+Write-Host "  GitHub      : " -NoNewline -ForegroundColor DarkGray
+Write-Host "github.com/cheesecatlol" -ForegroundColor Yellow
+Write-Host ""
+Write-Host "  Created by  : " -NoNewline -ForegroundColor DarkGray
+Write-Host "nic" -ForegroundColor Yellow
+Write-Host "  Discord     : " -NoNewline -ForegroundColor DarkGray
+Write-Host "mecz.exe" -ForegroundColor Yellow
+Write-Host "  GitHub      : " -NoNewline -ForegroundColor DarkGray
+Write-Host "github.com/Nickk196" -ForegroundColor Yellow
+Write-Host ""
+Write-Host $sumSep -ForegroundColor DarkYellow
+Write-Host ""
+Read-Host "  Press Enter to exit"
+'@
+
 # --- Backend Logic ---
 
 try {
-    # Parse XAML
+    # Parse Main XAML
     $reader = (New-Object System.Xml.XmlNodeReader $xaml) 
     $window = [Windows.Markup.XamlReader]::Load($reader)
 
-    # Find Elements
+    # Find Main Elements
     $SidebarList = $window.FindName("SidebarList")
     $DisplayTitle = $window.FindName("DisplayTitle")
     $DisplayDesc = $window.FindName("DisplayDesc")
     $MainLaunchBtn = $window.FindName("MainLaunchBtn")
     $LogPreview = $window.FindName("LogPreview")
     $CloseBtn = $window.FindName("CloseBtn")
+    $MinBtn   = $window.FindName("MinBtn")
+    $ExtrasBtn = $window.FindName("ExtrasBtn")
 
     # Tool Data
     $tools = @(
@@ -182,11 +330,11 @@ try {
         @{Name="Schedule Tasks"; Desc="Lists and checks signed scheduled tasks."; Cmd="powershell -Command `"Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass; Invoke-Expression (Invoke-RestMethod 'https://raw.githubusercontent.com/praiselily/lilith-ps/refs/heads/main/Signed-Scheduled-Tasks')`""},
         @{Name="Faker Detection"; Desc="Identifies VPN and hotspot usage."; Cmd="powershell -ExecutionPolicy Bypass -Command `"iwr https://raw.githubusercontent.com/praiselily/WeHateFakers/refs/heads/main/HotspotLogs.ps1 | iex`""},
         @{Name="Directory Scanner"; Desc="Scans common directories for specific files."; Cmd="powershell -Command `"Set-ExecutionPolicy Bypass -Scope Process; Invoke-Expression (Invoke-RestMethod 'https://raw.githubusercontent.com/praiselily/lilith-ps/refs/heads/main/CommonDirectories.ps1')`""},
-        @{Name="Tool Downloader"; Desc="Downloads required utilities automatically."; Cmd="powershell -ExecutionPolicy Bypass -Command `"Invoke-Expression (Invoke-RestMethod 'https://raw.githubusercontent.com/Nickk196/ToolDownloader/refs/heads/main/ToolDownloader.ps1')`""},
+        @{Name="NicTool Downloader"; Desc="Downloads SSTool, System Informer, and other utilities to C:\SS."; Cmd="CUSTOM_NIC_DOWNLOADER"},
         @{Name="JAR Parser"; Desc="Parses Java JAR files for metadata."; Cmd="powershell Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass && powershell Invoke-Expression (Invoke-RestMethod https://raw.githubusercontent.com/NoDiff-del/JARParser/refs/heads/main/JARParser.ps1)"},
-        @{Name="Alt Detector"; Desc="Identifies alternative accounts and identifiers."; Cmd="powershell -ExecutionPolicy Bypass -Command `"Invoke-Expression (Invoke-RestMethod 'https://raw.githubusercontent.com/Enr1c0o/Powershell-Scripts/refs/heads/main/Alt-Detector.ps1')`""}
-        @{Name="Dqrkis Fucker"; Desc="Scans for Dqrkis Client."; Cmd="powershell -ExecutionPolicy Bypass -Command `"Invoke-Expression (Invoke-RestMethod 'https://raw.githubusercontent.com/cheesecatlol/DQRKIS-FUCKER/refs/heads/main/DqrkisFucker.ps1')`""}
-          
+        @{Name="Alt Detector"; Desc="Identifies alternative accounts and identifiers."; Cmd="powershell -ExecutionPolicy Bypass -Command `"Invoke-Expression (Invoke-RestMethod 'https://raw.githubusercontent.com/Enr1c0o/Powershell-Scripts/refs/heads/main/Alt-Detector.ps1')`""},
+        @{Name="Signature"; Desc="Signature Checker."; Cmd="powershell -ExecutionPolicy Bypass -Command `"Invoke-Expression (Invoke-RestMethod 'https://raw.githubusercontent.com/bacanoicua/Screenshare/main/RedLotusSignatures.ps1')`""},
+        @{Name="BAM"; Desc="Backround Activity Monitoring."; Cmd="powershell -ExecutionPolicy Bypass -Command `"Invoke-Expression (Invoke-RestMethod 'https://raw.githubusercontent.com/PureIntent/ScreenShare/main/RedLotusBam.ps1')`""}
     )
 
     $currentCommand = ""
@@ -199,25 +347,18 @@ try {
         $btn.Content = $Name
         $btn.Style = $window.FindResource("SidebarButton")
         
-        # Attach metadata to button object for the event handler to access
         $btn | Add-Member -MemberType NoteProperty -Name "CmdData" -Value $Cmd
         $btn | Add-Member -MemberType NoteProperty -Name "DescData" -Value $Desc
         
-        # Update the closure manually to capture variables
         $btn.Add_Click({
              param($sender, $e)
-             # Reset styles
              foreach($child in $SidebarList.Children) {
                 if($child -is [System.Windows.Controls.Button]) { $child.Style = $window.FindResource("SidebarButton") }
              }
-             # Set Active
              $sender.Style = $window.FindResource("ActiveSidebarButton")
-             
-             # Update Display
              $DisplayTitle.Text = $sender.Content.ToString().ToUpper()
              $DisplayDesc.Text = $sender.DescData
              $global:CurrentCmd = $sender.CmdData
-             
              $MainLaunchBtn.IsEnabled = $true
              $MainLaunchBtn.Opacity = 1
              $LogPreview.Text = "Ready to launch: " + $sender.Content
@@ -231,23 +372,72 @@ try {
         Create-SidebarButton -Name $tool.Name -Cmd $tool.Cmd -Desc $tool.Desc
     }
 
-    # Launch Function
+    # --- Extras Window Logic ---
+    $ExtrasBtn.Add_Click({
+        $reader2 = (New-Object System.Xml.XmlNodeReader $extrasXaml)
+        $winExtras = [Windows.Markup.XamlReader]::Load($reader2)
+        $listExtras = $winExtras.FindName("ExtrasList")
+        $closeExtras = $winExtras.FindName("CloseExtrasBtn")
+
+        $myExes = @(
+            @{Name="Notepad"; Path="notepad.exe"},
+            @{Name="Calculator"; Path="calc.exe"},
+            @{Name="Paint"; Path="mspaint.exe"},
+            @{Name="Task Manager"; Path="taskmgr.exe"}
+        )
+
+        foreach ($exe in $myExes) {
+            $btn = New-Object System.Windows.Controls.Button
+            $btn.Content = $exe.Name
+            $btn.Background = "#0f3460"
+            $btn.Foreground = "White"
+            $btn.Margin = "0,5"
+            $btn.Height = "35"
+            $btn.FontFamily = "Segoe UI"
+            $btn.Cursor = "Hand"
+            $btn.Add_Click({
+                try { Start-Process $this.Path } catch { [System.Windows.MessageBox]::Show("Could not launch: " + $this.Path) }
+            }.GetNewClosure())
+            $btn | Add-Member -MemberType NoteProperty -Name "Path" -Value $exe.Path
+            $listExtras.Children.Add($btn)
+        }
+
+        $closeExtras.Add_Click({ $winExtras.Close() })
+        $winExtras.ShowDialog() | Out-Null
+    })
+
+    # Main Launch Function
     $MainLaunchBtn.Add_Click({
         if($global:CurrentCmd) {
             $LogPreview.Text = "Initializing..."
             
-            $tempFileName = [Guid]::NewGuid().ToString() + ".ps1"
-            $tempFilePath = Join-Path $env:TEMP $tempFileName
-            
-            $fileContent = @"
+            # --- SPECIAL HANDLING FOR NIC TOOL DOWNLOADER ---
+            if ($global:CurrentCmd -eq "CUSTOM_NIC_DOWNLOADER") {
+                $tempFileName = [Guid]::NewGuid().ToString() + ".ps1"
+                $tempFilePath = Join-Path $env:TEMP $tempFileName
+                $script_NicToolDownloader | Out-File -FilePath $tempFilePath -Encoding UTF8
+                Start-Process powershell.exe -ArgumentList "-NoExit", "-ExecutionPolicy", "Bypass", "-File", `"$tempFilePath`"`
+                $LogPreview.Text = "Running NicTool Downloader..."
+            }
+            # --- STANDARD WEB SCRIPTS ---
+            else {
+                $tempFileName = [Guid]::NewGuid().ToString() + ".ps1"
+                $tempFilePath = Join-Path $env:TEMP $tempFileName
+                
+                $fileContent = @"
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
  $global:CurrentCmd
 "@
-            Set-Content -Path $tempFilePath -Value $fileContent
-            Start-Process cmd.exe -ArgumentList "/k", "powershell -NoExit -ExecutionPolicy Bypass -File `"$tempFilePath`""
-            
-            $LogPreview.Text = "Process started."
+                Set-Content -Path $tempFilePath -Value $fileContent
+                Start-Process cmd.exe -ArgumentList "/k", "powershell -NoExit -ExecutionPolicy Bypass -File `"$tempFilePath`""
+                $LogPreview.Text = "Process started."
+            }
         }
+    })
+
+    # Minimize Function
+    $MinBtn.Add_Click({
+        $window.WindowState = [Windows.WindowState]::Minimized
     })
 
     # Close Button

@@ -1,8 +1,7 @@
-# Required for GUI
 Add-Type -AssemblyName PresentationFramework
 Add-Type -AssemblyName System.Windows.Forms
 
-# --- XAML GUI Definition ---
+# --- XAML GUI Definition (Simplified for Compatibility) ---
 [xml]$xaml = @"
 <Window 
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -18,7 +17,7 @@ Add-Type -AssemblyName System.Windows.Forms
     Topmost="False">
 
     <Window.Resources>
-        <!-- Neon Glow Effect -->
+        <!-- Simplified Button Style (No complex templates, just triggers) -->
         <Style x:Key="NeonButton" TargetType="Button">
             <Setter Property="Background" Value="#0A0A0A"/>
             <Setter Property="Foreground" Value="#00FFCC"/>
@@ -30,37 +29,17 @@ Add-Type -AssemblyName System.Windows.Forms
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Height" Value="80"/>
             <Setter Property="Margin" Value="10"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border Name="Border" 
-                                Background="{TemplateBinding Background}" 
-                                BorderBrush="{TemplateBinding BorderBrush}" 
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="4">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            <Border.Effect>
-                                <DropShadowEffect Color="#00FFCC" BlurRadius="0" ShadowDepth="0" Opacity="0"/>
-                            </Border.Effect>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Border" Property="Background" Value="#111111"/>
-                                <Setter TargetName="Border" Property="BorderBrush" Value="#00FFCC"/>
-                                <Setter TargetName="Border" Property="Foreground" Value="White"/>
-                                <Setter Property="FontWeight" Value="ExtraBold"/>
-                                <Border.Effect>
-                                    <DropShadowEffect Color="#00FFCC" BlurRadius="10" ShadowDepth="0" Opacity="0.6"/>
-                                </Border.Effect>
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="Border" Property="Background" Value="#00FFCC"/>
-                                <Setter TargetName="Border" Property="Foreground" Value="Black"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#111111"/>
+                    <Setter Property="BorderBrush" Value="#00FFCC"/>
+                    <Setter Property="Foreground" Value="White"/>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Background" Value="#00FFCC"/>
+                    <Setter Property="Foreground" Value="Black"/>
+                </Trigger>
+            </Style.Triggers>
         </Style>
 
         <Style x:Key="HeaderLabel" TargetType="TextBlock">
@@ -68,11 +47,6 @@ Add-Type -AssemblyName System.Windows.Forms
             <Setter Property="FontFamily" Value="Consolas"/>
             <Setter Property="FontWeight" Value="Bold"/>
             <Setter Property="FontSize" Value="24"/>
-            <Setter Property="Effect">
-                <Setter.Value>
-                    <DropShadowEffect Color="#FF0055" BlurRadius="8" ShadowDepth="0" Opacity="0.8"/>
-                </Setter.Value>
-            </Setter>
         </Style>
     </Window.Resources>
 
@@ -126,6 +100,7 @@ Add-Type -AssemblyName System.Windows.Forms
                         </RichTextBox>
                     </ScrollViewer>
                 </Border>
+
             </Grid>
         </Border>
     </Grid>
@@ -151,7 +126,7 @@ try {
     $CloseBtn   = $window.FindName("CloseBtn")
     $LogConsole = $window.FindName("LogConsole")
 
-    # Logging Function (Fixed to avoid parser errors)
+    # Logging Function
     function Write-Log {
         param([string]$Message, [string]$Color = "Green")
         
@@ -165,7 +140,6 @@ try {
         
         $run.Foreground = $brush
 
-        # Create paragraph separately
         $para = New-Object System.Windows.Documents.Paragraph
         $para.Inlines.Add($run)
         
@@ -237,5 +211,6 @@ try {
 
 } catch {
     Write-Host "CRITICAL ERROR: $_" -ForegroundColor Red
+    Write-Host "If you see a 'Setter' error, your .NET version is outdated." -ForegroundColor Yellow
     Read-Host "Press Enter to exit"
 }

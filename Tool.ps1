@@ -381,11 +381,16 @@ try {
         $listExtras = $winExtras.FindName("ExtrasList")
         $closeExtras = $winExtras.FindName("CloseExtrasBtn")
 
+        # Updated List with System Locations
         $myExes = @(
             @{Name="Notepad"; Path="notepad.exe"},
             @{Name="Calculator"; Path="calc.exe"},
             @{Name="Paint"; Path="mspaint.exe"},
-            @{Name="Task Manager"; Path="taskmgr.exe"}
+            @{Name="Task Manager"; Path="taskmgr.exe"},
+            @{Name="Recycle Bin"; Path="::{645FF040-5081-101B-9F08-00AA002F954E}::"},
+            @{Name="Recent Files"; Path="shell:Recent"},
+            @{Name="Temp Folder"; Path="explorer.exe"; Args="$env:TEMP"},
+            @{Name="Prefetch"; Path="explorer.exe"; Args="C:\Windows\Prefetch"}
         )
 
         foreach ($exe in $myExes) {
@@ -400,12 +405,18 @@ try {
             $btn.HorizontalContentAlignment = "Left"
             $btn.Padding = "10,0"
             
-            # Add Mouse Effect to Extras Buttons too
+            # Add Mouse Effect
             $btn.RenderTransformOrigin = "0.5,0.5"
             $btn.RenderTransform = [Windows.Media.ScaleTransform]::new(1,1)
             
             $btn.Add_Click({
-                try { Start-Process $this.Path } catch { [System.Windows.MessageBox]::Show("Could not launch: " + $this.Path) }
+                try { 
+                    if ($this.Args) {
+                        Start-Process $this.Path -ArgumentList $this.Args
+                    } else {
+                        Start-Process $this.Path
+                    }
+                } catch { [System.Windows.MessageBox]::Show("Could not launch: " + $this.Path) }
             }.GetNewClosure())
             
             $btn.Add_MouseEnter({
@@ -426,7 +437,10 @@ try {
                 $this.RenderTransform = $scale
             })
             
+            # Attach properties
             $btn | Add-Member -MemberType NoteProperty -Name "Path" -Value $exe.Path
+            $btn | Add-Member -MemberType NoteProperty -Name "Args" -Value $exe.Args
+            
             $listExtras.Children.Add($btn)
         }
 

@@ -70,7 +70,7 @@ Add-Type -AssemblyName System.Windows.Forms
         </Style>
         
         <!-- Professional Launch Button Style -->
-        <Style x:Key="LaunchButton" TargetType="Button">
+        <Style xKey="LaunchButton" TargetType="Button">
             <Setter Property="Background" Value="#007ACC"/>
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="FontFamily" Value="Segoe UI"/>
@@ -323,7 +323,7 @@ try {
     $MinBtn   = $window.FindName("MinBtn")
     $ExtrasBtn = $window.FindName("ExtrasBtn")
 
-    # Tool Data
+    # Tool Data (Fixed Quotes)
     $tools = @(
         @{Name="Meow Mod Analyzer"; Desc="Advanced Minecraft mod analysis utility."; Cmd="powershell -ExecutionPolicy Bypass -Command `"Invoke-Expression (Invoke-RestMethod 'https://raw.githubusercontent.com/MeowTonynoh/MeowModAnalyzer/main/MeowModAnalyzer.ps1')`""},
         @{Name="Macro Detector"; Desc="Detects mouse macros and autoclickers."; Cmd="powershell -ExecutionPolicy Bypass -Command `"Invoke-Expression (Invoke-RestMethod 'https://raw.githubusercontent.com/Nickk196/MacroDetector/refs/heads/main/MacroDetector.ps1')`""},
@@ -514,8 +514,3 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
     })
 
     $window.ShowDialog() | Out-Null
-
-} catch {
-    Write-Host "CRITICAL ERROR: $_" -ForegroundColor Red
-    Read-Host "Press Enter to exit"
-}

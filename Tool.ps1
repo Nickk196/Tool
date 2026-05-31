@@ -1,7 +1,7 @@
 Add-Type -AssemblyName PresentationFramework
 Add-Type -AssemblyName System.Windows.Forms
 
-# --- XAML GUI Definition (Professional Clean Theme) ---
+# --- XAML GUI Definition ---
 [xml]$xaml = @"
 <Window 
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -64,13 +64,14 @@ Add-Type -AssemblyName System.Windows.Forms
 
         <!-- Active Sidebar Button Style -->
         <Style x:Key="ActiveSidebarButton" TargetType="Button" BasedOn="{StaticResource SidebarButton}">
-            <Setter Property="Background" Value="#007ACC"/> <!-- VS Code Blue -->
+            <Setter Property="Background" Value="#007ACC"/>
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
         </Style>
         
         <!-- Professional Launch Button Style -->
-        <Style xKey="LaunchButton" TargetType="Button">
+        <!-- FIXED: Changed xKey to x:Key -->
+        <Style x:Key="LaunchButton" TargetType="Button">
             <Setter Property="Background" Value="#007ACC"/>
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="FontFamily" Value="Segoe UI"/>
@@ -323,7 +324,9 @@ try {
     $MinBtn   = $window.FindName("MinBtn")
     $ExtrasBtn = $window.FindName("ExtrasBtn")
 
-    # Tool Data (Fixed Quotes)
+    $global:CurrentCmd = ""
+
+    # Tool Data
     $tools = @(
         @{Name="Meow Mod Analyzer"; Desc="Advanced Minecraft mod analysis utility."; Cmd="powershell -ExecutionPolicy Bypass -Command `"Invoke-Expression (Invoke-RestMethod 'https://raw.githubusercontent.com/MeowTonynoh/MeowModAnalyzer/main/MeowModAnalyzer.ps1')`""},
         @{Name="Macro Detector"; Desc="Detects mouse macros and autoclickers."; Cmd="powershell -ExecutionPolicy Bypass -Command `"Invoke-Expression (Invoke-RestMethod 'https://raw.githubusercontent.com/Nickk196/MacroDetector/refs/heads/main/MacroDetector.ps1')`""},
@@ -338,8 +341,6 @@ try {
         @{Name="Signature"; Desc="Signature Checker."; Cmd="powershell -ExecutionPolicy Bypass -Command `"Invoke-Expression (Invoke-RestMethod 'https://raw.githubusercontent.com/bacanoicua/Screenshare/main/RedLotusSignatures.ps1')`""},
         @{Name="BAM"; Desc="Backround Activity Monitoring."; Cmd="powershell -ExecutionPolicy Bypass -Command `"Invoke-Expression (Invoke-RestMethod 'https://raw.githubusercontent.com/PureIntent/ScreenShare/main/RedLotusBam.ps1')`""}
     )
-
-    $currentCommand = ""
 
     # Function to Create Sidebar Buttons
     function Create-SidebarButton {
@@ -381,16 +382,16 @@ try {
         $listExtras = $winExtras.FindName("ExtrasList")
         $closeExtras = $winExtras.FindName("CloseExtrasBtn")
 
-        # Updated List with System Locations
+        # FIXED: Added quotes around arguments to handle spaces in paths
         $myExes = @(
-            @{Name="Notepad"; Path="notepad.exe"},
-            @{Name="Calculator"; Path="calc.exe"},
-            @{Name="Paint"; Path="mspaint.exe"},
-            @{Name="Task Manager"; Path="taskmgr.exe"},
-            @{Name="Recycle Bin"; Path="::{645FF040-5081-101B-9F08-00AA002F954E}::"},
-            @{Name="Recent Files"; Path="shell:Recent"},
-            @{Name="Temp Folder"; Path="explorer.exe"; Args="$env:TEMP"},
-            @{Name="Prefetch"; Path="explorer.exe"; Args="C:\Windows\Prefetch"}
+            @{Name="Notepad"; Path="notepad.exe"; Args=""},
+            @{Name="Calculator"; Path="calc.exe"; Args=""},
+            @{Name="Paint"; Path="mspaint.exe"; Args=""},
+            @{Name="Task Manager"; Path="taskmgr.exe"; Args=""},
+            @{Name="Recycle Bin"; Path="explorer.exe"; Args="::{645FF040-5081-101B-9F08-00AA002F954E}::"},
+            @{Name="Recent Files"; Path="explorer.exe"; Args="shell:Recent"},
+            @{Name="Temp Folder"; Path="explorer.exe"; Args="`"$env:TEMP`""},
+            @{Name="Prefetch"; Path="explorer.exe"; Args="`"C:\Windows\Prefetch`""}
         )
 
         foreach ($exe in $myExes) {
@@ -405,16 +406,17 @@ try {
             $btn.HorizontalContentAlignment = "Left"
             $btn.Padding = "10,0"
             
-            # Add Mouse Effect
             $btn.RenderTransformOrigin = "0.5,0.5"
             $btn.RenderTransform = [Windows.Media.ScaleTransform]::new(1,1)
             
             $btn.Add_Click({
                 try { 
-                    if ($this.Args) {
-                        Start-Process $this.Path -ArgumentList $this.Args
-                    } else {
+                    # FIXED: Improved argument handling
+                    $procArgs = $this.Args
+                    if ([string]::IsNullOrWhiteSpace($procArgs)) {
                         Start-Process $this.Path
+                    } else {
+                        Start-Process $this.Path -ArgumentList $procArgs
                     }
                 } catch { [System.Windows.MessageBox]::Show("Could not launch: " + $this.Path) }
             }.GetNewClosure())
@@ -423,8 +425,6 @@ try {
                 $this.Foreground = "White"
                 $this.Background = "#333"
                 $scale = [Windows.Media.ScaleTransform]::new(1.05, 1.05)
-                $scale.CenterX = 0.5
-                $scale.CenterY = 0.5
                 $this.RenderTransform = $scale
             })
             
@@ -432,12 +432,9 @@ try {
                 $this.Foreground = "#CCC"
                 $this.Background = "Transparent"
                 $scale = [Windows.Media.ScaleTransform]::new(1,1)
-                $scale.CenterX = 0.5
-                $scale.CenterY = 0.5
                 $this.RenderTransform = $scale
             })
             
-            # Attach properties
             $btn | Add-Member -MemberType NoteProperty -Name "Path" -Value $exe.Path
             $btn | Add-Member -MemberType NoteProperty -Name "Args" -Value $exe.Args
             
@@ -462,7 +459,6 @@ try {
                     try {
                         $script_NicToolDownloader | Out-File -FilePath $tempFilePath -Encoding UTF8
                         
-                        # Robust Argument List
                         $psiArgs = "/k", "powershell -NoExit -ExecutionPolicy Bypass -File `"$tempFilePath`""
                         Start-Process "cmd.exe" -ArgumentList $psiArgs
                         
@@ -477,14 +473,12 @@ try {
                     $tempFileName = [Guid]::NewGuid().ToString() + ".ps1"
                     $tempFilePath = Join-Path $env:TEMP $tempFileName
                     
-                    # Using Here-String to prevent quote errors
                     $fileContent = @"
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
  $global:CurrentCmd
 "@
                     $fileContent | Out-File -FilePath $tempFilePath -Encoding UTF8
                     
-                    # Robust Argument List
                     $psiArgs = "/k", "powershell -NoExit -ExecutionPolicy Bypass -File `"$tempFilePath`""
                     Start-Process "cmd.exe" -ArgumentList $psiArgs
                     
@@ -508,9 +502,16 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
         $window.Close()
     })
 
-    # Draggable
+    # FIXED: Draggable Window - Added check to prevent dragging when clicking buttons
     $window.Add_MouseLeftButtonDown({
-        $window.DragMove()
+        # Only allow dragging if the source is NOT a button
+        if ($_.OriginalSource -isnot [System.Windows.Controls.Button] -and $_.OriginalSource -isnot [System.Windows.Controls.TextBox]) {
+            $window.DragMove()
+        }
     })
 
     $window.ShowDialog() | Out-Null
+}
+catch {
+    Write-Error $_.Exception.Message
+}

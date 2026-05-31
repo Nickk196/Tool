@@ -1,10 +1,8 @@
-# Check for Admin/Execution Policy just in case (Optional, but good practice)
-# Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process -Force
-
+# Required for GUI
 Add-Type -AssemblyName PresentationFramework
 Add-Type -AssemblyName System.Windows.Forms
 
-# --- XAML Definition ---
+# --- XAML GUI Definition ---
 [xml]$xaml = @"
 <Window 
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -79,9 +77,7 @@ Add-Type -AssemblyName System.Windows.Forms
     </Window.Resources>
 
     <Grid>
-        <!-- Main Background with Transparency -->
         <Border Background="#DD050505" CornerRadius="12" BorderBrush="#333" BorderThickness="1">
-            
             <Grid Margin="20">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -89,60 +85,54 @@ Add-Type -AssemblyName System.Windows.Forms
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <!-- Header & Close Button -->
+                <!-- Header -->
                 <Grid Grid.Row="0" Margin="0,0,0,20">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="> SYSTEM_ROOT" Style="{StaticResource HeaderLabel}"/>
                         <TextBlock Text=" :: EXECUTOR" Foreground="#00FFCC" FontFamily="Consolas" FontSize="24" FontWeight="Bold" Margin="10,0,0,0"/>
                     </StackPanel>
                     
-                    <!-- Window Controls -->
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                         <Button Content="EXIT" Width="60" Height="25" Background="#330000" Foreground="Red" BorderThickness="0" FontFamily="Consolas" Cursor="Hand" Name="CloseBtn"/>
                     </StackPanel>
                 </Grid>
 
-                <!-- Tools Grid (3 Columns) -->
+                <!-- Tools Grid -->
                 <UniformGrid Grid.Row="1" Columns="3" Rows="3">
-                    <!-- Row 1 -->
                     <Button Name="BtnMeow" Content="[ ANALYZE_MODS ]" Style="{StaticResource NeonButton}"/>
                     <Button Name="BtnMacro" Content="[ MACRO_DETECT ]" Style="{StaticResource NeonButton}"/>
                     <Button Name="BtnService" Content="[ SERVICE_CHK ]" Style="{StaticResource NeonButton}"/>
                     
-                    <!-- Row 2 -->
                     <Button Name="BtnTask" Content="[ SCHED_TASKS ]" Style="{StaticResource NeonButton}"/>
                     <Button Name="BtnFaker" Content="[ FAKER_DETECT ]" Style="{StaticResource NeonButton}"/>
                     <Button Name="BtnDir" Content="[ DIR_SCANNER ]" Style="{StaticResource NeonButton}"/>
                     
-                    <!-- Row 3 -->
                     <Button Name="BtnDown" Content="[ TOOL_DL ]" Style="{StaticResource NeonButton}"/>
                     <Button Name="BtnJar" Content="[ JAR_PARSER ]" Style="{StaticResource NeonButton}"/>
-                    <!-- Placeholder for Alt Detector since no command was provided -->
                     <Button Content="[ N/A ]" IsEnabled="False" Background="#111" Foreground="#333" BorderBrush="#222" FontFamily="Consolas" Cursor="Arrow"/>
                 </UniformGrid>
 
-                <!-- Terminal Output Log -->
+                <!-- Log Console -->
                 <Border Grid.Row="2" Background="#000000" CornerRadius="4" BorderBrush="#333" BorderThickness="1" Padding="10" Margin="0,20,0,0" Height="150">
                     <ScrollViewer VerticalScrollBarVisibility="Auto">
                         <RichTextBox Name="LogConsole" IsReadOnly="True" Background="Transparent" BorderThickness="0" Foreground="#00FF00" FontFamily="Consolas" FontSize="12">
                             <FlowDocument>
                                 <Paragraph>
-                                    <Run Text="[INIT] Launcher loaded successfully..."/>
+                                    <Run Text="[INIT] Launcher loaded..."/>
                                     <LineBreak/>
-                                    <Run Text="[WAIT] Select a module to execute." Foreground="#888888"/>
+                                    <Run Text="[WAIT] Select a module." Foreground="#888888"/>
                                 </Paragraph>
                             </FlowDocument>
                         </RichTextBox>
                     </ScrollViewer>
                 </Border>
-
             </Grid>
         </Border>
     </Grid>
 </Window>
 "@
 
-# --- PowerShell Logic ---
+# --- Backend Logic ---
 
 try {
     # Parse XAML
@@ -161,32 +151,36 @@ try {
     $CloseBtn   = $window.FindName("CloseBtn")
     $LogConsole = $window.FindName("LogConsole")
 
-    # Helper to log to the GUI console
+    # Logging Function (Fixed to avoid parser errors)
     function Write-Log {
-        param([string]$Message, [string]$Color = "#00FF00")
+        param([string]$Message, [string]$Color = "Green")
         
         $run = New-Object System.Windows.Documents.Run
         $run.Text = "[$(Get-Date -Format 'HH:mm:ss')] $Message`n"
-        $run.Foreground = [Windows.Media.Brushes]::Green # Default
         
-        # Simple color mapping
-        if ($Color -eq "Red") { $run.Foreground = [Windows.Media.Brushes]::Red }
-        if ($Color -eq "Cyan") { $run.Foreground = [Windows.Media.Brushes]::Cyan }
-        if ($Color -eq "Gray") { $run.Foreground = [Windows.Media.Brushes]::Gray }
+        $brush = [Windows.Media.Brushes]::Green
+        if ($Color -eq "Red") { $brush = [Windows.Media.Brushes]::Red }
+        if ($Color -eq "Cyan") { $brush = [Windows.Media.Brushes]::Cyan }
+        if ($Color -eq "Gray") { $brush = [Windows.Media.Brushes]::Gray }
+        
+        $run.Foreground = $brush
 
-        $LogConsole.Document.Blocks.Add($Paragraph = New-Object System.Windows.Documents.Paragraph)
-        $Paragraph.Inlines.Add($run)
+        # Create paragraph separately
+        $para = New-Object System.Windows.Documents.Paragraph
+        $para.Inlines.Add($run)
+        
+        $LogConsole.Document.Blocks.Add($para)
         $LogConsole.ScrollToEnd()
     }
 
-    # Helper to launch command
+    # Tool Launcher Helper
     function Invoke-Tool {
         param([string]$Name, [string]$Command)
         Write-Log "INITIATING: $Name..." "Cyan"
         Start-Process powershell.exe -ArgumentList "-NoExit", "-Command", $Command
     }
 
-    # --- Hook up Events ---
+    # --- Event Hooks ---
 
     # 1. MeowModAnalyzer
     $BtnMeow.Add_Click({
@@ -233,7 +227,7 @@ try {
         $window.Close()
     })
 
-    # Make Window Draggable (since it has no title bar)
+    # Make Window Draggable
     $window.Add_MouseLeftButtonDown({
         $window.DragMove()
     })
@@ -242,5 +236,6 @@ try {
     $window.ShowDialog() | Out-Null
 
 } catch {
-    Write-Error "Error loading GUI: $_"
+    Write-Host "CRITICAL ERROR: $_" -ForegroundColor Red
+    Read-Host "Press Enter to exit"
 }

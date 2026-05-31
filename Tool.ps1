@@ -130,7 +130,7 @@ Add-Type -AssemblyName System.Windows.Forms
                     <!-- Sidebar Header -->
                     <StackPanel DockPanel.Dock="Top" Margin="18,22,18,12">
                         <TextBlock Text="TOOL LAUNCHER" Foreground="#333" FontSize="10"
-                                   FontWeight="Bold" FontFamily="Segoe UI" LetterSpacing="2"/>
+                                   FontWeight="Bold" FontFamily="Segoe UI"/>
                         <Rectangle Height="1" Fill="#1F1F1F" Margin="0,12,0,0"/>
                     </StackPanel>
 

@@ -48,7 +48,7 @@ Add-Type -AssemblyName System.Windows.Forms
             </Style.Triggers>
         </Style>
 
-        <!-- Active Sidebar Button Style (Applied via code) -->
+        <!-- Active Sidebar Button Style -->
         <Style x:Key="ActiveSidebarButton" TargetType="Button" BasedOn="{StaticResource SidebarButton}">
             <Setter Property="Background" Value="#e94560"/>
             <Setter Property="Foreground" Value="White"/>
@@ -415,7 +415,11 @@ try {
                     
                     try {
                         $script_NicToolDownloader | Out-File -FilePath $tempFilePath -Encoding UTF8
-                        Start-Process powershell.exe -ArgumentList "-NoExit", "-ExecutionPolicy", "Bypass", "-File", `"$tempFilePath`"`
+                        
+                        # Robust Argument List
+                        $psiArgs = "/k", "powershell -NoExit -ExecutionPolicy Bypass -File `"$tempFilePath`""
+                        Start-Process "cmd.exe" -ArgumentList $psiArgs
+                        
                         $LogPreview.Text = "Running NicTool Downloader..."
                     }
                     catch {
@@ -432,13 +436,17 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
  $global:CurrentCmd
 "@
                     Set-Content -Path $tempFilePath -Value $fileContent
-                    Start-Process cmd.exe -ArgumentList "/k", "powershell -NoExit -ExecutionPolicy Bypass -File `"$tempFilePath`""
+                    
+                    # Robust Argument List
+                    $psiArgs = "/k", "powershell -NoExit -ExecutionPolicy Bypass -File `"$tempFilePath`""
+                    Start-Process "cmd.exe" -ArgumentList $psiArgs
+                    
                     $LogPreview.Text = "Process started."
                 }
             }
         }
         catch {
-            [System.Windows.MessageBox]::Show("Launcher Error: $_`n`nPlease check permissions or temporary folder access.")
+            [System.Windows.MessageBox]::Show("Launcher Error: $_")
             $LogPreview.Text = "Error occurred."
         }
     })

@@ -63,7 +63,7 @@ Add-Type -AssemblyName System.Windows.Forms
                 <Grid Grid.Row="0" Margin="0,0,0,20">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="> SYSTEM_ROOT" Style="{StaticResource HeaderLabel}"/>
-                        <TextBlock Text=" :: EXECUTOR" Foreground="#00FFCC" FontFamily="Consolas" FontSize="24" FontWeight="Bold" Margin="10,0,0,0"/>
+                        <TextBlock Text=" :: CMD_EXECUTOR" Foreground="#00FFCC" FontFamily="Consolas" FontSize="24" FontWeight="Bold" Margin="10,0,0,0"/>
                     </StackPanel>
                     
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
@@ -147,7 +147,7 @@ try {
         $LogConsole.ScrollToEnd()
     }
 
-    # Tool Launcher Helper (FIXED: Uses Temp File to avoid length limit)
+    # Tool Launcher Helper (Opens CMD window, runs PowerShell command inside it)
     function Invoke-Tool {
         param([string]$Name, [string]$Command)
         Write-Log "INITIATING: $Name..." "Cyan"
@@ -157,15 +157,16 @@ try {
         $tempFilePath = Join-Path $env:TEMP $tempFileName
         
         # 2. Write the command to the file
-        # We add Set-ExecutionPolicy locally to the file just to be safe
         $fileContent = @"
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
  $Command
 "@
         Set-Content -Path $tempFilePath -Value $fileContent
         
-        # 3. Execute the file
-        Start-Process powershell.exe -ArgumentList "-NoExit", "-File", `"$tempFilePath`"
+        # 3. Execute via CMD
+        # /K = Keep the window open after execution
+        # We ask CMD to run PowerShell, which then runs the script file
+        Start-Process cmd.exe -ArgumentList "/k", "powershell -NoExit -ExecutionPolicy Bypass -File `"$tempFilePath`""
     }
 
     # --- Event Hooks ---

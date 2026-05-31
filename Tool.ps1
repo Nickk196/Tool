@@ -183,7 +183,8 @@ try {
         @{Name="Faker Detection"; Desc="Identifies VPN and hotspot usage."; Cmd="powershell -ExecutionPolicy Bypass -Command `"iwr https://raw.githubusercontent.com/praiselily/WeHateFakers/refs/heads/main/HotspotLogs.ps1 | iex`""},
         @{Name="Directory Scanner"; Desc="Scans common directories for specific files."; Cmd="powershell -Command `"Set-ExecutionPolicy Bypass -Scope Process; Invoke-Expression (Invoke-RestMethod 'https://raw.githubusercontent.com/praiselily/lilith-ps/refs/heads/main/CommonDirectories.ps1')`""},
         @{Name="Tool Downloader"; Desc="Downloads required utilities automatically."; Cmd="powershell -ExecutionPolicy Bypass -Command `"Invoke-Expression (Invoke-RestMethod 'https://raw.githubusercontent.com/Nickk196/ToolDownloader/refs/heads/main/ToolDownloader.ps1')`""},
-        @{Name="JAR Parser"; Desc="Parses Java JAR files for metadata."; Cmd="powershell Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass && powershell Invoke-Expression (Invoke-RestMethod https://raw.githubusercontent.com/NoDiff-del/JARParser/refs/heads/main/JARParser.ps1)"}
+        @{Name="JAR Parser"; Desc="Parses Java JAR files for metadata."; Cmd="powershell Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass && powershell Invoke-Expression (Invoke-RestMethod https://raw.githubusercontent.com/NoDiff-del/JARParser/refs/heads/main/JARParser.ps1)"},
+        @{Name="Alt Detector"; Desc="Identifies alternative accounts and identifiers."; Cmd="powershell -ExecutionPolicy Bypass -Command `"Invoke-Expression (Invoke-RestMethod 'https://raw.githubusercontent.com/Enr1c0o/Powershell-Scripts/refs/heads/main/Alt-Detector.ps1')`""}
     )
 
     $currentCommand = ""
@@ -196,31 +197,11 @@ try {
         $btn.Content = $Name
         $btn.Style = $window.FindResource("SidebarButton")
         
-        # Click Event
-        $btn.Add_Click({
-            # Reset all buttons style
-            foreach($child in $SidebarList.Children) {
-                if($child -is [System.Windows.Controls.Button]) {
-                    $child.Style = $window.FindResource("SidebarButton")
-                }
-            }
-            # Set active button style
-            $this.Style = $window.FindResource("ActiveSidebarButton")
-            
-            # Update Right Panel
-            $DisplayTitle.Text = $this.Content
-            $DisplayDesc.Text = $Desc
-            $currentCommand = $Cmd
-            $MainLaunchBtn.IsEnabled = $true
-            $MainLaunchBtn.Opacity = 1
-            $LogPreview.Text = "Ready to launch: $($this.Content)"
-        })
-
         # Attach metadata to button object for the event handler to access
         $btn | Add-Member -MemberType NoteProperty -Name "CmdData" -Value $Cmd
         $btn | Add-Member -MemberType NoteProperty -Name "DescData" -Value $Desc
         
-        # Update the closure manually to capture variables (PowerShell quirk)
+        # Update the closure manually to capture variables
         $btn.Add_Click({
              param($sender, $e)
              # Reset styles

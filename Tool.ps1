@@ -1,7 +1,7 @@
 Add-Type -AssemblyName PresentationFramework
 Add-Type -AssemblyName System.Windows.Forms
 
-# --- XAML GUI Definition (Sidebar + Dashboard Style) ---
+# --- XAML GUI Definition (Purple & Black Theme) ---
 [xml]$xaml = @"
 <Window 
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -50,14 +50,14 @@ Add-Type -AssemblyName System.Windows.Forms
 
         <!-- Active Sidebar Button Style -->
         <Style x:Key="ActiveSidebarButton" TargetType="Button" BasedOn="{StaticResource SidebarButton}">
-            <Setter Property="Background" Value="#e94560"/>
+            <Setter Property="Background" Value="#9D00FF"/>
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
         </Style>
         
         <!-- Big Launch Button Style -->
         <Style x:Key="LaunchButton" TargetType="Button">
-            <Setter Property="Background" Value="#e94560"/>
+            <Setter Property="Background" Value="#9D00FF"/>
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="FontFamily" Value="Segoe UI"/>
             <Setter Property="FontSize" Value="16"/>
@@ -71,13 +71,13 @@ Add-Type -AssemblyName System.Windows.Forms
                     <ControlTemplate TargetType="Button">
                         <Border Background="{TemplateBinding Background}" CornerRadius="25">
                             <Border.Effect>
-                                <DropShadowEffect Color="#e94560" BlurRadius="10" ShadowDepth="0" Opacity="0.4"/>
+                                <DropShadowEffect Color="#9D00FF" BlurRadius="10" ShadowDepth="0" Opacity="0.4"/>
                             </Border.Effect>
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#ff5e78"/>
+                                <Setter Property="Background" Value="#B533FF"/>
                                 <Setter Property="RenderTransform">
                                     <Setter.Value>
                                         <ScaleTransform ScaleX="1.05" ScaleY="1.05"/>
@@ -93,7 +93,7 @@ Add-Type -AssemblyName System.Windows.Forms
 
     <Grid Margin="10">
         <!-- Main Border -->
-        <Border Background="#DD1a1a2e" CornerRadius="15" BorderBrush="#e94560" BorderThickness="1">
+        <Border Background="#DD0F0518" CornerRadius="15" BorderBrush="#9D00FF" BorderThickness="1">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="260"/>
@@ -101,15 +101,15 @@ Add-Type -AssemblyName System.Windows.Forms
                 </Grid.ColumnDefinitions>
 
                 <!-- Sidebar (Left) -->
-                <Border Grid.Column="0" Background="#0f0f1a" CornerRadius="15,0,0,15" BorderBrush="#2a2a3d" BorderThickness="0,0,1,0">
+                <Border Grid.Column="0" Background="#1A0B2E" CornerRadius="15,0,0,15" BorderBrush="#3A1C5E" BorderThickness="0,0,1,0">
                     <StackPanel>
                         <!-- Logo Area -->
                         <StackPanel Margin="20,30,20,20">
-                            <Border Width="50" Height="50" Background="#e94560" CornerRadius="25" HorizontalAlignment="Left">
+                            <Border Width="50" Height="50" Background="#9D00FF" CornerRadius="25" HorizontalAlignment="Left">
                                 <TextBlock Text="O" Foreground="White" FontSize="30" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
                             <TextBlock Text="OBSIDIAN" Foreground="White" FontSize="18" FontWeight="SemiBold" Margin="0,10,0,0" FontFamily="Segoe UI"/>
-                            <TextBlock Text="Launcher" Foreground="#666" FontSize="12" Margin="0,0,0,5" FontFamily="Segoe UI"/>
+                            <TextBlock Text="Launcher" Foreground="#888" FontSize="12" Margin="0,0,0,5" FontFamily="Segoe UI"/>
                         </StackPanel>
 
                         <!-- Tool List Buttons -->
@@ -118,7 +118,7 @@ Add-Type -AssemblyName System.Windows.Forms
                         </ScrollViewer>
                         
                         <!-- Extras Button -->
-                        <Button Name="ExtrasBtn" Content="Extras / EXEs" Foreground="#e94560" Background="Transparent" BorderThickness="0" HorizontalAlignment="Center" Margin="0,10,0,0" Cursor="Hand" FontSize="12" FontWeight="Bold"/>
+                        <Button Name="ExtrasBtn" Content="Extras / EXEs" Foreground="#9D00FF" Background="Transparent" BorderThickness="0" HorizontalAlignment="Center" Margin="0,10,0,0" Cursor="Hand" FontSize="12" FontWeight="Bold"/>
 
                         <!-- Footer in Sidebar -->
                         <TextBlock Text="v2.1 Stable" Foreground="#444" FontSize="10" HorizontalAlignment="Center" Margin="0,20,0,20"/>
@@ -135,16 +135,16 @@ Add-Type -AssemblyName System.Windows.Forms
 
                     <!-- Window Controls (Top Right) -->
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,-10,0,0" ZIndex="10">
-                        <Button Content="−" Width="30" Height="30" Background="Transparent" Foreground="#666" FontSize="18" BorderThickness="0" Cursor="Hand" Name="MinBtn" Margin="0,0,5,0"/>
-                        <Button Content="✕" Width="30" Height="30" Background="Transparent" Foreground="#666" FontSize="16" BorderThickness="0" Cursor="Hand" Name="CloseBtn"/>
+                        <Button Content="−" Width="30" Height="30" Background="Transparent" Foreground="#888" FontSize="18" BorderThickness="0" Cursor="Hand" Name="MinBtn" Margin="0,0,5,0"/>
+                        <Button Content="✕" Width="30" Height="30" Background="Transparent" Foreground="#888" FontSize="16" BorderThickness="0" Cursor="Hand" Name="CloseBtn"/>
                     </StackPanel>
 
                     <!-- Tool Display Info -->
                     <StackPanel Grid.Row="1" VerticalAlignment="Center">
-                        <TextBlock Text="SELECT A TOOL" Foreground="#e94560" FontSize="14" FontWeight="Bold"/>
+                        <TextBlock Text="SELECT A TOOL" Foreground="#9D00FF" FontSize="14" FontWeight="Bold"/>
                         <TextBlock Name="DisplayTitle" Text="Welcome" FontSize="48" FontWeight="Light" Foreground="White" Margin="0,10,0,10" FontFamily="Segoe UI">
                             <TextBlock.Effect>
-                                <DropShadowEffect Color="#e94560" BlurRadius="10" ShadowDepth="0" Opacity="0.3"/>
+                                <DropShadowEffect Color="#9D00FF" BlurRadius="10" ShadowDepth="0" Opacity="0.3"/>
                             </TextBlock.Effect>
                         </TextBlock>
                         <TextBlock Name="DisplayDesc" Text="Select a module from the sidebar to view details and execute." FontSize="16" Foreground="#8892b0" Width="500" TextWrapping="Wrap" Margin="0,0,0,30"/>
@@ -172,10 +172,10 @@ Add-Type -AssemblyName System.Windows.Forms
         WindowStartupLocation="CenterScreen"
         WindowStyle="None"
         ResizeMode="NoResize"
-        Background="#1a1a2e"
+        Background="#0F0518"
         Topmost="False">
     
-    <Border Background="#DD1a1a2e" CornerRadius="10" BorderBrush="#e94560" BorderThickness="1" Margin="10">
+    <Border Background="#DD0F0518" CornerRadius="10" BorderBrush="#9D00FF" BorderThickness="1" Margin="10">
         <Grid Margin="20">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
@@ -186,7 +186,7 @@ Add-Type -AssemblyName System.Windows.Forms
             <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
                 <StackPanel Name="ExtrasList"/>
             </ScrollViewer>
-            <Button Grid.Row="2" Content="CLOSE" Background="#333" Foreground="White" BorderThickness="0" Height="30" Cursor="Hand" Name="CloseExtrasBtn" Margin="0,20,0,0"/>
+            <Button Grid.Row="2" Content="CLOSE" Background="#240046" Foreground="White" BorderThickness="0" Height="30" Cursor="Hand" Name="CloseExtrasBtn" Margin="0,20,0,0"/>
         </Grid>
     </Border>
 </Window>
@@ -326,7 +326,7 @@ try {
         @{Name="Faker Detection"; Desc="Identifies VPN and hotspot usage."; Cmd="powershell -ExecutionPolicy Bypass -Command `"iwr https://raw.githubusercontent.com/praiselily/WeHateFakers/refs/heads/main/HotspotLogs.ps1 | iex`""},
         @{Name="Directory Scanner"; Desc="Scans common directories for specific files."; Cmd="powershell -Command `"Set-ExecutionPolicy Bypass -Scope Process; Invoke-Expression (Invoke-RestMethod 'https://raw.githubusercontent.com/praiselily/lilith-ps/refs/heads/main/CommonDirectories.ps1')`""},
         @{Name="NicTool Downloader"; Desc="Downloads SSTool, System Informer, and other utilities to C:\SS."; Cmd="CUSTOM_NIC_DOWNLOADER"},
-        @{Name="JAR Scanner"; Desc="Parses Java JAR files for metadata."; Cmd="powershell Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass ; powershell Invoke-Expression (Invoke-RestMethod   https://raw.githubusercontent.com/praiselily/JARScanner/refs/heads/main/JARScanner.ps1)"},
+        @{Name="JAR Scanner"; Desc="Parses Java JAR files for metadata."; Cmd="powershell Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass ; powershell Invoke-Expression (Invoke-RestMethod  https://raw.githubusercontent.com/praiselily/JARScanner/refs/heads/main/JARScanner.ps1 | iex)"},
         @{Name="Alt Detector"; Desc="Identifies alternative accounts and identifiers."; Cmd="powershell -ExecutionPolicy Bypass -Command `"Invoke-Expression (Invoke-RestMethod 'https://raw.githubusercontent.com/Enr1c0o/Powershell-Scripts/refs/heads/main/Alt-Detector.ps1')`""},
         @{Name="Dqrkis Finder"; Desc="Locates Dqrkis in active sessions."; Cmd="powershell -ExecutionPolicy Bypass -Command `"Invoke-Expression (Invoke-RestMethod 'https://raw.githubusercontent.com/cheesecatlol/DQRKIS-FUCKER/refs/heads/main/DqrkisFucker.ps1')`""},
         @{Name="Signature"; Desc="Signature Checker."; Cmd="powershell -ExecutionPolicy Bypass -Command `"Invoke-Expression (Invoke-RestMethod 'https://raw.githubusercontent.com/bacanoicua/Screenshare/main/RedLotusSignatures.ps1')`""},
@@ -385,7 +385,7 @@ try {
         foreach ($exe in $myExes) {
             $btn = New-Object System.Windows.Controls.Button
             $btn.Content = $exe.Name
-            $btn.Background = "#0f3460"
+            $btn.Background = "#240046"
             $btn.Foreground = "White"
             $btn.Margin = "0,5"
             $btn.Height = "35"
@@ -431,11 +431,12 @@ try {
                     $tempFileName = [Guid]::NewGuid().ToString() + ".ps1"
                     $tempFilePath = Join-Path $env:TEMP $tempFileName
                     
+                    # Using Here-String to prevent quote errors
                     $fileContent = @"
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
  $global:CurrentCmd
 "@
-                    Set-Content -Path $tempFilePath -Value $fileContent
+                    $fileContent | Out-File -FilePath $tempFilePath -Encoding UTF8
                     
                     # Robust Argument List
                     $psiArgs = "/k", "powershell -NoExit -ExecutionPolicy Bypass -File `"$tempFilePath`""

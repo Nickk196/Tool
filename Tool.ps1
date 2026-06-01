@@ -52,8 +52,10 @@ Add-Type -AssemblyName System.Drawing
     @{ Name="HotspotLogs"; Category="Praiselily"; Type="Cmd"; Command="iwr https://raw.githubusercontent.com/praiselily/WeHateFakers/refs/heads/main/HotspotLogs.ps1 | iex" },
     @{ Name="CommonDirectories"; Category="Praiselily"; Type="Cmd"; Command="Invoke-Expression (Invoke-RestMethod 'https://raw.githubusercontent.com/praiselily/lilith-ps/refs/heads/main/CommonDirectories.ps1')" },
     @{ Name="HarddiskConverter"; Category="Praiselily"; Type="Cmd"; Command="Invoke-Expression (Invoke-RestMethod https://raw.githubusercontent.com/praiselily/lilith-ps/refs/heads/main/HarddiskConverter.ps1)" },
-    @{ Name="Services"; Category="Praiselily"; Type="Cmd"; Command="Invoke-Expression (Invoke-RestMethod https://raw.githubusercontent.com/praiselily/lilith-ps/refs/heads/main/Services.ps1)" },
-    @{ Name="Signed-Scheduled-Tasks"; Category="Praiselily"; Type="Cmd"; Command="Invoke-Expression (Invoke-RestMethod 'https://raw.githubusercontent.com/praiselily/lilith-ps/refs/heads/main/Signed-Scheduled-Tasks')" },
+    # --- FIXED SERVICES COMMAND (Removed typo ~) ---
+    @{ Name="Services"; Category="Praiselily"; Type="Cmd"; Command="Invoke-Expression (Invoke-RestMethod 'https://raw.githubusercontent.com/praiselily/lilith-ps/refs/heads/main/Services.ps1')" },
+    # --- FIXED SIGNED-SCHEDULED-TASKS (Added .ps1) ---
+    @{ Name="Signed-Scheduled-Tasks"; Category="Praiselily"; Type="Cmd"; Command="Invoke-Expression (Invoke-RestMethod 'https://raw.githubusercontent.com/praiselily/lilith-ps/refs/heads/main/Signed-Scheduled-Tasks.ps1')" },
 
     # --- REDLOTUS ---
     @{ Name="RedLotus-Mod-Analyzer"; Category="RedLotus"; Type="GitHub"; URL="https://github.com/ItzIceHere/RedLotus-Mod-Analyzer/releases/tag/RL" },
@@ -104,7 +106,7 @@ function Get-GitHubExeUrl {
 
 # --- CREATE FORM ---
  $Form = New-Object System.Windows.Forms.Form
- $Form.Text = "Tool Launcher v4 (Centered)"
+ $Form.Text = "Tool Launcher v5 (Centered)"
  $Form.Size = New-Object System.Drawing.Size(600, 500)
  $Form.StartPosition = "CenterScreen"
  $Form.BackColor = $ColorBg
@@ -121,7 +123,54 @@ function Get-GitHubExeUrl {
  $TabControl = New-Object System.Windows.Forms.TabControl
  $TabControl.Dock = "Fill"
  $TabControl.BackColor = $ColorBg
+ $TabControl.DrawMode = "OwnerDrawFixed" # Enable custom drawing for centering
  $SplitContainer.Panel1.Controls.Add($TabControl)
+
+# --- CUSTOM DRAWING TO CENTER TABS ---
+ $TabControl.Add_DrawItem({
+    param($sender, $e)
+    $tabControl = $sender
+    $tabPage = $tabControl.TabPages[$e.Index]
+    
+    # Calculate total width of all tabs
+    $totalWidth = 0
+    for ($i = 0; $i -lt $tabControl.TabPages.Count; $i++) {
+        # Measure text size
+        $sz = $e.Graphics.MeasureString($tabControl.TabPages[$i].Text, $tabControl.Font)
+        # Add some padding
+        $totalWidth += [int]$sz.Width + 20
+    }
+    
+    # Calculate starting X position to center
+    $startX = ($tabControl.Width - $totalWidth) / 2
+    if ($startX -lt 5) { $startX = 5 } # Don't go off screen edge
+
+    # Re-calculate current tab's position based on previous tabs
+    $currentX = $startX
+    for ($i = 0; $i -lt $e.Index; $i++) {
+        $szPrev = $e.Graphics.MeasureString($tabControl.TabPages[$i].Text, $tabControl.Font)
+        $currentX += [int]$szPrev.Width + 20
+    }
+    
+    $tabBounds = $tabControl.GetTabRect($e.Index)
+    # Define new centered rectangle
+    $newBounds = New-Object System.Drawing.Rectangle($currentX, $tabBounds.Y, $tabBounds.Width, $tabBounds.Height)
+    
+    # Draw Background
+    $brush = if ($e.State -eq [System.Windows.Forms.DrawItemState]::Selected) { 
+        [System.Drawing.SolidBrush]::new($ColorBtnHover) 
+    } else { 
+        [System.Drawing.SolidBrush]::new($ColorBg) 
+    }
+    $e.Graphics.FillRectangle($brush, $newBounds)
+    
+    # Draw Text
+    $textBrush = [System.Drawing.SolidBrush]::new($ColorText)
+    $format = [System.Drawing.StringFormat]::new()
+    $format.Alignment = [System.Drawing.StringAlignment]::Center
+    $format.LineAlignment = [System.Drawing.StringAlignment]::Center
+    $e.Graphics.DrawString($tabPage.Text, $e.Font, $textBrush, $newBounds, $format)
+})
 
 # --- OUTPUT LOG ---
  $OutputLog = New-Object System.Windows.Forms.TextBox
@@ -174,23 +223,20 @@ foreach ($Tool in $ToolData) {
         $Btn = New-Object System.Windows.Forms.Button
         $Btn.Text = $Tool.Name
         $Btn.Width = 480
-        $Btn.Height = 50 # Increased height slightly
+        $Btn.Height = 50 
         
-        # --- DESIGN UPDATE ---
         $Btn.BackColor = $ColorBtn
         $Btn.ForeColor = $ColorText
-        $Btn.Font = New-Object System.Drawing.Font("Segoe UI", 11, [System.Drawing.FontStyle]::Bold) # Bigger and Bold
-        $Btn.TextAlign = "MiddleCenter" # CENTERED TEXT
+        $Btn.Font = New-Object System.Drawing.Font("Segoe UI", 11, [System.Drawing.FontStyle]::Bold) 
+        $Btn.TextAlign = "MiddleCenter" 
         $Btn.FlatStyle = "Flat"
         $Btn.FlatAppearance.BorderSize = 0
         $Btn.Cursor = [System.Windows.Forms.Cursors]::Hand
         $Btn.Margin = New-Object System.Windows.Forms.Padding(0, 0, 0, 8)
 
-        # Hover Effect
         $Btn.Add_MouseEnter({ $This.BackColor = $ColorBtnHover })
         $Btn.Add_MouseLeave({ $This.BackColor = $ColorBtn })
 
-        # Click Logic
         $Btn.Add_Click({
             $ToolName = $This.Text
             $ToolDataItem = $ToolData | Where-Object { $_.Name -eq $ToolName }

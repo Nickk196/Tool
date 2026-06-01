@@ -101,6 +101,7 @@ function Write-Log {
 
 # Helper to find or create a tab
  $Tabs = @{}
+ $TabYPos = @{} # FIX: Keep track of Y position for EACH tab separately
  $Categories = @("Orbdiff", "Spokwn", "RedLotus", "Tonynoh", "Praiselily", "Others", "Webs")
 
 foreach ($Cat in $Categories) {
@@ -110,20 +111,22 @@ foreach ($Cat in $Categories) {
     $Tab.AutoScroll = $true 
     $TabControl.TabPages.Add($Tab)
     $Tabs[$Cat] = $Tab
+    $TabYPos[$Cat] = 10 # Initialize Y position for this tab to 10
 }
 
 # --- GENERATE BUTTONS ---
- $yPos = 10
-
 foreach ($Tool in $ToolData) {
     $CatTab = $Tabs[$Tool.Category]
     if (-not $CatTab) { continue }
+
+    # Get the Y position specific to this category
+    $CurrentY = $TabYPos[$Tool.Category]
 
     $Btn = New-Object System.Windows.Forms.Button
     $Btn.Text = $Tool.Name
     $Btn.Width = 460
     $Btn.Height = 35
-    $Btn.Top = $yPos
+    $Btn.Top = $CurrentY  # Use the specific Y position
     $Btn.Left = 10
     $Btn.FlatStyle = "Flat"
     $Btn.BackColor = [System.Drawing.Color]::FromArgb(240, 240, 240)
@@ -132,39 +135,29 @@ foreach ($Tool in $ToolData) {
     # Add Click Logic
     $Btn.Add_Click({
         $ToolName = $This.Text
-        # Find the tool data in the array by name
         $ToolDataItem = $ToolData | Where-Object { $_.Name -eq $ToolName }
         
         Write-Log "Checking: $ToolName..."
 
         if ($ToolDataItem.Type -eq "Cmd") {
-            # Run PowerShell Command
             Write-Log "Running script..."
             Start-Process powershell -ArgumentList "-NoProfile -ExecutionPolicy Bypass -Command `"$($ToolDataItem.Command)`""
         }
         elseif ($ToolDataItem.Type -eq "Web") {
-            # Just open the browser (for NirSoft/EZ Tools)
             Write-Log "Opening website..."
             Start-Process $ToolDataItem.URL
         }
         elseif ($ToolDataItem.Type -eq "SmartDL") {
-            # Attempt Smart Download
             $PageUrl = $ToolDataItem.URL
-            
-            # Construct the likely download URL: Replace "/tag/" with "/download/" and add ".exe"
-            # Example: github.com/user/repo/releases/tag/v1.0 -> github.com/user/repo/releases/download/v1.0/ToolName.exe
             $DownloadGuess = $PageUrl -replace "/tag/", "/download/"
             $DownloadGuess += "/" + $ToolName + ".exe"
-            
             $TempPath = "$env:TEMP\$ToolName.exe"
 
-            # Check if already exists in Temp
             if (Test-Path $TempPath) {
                 Write-Log "Found in Temp. Running..."
                 Start-Process $TempPath
             }
             else {
-                # Try to download
                 Write-Log "Attempting download..."
                 try {
                     Invoke-WebRequest -Uri $DownloadGuess -OutFile $TempPath -UseBasicParsing -ErrorAction Stop
@@ -174,7 +167,6 @@ foreach ($Tool in $ToolData) {
                 catch {
                     Write-Log "Auto-download failed."
                     Write-Log "Opening browser for manual download..."
-                    # Fallback: Open the release page
                     Start-Process $PageUrl
                 }
             }
@@ -182,7 +174,9 @@ foreach ($Tool in $ToolData) {
     })
 
     $CatTab.Controls.Add($Btn)
-    $yPos += 40 
+    
+    # Increment the Y position for this specific category
+    $TabYPos[$Tool.Category] = $CurrentY + 40
 }
 
 # --- WEBS CATEGORY (Placeholder) ---

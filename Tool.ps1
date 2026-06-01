@@ -160,7 +160,15 @@ Add-Type -AssemblyName System.Windows.Forms
 
                     <!-- Tool List -->
                     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="0,0,0,0">
-                        <StackPanel Name="SidebarList" Margin="6,0,6,0"/>
+                        <StackPanel>
+                            <TextBlock Text="SCRIPTS" Foreground="#333" FontSize="10"
+                                       FontWeight="Bold" FontFamily="Segoe UI" Margin="18,8,0,6"/>
+                            <StackPanel Name="SidebarList" Margin="6,0,6,0"/>
+                            <Rectangle Height="1" Fill="#1F1F1F" Margin="12,10,12,6"/>
+                            <TextBlock Text="APPS" Foreground="#333" FontSize="10"
+                                       FontWeight="Bold" FontFamily="Segoe UI" Margin="18,0,0,6"/>
+                            <StackPanel Name="ExeList" Margin="6,0,6,0"/>
+                        </StackPanel>
                     </ScrollViewer>
                 </DockPanel>
             </Border>
@@ -246,6 +254,7 @@ try {
     $window = [Windows.Markup.XamlReader]::Load($reader)
 
     $SidebarList   = $window.FindName("SidebarList")
+    $ExeList       = $window.FindName("ExeList")
     $DisplayTitle  = $window.FindName("DisplayTitle")
     $DisplayDesc   = $window.FindName("DisplayDesc")
     $MainLaunchBtn = $window.FindName("MainLaunchBtn")
@@ -288,6 +297,11 @@ try {
                     $child.Style = $window.FindResource("SidebarButton")
                 }
             }
+            foreach ($child in $ExeList.Children) {
+                if ($child -is [System.Windows.Controls.Button]) {
+                    $child.Style = $window.FindResource("SidebarButton")
+                }
+            }
             $sender.Style          = $window.FindResource("ActiveSidebarButton")
             $DisplayTitle.Text     = $sender.Content.ToString()
             $DisplayDesc.Text      = $sender.DescData
@@ -304,7 +318,48 @@ try {
         Create-SidebarButton -Name $tool.Name -Cmd $tool.Cmd -Desc $tool.Desc
     }
 
-    # --- System Apps Popup ---
+    # --- Local EXE Apps ---
+    $exeApps = @(
+        @{Name="BAMReveal";           Path="C:\SS\BAMReveal.exe";           Desc="Background Activity Monitor reveal tool."},
+        @{Name="SSTool";              Path="C:\SS\SSTool.exe";              Desc="Screenshot tool utility."},
+        @{Name="System Informer";     Path="C:\SS\systeminformer-4.0.26144-setup.exe"; Desc="Advanced system monitoring tool."},
+        @{Name="MeowDoomsdayFucker";  Path="C:\SS\MeowDoomsdayFucker.exe";  Desc="Meow Doomsday analysis tool."},
+        @{Name="MeowImportsChecker";  Path="C:\SS\MeowImportsChecker.exe";  Desc="Checks imports in executables."},
+        @{Name="MeowResolver";        Path="C:\SS\MeowResolver.exe";        Desc="Meow DNS/address resolver."}
+    )
+
+    function Create-ExeButton {
+        param($Name, $Path, $Desc)
+        $btn = New-Object System.Windows.Controls.Button
+        $btn.Content = $Name
+        $btn.Style   = $window.FindResource("SidebarButton")
+        $btn | Add-Member -MemberType NoteProperty -Name "ExePath" -Value $Path
+        $btn | Add-Member -MemberType NoteProperty -Name "DescData" -Value $Desc
+
+        $btn.Add_Click({
+            param($sender, $e)
+            # Deselect all buttons in both lists
+            foreach ($child in $SidebarList.Children) {
+                if ($child -is [System.Windows.Controls.Button]) { $child.Style = $window.FindResource("SidebarButton") }
+            }
+            foreach ($child in $ExeList.Children) {
+                if ($child -is [System.Windows.Controls.Button]) { $child.Style = $window.FindResource("SidebarButton") }
+            }
+            $sender.Style      = $window.FindResource("ActiveSidebarButton")
+            $DisplayTitle.Text = $sender.Content.ToString()
+            $DisplayDesc.Text  = $sender.DescData
+            $global:CurrentCmd = "EXE:" + $sender.ExePath
+            $MainLaunchBtn.IsEnabled = $true
+            $MainLaunchBtn.Opacity   = 1
+            $LogPreview.Text   = "Ready — " + $sender.Content
+        }.GetNewClosure())
+
+        $ExeList.Children.Add($btn) | Out-Null
+    }
+
+    foreach ($app in $exeApps) {
+        Create-ExeButton -Name $app.Name -Path $app.Path -Desc $app.Desc
+    }
     $ExtrasBtn.Add_Click({
         $reader2   = New-Object System.Xml.XmlNodeReader $extrasXaml
         $winExtras = [Windows.Markup.XamlReader]::Load($reader2)
@@ -376,6 +431,19 @@ try {
             $LogPreview.Text  = "Initializing..."
             $tempFileName     = [Guid]::NewGuid().ToString() + ".ps1"
             $tempFilePath     = Join-Path $env:TEMP $tempFileName
+
+            # Direct EXE launch
+            if ($global:CurrentCmd -like "EXE:*") {
+                $exePath = $global:CurrentCmd.Substring(4)
+                if (Test-Path $exePath) {
+                    Start-Process $exePath
+                    $LogPreview.Text = "Launched: $exePath"
+                } else {
+                    [System.Windows.MessageBox]::Show("File not found:`n$exePath`n`nRun NicTool Downloader first to install apps to C:\SS")
+                    $LogPreview.Text = "File not found."
+                }
+                return
+            }
 
             if ($global:CurrentCmd -eq "CUSTOM_NIC_DOWNLOADER") {
                 # Embedded NicTool downloader — written as a self-contained script

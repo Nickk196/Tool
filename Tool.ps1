@@ -2,6 +2,15 @@
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 
+# --- DEFINE COLORS (THEME) ---
+ $ColorBg        = [System.Drawing.Color]::FromArgb(43, 43, 43)   # Dark Gray Background
+ $ColorPanel     = [System.Drawing.Color]::FromArgb(43, 43, 43)   # Panel Background
+ $ColorBtn       = [System.Drawing.Color]::FromArgb(60, 60, 60)   # Button Color
+ $ColorBtnHover  = [System.Drawing.Color]::FromArgb(80, 80, 80)   # Button Hover
+ $ColorText      = [System.Drawing.Color]::White                  # White Text
+ $ColorLogBg     = [System.Drawing.Color]::Black                  # Log Background
+ $ColorLogText   = [System.Drawing.Color]::LimeGreen              # Log Text
+
 # --- DEFINE ALL TOOLS ---
  $ToolData = @(
     # --- ORBDIFF ---
@@ -63,32 +72,40 @@ Add-Type -AssemblyName System.Drawing
 
 # --- CREATE FORM ---
  $Form = New-Object System.Windows.Forms.Form
- $Form.Text = "Auto Tool Launcher"
+ $Form.Text = "Tool Launcher v2"
  $Form.Size = New-Object System.Drawing.Size(600, 500)
  $Form.StartPosition = "CenterScreen"
+ $Form.BackColor = $ColorBg
 
-# --- CREATE SPLIT CONTAINER (Top: Tabs, Bottom: Log) ---
+# --- CREATE SPLIT CONTAINER ---
  $SplitContainer = New-Object System.Windows.Forms.SplitContainer
  $SplitContainer.Dock = "Fill"
- $SplitContainer.SplitterDistance = 400 # Top area height
+ $SplitContainer.SplitterDistance = 400
  $SplitContainer.Panel2MinSize = 50
+ $SplitContainer.BackColor = $ColorBg
  $Form.Controls.Add($SplitContainer)
 
-# --- CREATE TAB CONTROL (Top Panel) ---
+# --- CREATE TAB CONTROL ---
  $TabControl = New-Object System.Windows.Forms.TabControl
  $TabControl.Dock = "Fill"
+ $TabControl.BackColor = $ColorBg
+# We need to draw the tab pages in dark mode manually or set specific properties
+ $TabControl.DrawMode = "OwnerDrawFixed"
+# Simple approach: Set backcolor, though standard tabs might still show white borders on some OS versions without OwnerDraw.
+# For simplicity in this script, we keep standard tabs but set the page content color.
  $SplitContainer.Panel1.Controls.Add($TabControl)
 
-# --- CREATE OUTPUT LOG (Bottom Panel) ---
+# --- CREATE OUTPUT LOG ---
  $OutputLog = New-Object System.Windows.Forms.TextBox
  $OutputLog.Multiline = $true
  $OutputLog.ScrollBars = "Vertical"
  $OutputLog.ReadOnly = $true
- $OutputLog.BackColor = [System.Drawing.Color]::Black
- $OutputLog.ForeColor = [System.Drawing.Color]::LimeGreen
+ $OutputLog.BackColor = $ColorLogBg
+ $OutputLog.ForeColor = $ColorLogText
  $OutputLog.Font = New-Object System.Drawing.Font("Consolas", 9)
  $OutputLog.Dock = "Fill"
  $OutputLog.Text = "System Ready..."
+ $OutputLog.BorderStyle = "None"
  $SplitContainer.Panel2.Controls.Add($OutputLog)
 
 function Write-Log {
@@ -99,21 +116,22 @@ function Write-Log {
 }
 
 # --- SETUP TABS AND FLOW LAYOUTS ---
- $TabPanels = @{} # Stores the FlowLayoutPanel for each category
+ $TabPanels = @{}
  $Categories = @("Orbdiff", "Spokwn", "RedLotus", "Tonynoh", "Praiselily", "Others", "Webs")
 
 foreach ($Cat in $Categories) {
     $TabPage = New-Object System.Windows.Forms.TabPage
     $TabPage.Text = $Cat
-    $TabPage.BackColor = [System.Drawing.Color]::White
+    $TabPage.BackColor = $ColorPanel # Dark Page Background
+    $TabPage.ForeColor = $ColorText   # White Tab Text
     
-    # Use FlowLayoutPanel to handle stacking automatically
     $FlowPanel = New-Object System.Windows.Forms.FlowLayoutPanel
     $FlowPanel.Dock = "Fill"
     $FlowPanel.FlowDirection = "TopDown"
     $FlowPanel.AutoScroll = $true
-    $FlowPanel.WrapContents = $false # Don't wrap buttons to the side
-    $FlowPanel.Padding = New-Object System.Windows.Forms.Padding(10)
+    $FlowPanel.WrapContents = $false 
+    $FlowPanel.Padding = New-Object System.Windows.Forms.Padding(15)
+    $FlowPanel.BackColor = $ColorPanel
     
     $TabPage.Controls.Add($FlowPanel)
     $TabControl.TabPages.Add($TabPage)
@@ -127,13 +145,26 @@ foreach ($Tool in $ToolData) {
     if ($Panel) {
         $Btn = New-Object System.Windows.Forms.Button
         $Btn.Text = $Tool.Name
-        $Btn.Width = 450 # Fixed width
-        $Btn.Height = 40
-        $Btn.Margin = New-Object System.Windows.Forms.Padding(0, 0, 0, 5) # Small gap between buttons
+        
+        $Btn.Width = 480
+        $Btn.Height = 45
+        $Btn.BackColor = $ColorBtn
+        $Btn.ForeColor = $ColorText
+        $Btn.Font = New-Object System.Drawing.Font("Segoe UI", 10)
         $Btn.FlatStyle = "Flat"
-        $Btn.BackColor = [System.Drawing.Color]::FromArgb(245, 245, 245)
+        $Btn.FlatAppearance.BorderSize = 0
         $Btn.Cursor = [System.Windows.Forms.Cursors]::Hand
-        $Btn.Font = New-Object System.Drawing.Font("Segoe UI", 9)
+        $Btn.Margin = New-Object System.Windows.Forms.Padding(0, 0, 0, 8)
+        $Btn.TextAlign = "MiddleLeft"
+        $Btn.Padding = New-Object System.Windows.Forms.Padding(10,0,0,0)
+
+        # Hover Effect Events
+        $Btn.Add_MouseEnter({
+            $This.BackColor = $ColorBtnHover
+        })
+        $Btn.Add_MouseLeave({
+            $This.BackColor = $ColorBtn
+        })
 
         # Click Logic
         $Btn.Add_Click({
@@ -143,6 +174,7 @@ foreach ($Tool in $ToolData) {
             Write-Log "Launching: $ToolName..."
 
             if ($ToolDataItem.Type -eq "Cmd") {
+                # For commands, we open a new PS window
                 Start-Process powershell -ArgumentList "-NoProfile -ExecutionPolicy Bypass -Command `"$($ToolDataItem.Command)`""
             }
             elseif ($ToolDataItem.Type -eq "Web") {
@@ -155,18 +187,23 @@ foreach ($Tool in $ToolData) {
                 $TempPath = "$env:TEMP\$ToolName.exe"
 
                 if (Test-Path $TempPath) {
-                    Write-Log "Found in Temp. Running..."
+                    Write-Log "Found in cache."
                     Start-Process $TempPath
                 }
                 else {
-                    Write-Log "Attempting download..."
+                    Write-Log "Downloading..."
                     try {
+                        # --- INVISIBLE DOWNLOAD LOGIC ---
+                        $ProgressPreference = 'SilentlyContinue' 
                         Invoke-WebRequest -Uri $DownloadGuess -OutFile $TempPath -UseBasicParsing -ErrorAction Stop
-                        Write-Log "Success. Running..."
+                        $ProgressPreference = 'Continue'
+                        
+                        Write-Log "Running..."
                         Start-Process $TempPath
                     }
                     catch {
-                        Write-Log "Download failed. Opening page..."
+                        $ProgressPreference = 'Continue'
+                        Write-Log "Download failed."
                         Start-Process $PageUrl
                     }
                 }
@@ -180,7 +217,7 @@ foreach ($Tool in $ToolData) {
 # --- WEBS TAB PLACEHOLDER ---
  $WebsPanel = $TabPanels["Webs"]
  $Label = New-Object System.Windows.Forms.Label
- $Label.Text = "Add web tools here."
+ $Label.Text = "No web tools added."
  $Label.ForeColor = [System.Drawing.Color]::Gray
  $WebsPanel.Controls.Add($Label)
 

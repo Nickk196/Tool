@@ -6,15 +6,15 @@ Add-Type -Name User32 -Namespace Win32 -MemberDefinition @"
 [DllImport("user32.dll")] public static extern int SendMessage(IntPtr hWnd, int Msg, int wParam, int lParam);
 "@
 
-# --- DEFINE COLORS (MODERN DARK) ---
- $ColorWindowBg     = [System.Drawing.Color]::FromArgb(30, 30, 30)    
- $ColorSidebar      = [System.Drawing.Color]::FromArgb(37, 37, 38)    
- $ColorHeader       = [System.Drawing.Color]::FromArgb(43, 43, 43)    
- $ColorBtn          = [System.Drawing.Color]::FromArgb(51, 51, 51)    
- $ColorBtnHover     = [System.Drawing.Color]::FromArgb(0, 122, 204)  # VS Code Blue
+# --- COLORS (DISCORD / DARK THEME) ---
+ $ColorWindowBg     = [System.Drawing.Color]::FromArgb(54, 57, 63)    # Discord Dark
+ $ColorTabBg        = [System.Drawing.Color]::FromArgb(47, 49, 54)
+ $ColorTabSelected  = [System.Drawing.Color]::FromArgb(66, 69, 73)    # Slightly Lighter
+ $ColorBtn          = [System.Drawing.Color]::FromArgb(78, 80, 85)    # Dark Grey Button
+ $ColorBtnHover     = [System.Drawing.Color]::FromArgb(88, 101, 242)  # Blurple
  $ColorText         = [System.Drawing.Color]::White
  $ColorLogBg        = [System.Drawing.Color]::Black
- $ColorLogText      = [System.Drawing.Color]::FromArgb(0, 255, 127)   
+ $ColorLogText      = [System.Drawing.Color]::LimeGreen
 
 # --- DEFINE ALL TOOLS ---
  $ToolData = @(
@@ -94,14 +94,14 @@ function Get-GitHubExeUrl {
 
 # --- CREATE FORM ---
  $Form = New-Object System.Windows.Forms.Form
- $Form.Text = "Tesla Launcher v2"
- $Form.Size = New-Object System.Drawing.Size(1000, 650)
+ $Form.Text = "ScreenShare Tool"
+ $Form.Size = New-Object System.Drawing.Size(1000, 700)
  $Form.StartPosition = "CenterScreen"
  $Form.BackColor = $ColorWindowBg
  $Form.FormBorderStyle = "None"
  $Form.TopLevel = $true
 
-# Make window draggable
+# Draggable Window
  $Form.Add_MouseDown({
     if ($_.Button -eq [System.Windows.Forms.MouseButtons]::Left) {
         [Win32.User32]::ReleaseCapture()
@@ -109,26 +109,26 @@ function Get-GitHubExeUrl {
     }
 })
 
-# --- HEADER (TOP BAR) ---
+# --- HEADER (TOP) ---
  $HeaderPanel = New-Object System.Windows.Forms.Panel
- $HeaderPanel.Height = 50
+ $HeaderPanel.Height = 45
  $HeaderPanel.Dock = "Top"
- $HeaderPanel.BackColor = $ColorHeader
+ $HeaderPanel.BackColor = $ColorTabBg
  $Form.Controls.Add($HeaderPanel)
 
  $TitleLabel = New-Object System.Windows.Forms.Label
- $TitleLabel.Text = "Tesla Launcher"
- $TitleLabel.Font = New-Object System.Drawing.Font("Segoe UI", 14, [System.Drawing.FontStyle]::Bold)
+ $TitleLabel.Text = "ScreenShare Tool (discord.gg/cfnmHrqP3K)"
+ $TitleLabel.Font = New-Object System.Drawing.Font("Segoe UI", 12, [System.Drawing.FontStyle]::Bold)
  $TitleLabel.ForeColor = [System.Drawing.Color]::White
- $TitleLabel.Location = New-Object System.Drawing.Point(20, 12)
+ $TitleLabel.Location = New-Object System.Drawing.Point(15, 10)
  $TitleLabel.AutoSize = $true
  $HeaderPanel.Controls.Add($TitleLabel)
 
-# Window Controls (Minimize and Close)
+# Window Controls
  $CloseBtn = New-Object System.Windows.Forms.Button
  $CloseBtn.Text = "✕"
- $CloseBtn.Size = New-Object System.Drawing.Size(40, 40)
- $CloseBtn.Location = New-Object System.Drawing.Point(950, 5)
+ $CloseBtn.Size = New-Object System.Drawing.Size(30, 30)
+ $CloseBtn.Location = New-Object System.Drawing.Point(955, 7)
  $CloseBtn.BackColor = [System.Drawing.Color]::Transparent
  $CloseBtn.ForeColor = [System.Drawing.Color]::White
  $CloseBtn.FlatStyle = "Flat"
@@ -139,8 +139,8 @@ function Get-GitHubExeUrl {
 
  $MinBtn = New-Object System.Windows.Forms.Button
  $MinBtn.Text = "—"
- $MinBtn.Size = New-Object System.Drawing.Size(40, 40)
- $MinBtn.Location = New-Object System.Drawing.Point(910, 5)
+ $MinBtn.Size = New-Object System.Drawing.Size(30, 30)
+ $MinBtn.Location = New-Object System.Drawing.Point(920, 7)
  $MinBtn.BackColor = [System.Drawing.Color]::Transparent
  $MinBtn.ForeColor = [System.Drawing.Color]::White
  $MinBtn.FlatStyle = "Flat"
@@ -149,24 +149,22 @@ function Get-GitHubExeUrl {
  $MinBtn.Add_Click({ $Form.WindowState = "Minimized" })
  $HeaderPanel.Controls.Add($MinBtn)
 
-# --- SIDEBAR (LEFT) ---
- $SidebarPanel = New-Object System.Windows.Forms.Panel
- $SidebarPanel.Width = 220
- $SidebarPanel.Dock = "Left"
- $SidebarPanel.BackColor = $ColorSidebar
- $SidebarPanel.Padding = New-Object System.Windows.Forms.Padding(10, 10, 10, 10)
- $Form.Controls.Add($SidebarPanel)
-
-# --- MAIN CONTENT (RIGHT) ---
+# --- MAIN CONTENT AREA ---
  $MainPanel = New-Object System.Windows.Forms.Panel
  $MainPanel.Dock = "Fill"
  $MainPanel.BackColor = $ColorWindowBg
- $MainPanel.Padding = New-Object System.Windows.Forms.Padding(40, 20, 40, 20)
  $Form.Controls.Add($MainPanel)
 
-# --- LOG OUTPUT (BOTTOM) ---
+# --- TAB CONTROL (NAVIGATION) ---
+ $TabControl = New-Object System.Windows.Forms.TabControl
+ $TabControl.Dock = "Top"
+ $TabControl.BackColor = $ColorWindowBg
+ $TabControl.Height = 40
+ $MainPanel.Controls.Add($TabControl)
+
+# --- LOG PANEL (BOTTOM) ---
  $OutputLog = New-Object System.Windows.Forms.TextBox
- $OutputLog.Height = 120
+ $OutputLog.Height = 100
  $OutputLog.Dock = "Bottom"
  $OutputLog.Multiline = $true
  $OutputLog.ScrollBars = "Vertical"
@@ -175,7 +173,7 @@ function Get-GitHubExeUrl {
  $OutputLog.ForeColor = $ColorLogText
  $OutputLog.Font = New-Object System.Drawing.Font("Consolas", 9)
  $OutputLog.BorderStyle = "None"
- $OutputLog.Text = "System Ready..."
+ $OutputLog.Text = "Ready..."
  $MainPanel.Controls.Add($OutputLog)
 
 function Write-Log {
@@ -185,108 +183,89 @@ function Write-Log {
     $OutputLog.ScrollToCaret()
 }
 
-# --- TOOLS FLOW PANEL ---
- $ToolsFlowPanel = New-Object System.Windows.Forms.FlowLayoutPanel
- $ToolsFlowPanel.Dock = "Fill"
- $ToolsFlowPanel.FlowDirection = "TopDown"
- $ToolsFlowPanel.AutoScroll = $true
- $ToolsFlowPanel.WrapContents = $false
- $ToolsFlowPanel.BackColor = $ColorWindowBg
- $MainPanel.Controls.Add($ToolsFlowPanel)
+# --- CONTENT PANEL (FILLS REMAINING SPACE) ---
+ $ContentPanel = New-Object System.Windows.Forms.Panel
+ $ContentPanel.Dock = "Fill"
+ $ContentPanel.Padding = New-Object System.Windows.Forms.Padding(20)
+ $MainPanel.Controls.Add($ContentPanel)
 
-# --- SETUP SIDEBAR BUTTONS ---
+# --- GENERATE TABS AND CONTENT ---
  $Categories = @("Orbdiff", "Spokwn", "RedLotus", "Tonynoh", "Praiselily", "Others")
- $SidebarButtons = @{}
 
- $yPos = 10
 foreach ($Cat in $Categories) {
-    $Btn = New-Object System.Windows.Forms.Button
-    $Btn.Text = $Cat
-    $Btn.Width = 200 # Full width of sidebar
-    $Btn.Height = 45
-    $Btn.Top = $yPos
-    $Btn.Left = 0
-    $Btn.FlatStyle = "Flat"
-    $Btn.BackColor = $ColorBtn
-    $Btn.ForeColor = $ColorText
-    $Btn.Font = New-Object System.Drawing.Font("Segoe UI", 10.5)
-    $Btn.TextAlign = "MiddleLeft"
-    $Btn.Padding = New-Object System.Windows.Forms.Padding(20, 0, 0, 0)
-    $Btn.Cursor = [System.Windows.Forms.Cursors]::Hand
-    
-    $SidebarButtons[$Cat] = $Btn
+    $TabPage = New-Object System.Windows.Forms.TabPage
+    $TabPage.Text = $Cat
+    $TabPage.BackColor = $ColorWindowBg
+    $TabPage.BorderStyle = "None"
+    $TabControl.TabPages.Add($TabPage)
 
-    $Btn.Add_Click({
-        foreach ($b in $SidebarButtons.Values) { 
-            $b.BackColor = $ColorBtn 
-            $b.ForeColor = $ColorText
-            $b.Font = New-Object System.Drawing.Font("Segoe UI", 10.5)
-        }
-        $This.BackColor = $ColorBtnHover
-        $This.ForeColor = [System.Drawing.Color]::White
-        $This.Font = New-Object System.Drawing.Font("Segoe UI", 10.5, [System.Drawing.FontStyle]::Bold)
-        
-        $ToolsFlowPanel.Controls.Clear()
-        $CatName = $This.Text
-        $Tools = $ToolData | Where-Object { $_.Category -eq $CatName }
-        
-        foreach ($Tool in $Tools) {
-            $ToolBtn = New-Object System.Windows.Forms.Button
-            $ToolBtn.Text = $Tool.Name
-            
-            # Make buttons narrower to look "Way Centered"
-            $ToolBtn.Width = 600 
-            $ToolBtn.Height = 55
-            $ToolBtn.BackColor = $ColorBtn
-            $ToolBtn.ForeColor = $ColorText
-            $ToolBtn.Font = New-Object System.Drawing.Font("Segoe UI", 11, [System.Drawing.FontStyle]::Bold)
-            $ToolBtn.FlatStyle = "Flat"
-            $ToolBtn.TextAlign = "MiddleCenter"
-            $ToolBtn.Cursor = [System.Windows.Forms.Cursors]::Hand
-            $ToolBtn.Margin = New-Object System.Windows.Forms.Padding(0, 0, 0, 15)
-            
-            # Hover
-            $ToolBtn.Add_MouseEnter({ $This.BackColor = $ColorBtnHover })
-            $ToolBtn.Add_MouseLeave({ $This.BackColor = $ColorBtn })
+    # 1. Description Label (Like "BAM forensic")
+    $DescLabel = New-Object System.Windows.Forms.Label
+    $DescLabel.Text = "Forensic Analysis Tools & Utilities - Select a tool below to download."
+    $DescLabel.Font = New-Object System.Drawing.Font("Segoe UI", 10)
+    $DescLabel.ForeColor = [System.Drawing.Color]::FromArgb(180, 180, 180)
+    $DescLabel.Dock = "Top"
+    $DescLabel.Height = 30
+    $DescLabel.Padding = New-Object System.Windows.Forms.Padding(0, 0, 0, 10)
+    $TabPage.Controls.Add($DescLabel)
 
-            $ToolBtn.Add_Click({
-                $TName = $This.Text
-                $TData = $ToolData | Where-Object { $_.Name -eq $TName }
-                Write-Log "Launching: $TName..."
-                if ($TData.Type -eq "Cmd") {
-                    Start-Process powershell -ArgumentList "-NoProfile -ExecutionPolicy Bypass -Command `"$($TData.Command)`""
-                }
-                elseif ($TData.Type -eq "Web") {
-                    Start-Process $TData.URL
-                }
-                elseif ($TData.Type -eq "GitHub") {
-                    $TempPath = "$env:TEMP\$TName.exe"
-                    if (Test-Path $TempPath) {
-                        Start-Process $TempPath
-                    } else {
-                        Write-Log "Downloading..."
-                        $Link = Get-GitHubExeUrl -ReleaseUrl $TData.URL
-                        if ($Link) {
-                            try {
-                                $ProgressPreference = 'SilentlyContinue'
-                                Invoke-WebRequest -Uri $Link -OutFile $TempPath -UseBasicParsing
-                                $ProgressPreference = 'Continue'
-                                Start-Process $TempPath
-                            } catch { Start-Process $TData.URL }
-                        } else { Start-Process $TData.URL }
-                    }
-                }
-            })
-            $ToolsFlowPanel.Controls.Add($ToolBtn)
-        }
-    })
-    $SidebarPanel.Controls.Add($Btn)
-    $yPos += 55
-}
+    # 2. Flow Panel (Grid Layout)
+    $ToolsFlowPanel = New-Object System.Windows.Forms.FlowLayoutPanel
+    $ToolsFlowPanel.Dock = "Fill"
+    $ToolsFlowPanel.FlowDirection = "LeftToRight" # Horizontal first
+    $ToolsFlowPanel.WrapContents = $true # Then wrap down (Grid)
+    $ToolsFlowPanel.AutoScroll = $true
+    $ToolsFlowPanel.BackColor = $ColorWindowBg
+    $TabPage.Controls.Add($ToolsFlowPanel)
 
-# Load first category
-if ($SidebarButtons["Orbdiff"]) {
-    $SidebarButtons["Orbdiff"].PerformClick()
+    # Add Buttons to Grid
+    $Tools = $ToolData | Where-Object { $_.Category -eq $Cat }
+    foreach ($Tool in $Tools) {
+        $ToolBtn = New-Object System.Windows.Forms.Button
+        $ToolBtn.Text = $Tool.Name
+        $ToolBtn.Width = 160  # Fixed width for grid look
+        $ToolBtn.Height = 100 # Fixed height (Tall buttons)
+        $ToolBtn.BackColor = $ColorBtn
+        $ToolBtn.ForeColor = $ColorText
+        $ToolBtn.Font = New-Object System.Drawing.Font("Segoe UI", 9.5)
+        $ToolBtn.FlatStyle = "Flat"
+        $ToolBtn.TextAlign = "MiddleCenter"
+        $ToolBtn.Cursor = [System.Windows.Forms.Cursors]::Hand
+        $ToolBtn.Margin = New-Object System.Windows.Forms.Padding(10)
+
+        $ToolBtn.Add_MouseEnter({ $This.BackColor = $ColorBtnHover })
+        $ToolBtn.Add_MouseLeave({ $This.BackColor = $ColorBtn })
+
+        $ToolBtn.Add_Click({
+            $TName = $This.Text
+            $TData = $ToolData | Where-Object { $_.Name -eq $TName }
+            Write-Log "Launching: $TName..."
+            if ($TData.Type -eq "Cmd") {
+                Start-Process powershell -ArgumentList "-NoProfile -ExecutionPolicy Bypass -Command `"$($TData.Command)`""
+            }
+            elseif ($TData.Type -eq "Web") {
+                Start-Process $TData.URL
+            }
+            elseif ($TData.Type -eq "GitHub") {
+                $TempPath = "$env:TEMP\$TName.exe"
+                if (Test-Path $TempPath) {
+                    Start-Process $TempPath
+                } else {
+                    Write-Log "Downloading..."
+                    $Link = Get-GitHubExeUrl -ReleaseUrl $TData.URL
+                    if ($Link) {
+                        try {
+                            $ProgressPreference = 'SilentlyContinue'
+                            Invoke-WebRequest -Uri $Link -OutFile $TempPath -UseBasicParsing
+                            $ProgressPreference = 'Continue'
+                            Start-Process $TempPath
+                        } catch { Start-Process $TData.URL }
+                    } else { Start-Process $TData.URL }
+                }
+            }
+        })
+        $ToolsFlowPanel.Controls.Add($ToolBtn)
+    }
 }
 
 [void]$Form.ShowDialog()

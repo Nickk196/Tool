@@ -320,25 +320,22 @@ try {
 
     # --- Local EXE Apps ---
     $exeApps = @(
-        @{Name="BAMReveal";           Path="C:\SS\BAMReveal.exe";           Desc="Background Activity Monitor reveal tool."},
-        @{Name="SSTool";              Path="C:\SS\SSTool.exe";              Desc="Screenshot tool utility."},
-        @{Name="System Informer";     Path="C:\SS\systeminformer-4.0.26144-setup.exe"; Desc="Advanced system monitoring tool."},
-        @{Name="MeowDoomsdayFucker";  Path="C:\SS\MeowDoomsdayFucker.exe";  Desc="Meow Doomsday analysis tool."},
-        @{Name="MeowImportsChecker";  Path="C:\SS\MeowImportsChecker.exe";  Desc="Checks imports in executables."},
-        @{Name="MeowResolver";        Path="C:\SS\MeowResolver.exe";        Desc="Meow DNS/address resolver."}
+        @{Name="SSTool";             Url="https://github.com/Orbdiff/SSTool/releases/download/yay/SSTool.exe";                                                Desc="Screenshot tool utility."},
+        @{Name="MeowDoomsdayFucker"; Url="https://github.com/MeowTonynoh/MeowDoomsdayFucker/releases/download/V.1.2/MeowDoomsdayFucker.exe";                 Desc="Meow Doomsday analysis tool."},
+        @{Name="MeowImportsChecker"; Url="https://github.com/MeowTonynoh/MeowImportsChecker/releases/download/MeowImportsChecker/MeowImportsChecker.exe";     Desc="Checks imports in executables."},
+        @{Name="MeowResolver";       Url="https://github.com/MeowTonynoh/MeowResolver/releases/download/MeowResolver/MeowResolver.exe";                       Desc="Meow DNS/address resolver."}
     )
 
     function Create-ExeButton {
-        param($Name, $Path, $Desc)
+        param($Name, $Url, $Desc)
         $btn = New-Object System.Windows.Controls.Button
         $btn.Content = $Name
         $btn.Style   = $window.FindResource("SidebarButton")
-        $btn | Add-Member -MemberType NoteProperty -Name "ExePath" -Value $Path
+        $btn | Add-Member -MemberType NoteProperty -Name "ExeUrl"  -Value $Url
         $btn | Add-Member -MemberType NoteProperty -Name "DescData" -Value $Desc
 
         $btn.Add_Click({
             param($sender, $e)
-            # Deselect all buttons in both lists
             foreach ($child in $SidebarList.Children) {
                 if ($child -is [System.Windows.Controls.Button]) { $child.Style = $window.FindResource("SidebarButton") }
             }
@@ -348,7 +345,7 @@ try {
             $sender.Style      = $window.FindResource("ActiveSidebarButton")
             $DisplayTitle.Text = $sender.Content.ToString()
             $DisplayDesc.Text  = $sender.DescData
-            $global:CurrentCmd = "EXE:" + $sender.ExePath
+            $global:CurrentCmd = "EXE:" + $sender.ExeUrl
             $MainLaunchBtn.IsEnabled = $true
             $MainLaunchBtn.Opacity   = 1
             $LogPreview.Text   = "Ready — " + $sender.Content
@@ -358,7 +355,7 @@ try {
     }
 
     foreach ($app in $exeApps) {
-        Create-ExeButton -Name $app.Name -Path $app.Path -Desc $app.Desc
+        Create-ExeButton -Name $app.Name -Url $app.Url -Desc $app.Desc
     }
     $ExtrasBtn.Add_Click({
         $reader2   = New-Object System.Xml.XmlNodeReader $extrasXaml
@@ -432,15 +429,19 @@ try {
             $tempFileName     = [Guid]::NewGuid().ToString() + ".ps1"
             $tempFilePath     = Join-Path $env:TEMP $tempFileName
 
-            # Direct EXE launch
+            # Direct EXE launch — download from URL to temp and run
             if ($global:CurrentCmd -like "EXE:*") {
-                $exePath = $global:CurrentCmd.Substring(4)
-                if (Test-Path $exePath) {
-                    Start-Process $exePath
-                    $LogPreview.Text = "Launched: $exePath"
-                } else {
-                    [System.Windows.MessageBox]::Show("File not found:`n$exePath`n`nRun NicTool Downloader first to install apps to C:\SS")
-                    $LogPreview.Text = "File not found."
+                $exeUrl      = $global:CurrentCmd.Substring(4)
+                $exeName     = Split-Path $exeUrl -Leaf
+                $exeTempPath = Join-Path $env:TEMP $exeName
+                try {
+                    $LogPreview.Text = "Downloading $exeName..."
+                    Invoke-WebRequest -Uri $exeUrl -OutFile $exeTempPath -UseBasicParsing
+                    $LogPreview.Text = "Launching $exeName..."
+                    Start-Process $exeTempPath
+                } catch {
+                    [System.Windows.MessageBox]::Show("Failed to download or launch:`n$exeUrl`n`n$_")
+                    $LogPreview.Text = "Error occurred."
                 }
                 return
             }

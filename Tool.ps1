@@ -1,15 +1,21 @@
 # Load required assemblies
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
+Add-Type -Name User32 -Namespace Win32 -MemberDefinition @"
+[DllImport("user32.dll")] public static extern bool ReleaseCapture();
+[DllImport("user32.dll")] public static extern int SendMessage(IntPtr hWnd, int Msg, int wParam, int lParam);
+"@
 
-# --- DEFINE COLORS (THEME) ---
- $ColorBg        = [System.Drawing.Color]::FromArgb(43, 43, 43)   
- $ColorPanel     = [System.Drawing.Color]::FromArgb(43, 43, 43)   
- $ColorBtn       = [System.Drawing.Color]::FromArgb(60, 60, 60)   
- $ColorBtnHover  = [System.Drawing.Color]::FromArgb(80, 80, 80)   
- $ColorText      = [System.Drawing.Color]::White                  
- $ColorLogBg     = [System.Drawing.Color]::Black                  
- $ColorLogText   = [System.Drawing.Color]::LimeGreen              
+# --- DEFINE COLORS (TESLA THEME) ---
+ $ColorWindowBg     = [System.Drawing.Color]::FromArgb(12, 16, 22)    # Deep Dark
+ $ColorSidebar      = [System.Drawing.Color]::FromArgb(22, 27, 34)    # Sidebar
+ $ColorHeader       = [System.Drawing.Color]::FromArgb(16, 20, 26)    # Header
+ $ColorBtn          = [System.Drawing.Color]::FromArgb(33, 38, 46)    # Button
+ $ColorBtnHover     = [System.Drawing.Color]::FromArgb(46, 52, 63)    # Hover
+ $ColorText         = [System.Drawing.Color]::White
+ $ColorAccent       = [System.Drawing.Color]::FromArgb(88, 166, 255)  # Blue Accent
+ $ColorLogBg        = [System.Drawing.Color]::Black
+ $ColorLogText      = [System.Drawing.Color]::FromArgb(100, 255, 100)
 
 # --- DEFINE ALL TOOLS ---
  $ToolData = @(
@@ -52,9 +58,7 @@ Add-Type -AssemblyName System.Drawing
     @{ Name="HotspotLogs"; Category="Praiselily"; Type="Cmd"; Command="iwr https://raw.githubusercontent.com/praiselily/WeHateFakers/refs/heads/main/HotspotLogs.ps1 | iex" },
     @{ Name="CommonDirectories"; Category="Praiselily"; Type="Cmd"; Command="Invoke-Expression (Invoke-RestMethod 'https://raw.githubusercontent.com/praiselily/lilith-ps/refs/heads/main/CommonDirectories.ps1')" },
     @{ Name="HarddiskConverter"; Category="Praiselily"; Type="Cmd"; Command="Invoke-Expression (Invoke-RestMethod https://raw.githubusercontent.com/praiselily/lilith-ps/refs/heads/main/HarddiskConverter.ps1)" },
-    # --- FIXED SERVICES COMMAND (Removed typo ~) ---
     @{ Name="Services"; Category="Praiselily"; Type="Cmd"; Command="Invoke-Expression (Invoke-RestMethod 'https://raw.githubusercontent.com/praiselily/lilith-ps/refs/heads/main/Services.ps1')" },
-    # --- FIXED SIGNED-SCHEDULED-TASKS (Added .ps1) ---
     @{ Name="Signed-Scheduled-Tasks"; Category="Praiselily"; Type="Cmd"; Command="Invoke-Expression (Invoke-RestMethod 'https://raw.githubusercontent.com/praiselily/lilith-ps/refs/heads/main/Signed-Scheduled-Tasks.ps1')" },
 
     # --- REDLOTUS ---
@@ -72,118 +76,103 @@ Add-Type -AssemblyName System.Drawing
     @{ Name="MacroDetector"; Category="Others"; Type="Cmd"; Command="Invoke-Expression (Invoke-RestMethod 'https://raw.githubusercontent.com/Nickk196/MacroDetector/refs/heads/main/MacroDetector.ps1')" }
 )
 
-# --- HELPER FUNCTION TO FIND EXE VIA GITHUB API ---
+# --- HELPER FUNCTION ---
 function Get-GitHubExeUrl {
     param([string]$ReleaseUrl)
-    
     if ($ReleaseUrl -match "github\.com/([^/]+)/([^/]+)/releases/tag/([^/]+)") {
-        $User = $matches[1]
-        $Repo = $matches[2]
-        $Tag = $matches[3]
-        
+        $User = $matches[1]; $Repo = $matches[2]; $Tag = $matches[3]
         $ApiUrl = "https://api.github.com/repos/$User/$Repo/releases/tags/$Tag"
-        
         try {
             $ProgressPreference = 'SilentlyContinue'
             $Response = Invoke-RestMethod -Uri $ApiUrl -ErrorAction Stop
             $ProgressPreference = 'Continue'
-            
             $Asset = $Response.assets | Where-Object { $_.name -like "*.exe" } | Select-Object -First 1
-            
-            if ($Asset) {
-                return $Asset.browser_download_url
-            }
-            else {
-                return $null
-            }
-        }
-        catch {
-            return $null
-        }
+            if ($Asset) { return $Asset.browser_download_url }
+        } catch { }
     }
     return $null
 }
 
 # --- CREATE FORM ---
  $Form = New-Object System.Windows.Forms.Form
- $Form.Text = "Tool Launcher v5 (Centered)"
- $Form.Size = New-Object System.Drawing.Size(600, 500)
+ $Form.Text = "Tool Launcher"
+ $Form.Size = New-Object System.Drawing.Size(1000, 650)
  $Form.StartPosition = "CenterScreen"
- $Form.BackColor = $ColorBg
+ $Form.BackColor = $ColorWindowBg
+ $Form.FormBorderStyle = "None" # No standard border
+ $Form.TopLevel = $true
 
-# --- SPLIT CONTAINER ---
- $SplitContainer = New-Object System.Windows.Forms.SplitContainer
- $SplitContainer.Dock = "Fill"
- $SplitContainer.SplitterDistance = 400
- $SplitContainer.Panel2MinSize = 50
- $SplitContainer.BackColor = $ColorBg
- $Form.Controls.Add($SplitContainer)
-
-# --- TAB CONTROL ---
- $TabControl = New-Object System.Windows.Forms.TabControl
- $TabControl.Dock = "Fill"
- $TabControl.BackColor = $ColorBg
- $TabControl.DrawMode = "OwnerDrawFixed" # Enable custom drawing for centering
- $SplitContainer.Panel1.Controls.Add($TabControl)
-
-# --- CUSTOM DRAWING TO CENTER TABS ---
- $TabControl.Add_DrawItem({
-    param($sender, $e)
-    $tabControl = $sender
-    $tabPage = $tabControl.TabPages[$e.Index]
-    
-    # Calculate total width of all tabs
-    $totalWidth = 0
-    for ($i = 0; $i -lt $tabControl.TabPages.Count; $i++) {
-        # Measure text size
-        $sz = $e.Graphics.MeasureString($tabControl.TabPages[$i].Text, $tabControl.Font)
-        # Add some padding
-        $totalWidth += [int]$sz.Width + 20
+# Make window draggable
+ $Form.Add_MouseDown({
+    if ($_.Button -eq [System.Windows.Forms.MouseButtons]::Left) {
+        [Win32.User32]::ReleaseCapture()
+        [Win32.User32]::SendMessage($Form.Handle, 0x0112, 0xF012, 0)
     }
-    
-    # Calculate starting X position to center
-    $startX = ($tabControl.Width - $totalWidth) / 2
-    if ($startX -lt 5) { $startX = 5 } # Don't go off screen edge
-
-    # Re-calculate current tab's position based on previous tabs
-    $currentX = $startX
-    for ($i = 0; $i -lt $e.Index; $i++) {
-        $szPrev = $e.Graphics.MeasureString($tabControl.TabPages[$i].Text, $tabControl.Font)
-        $currentX += [int]$szPrev.Width + 20
-    }
-    
-    $tabBounds = $tabControl.GetTabRect($e.Index)
-    # Define new centered rectangle
-    $newBounds = New-Object System.Drawing.Rectangle($currentX, $tabBounds.Y, $tabBounds.Width, $tabBounds.Height)
-    
-    # Draw Background
-    $brush = if ($e.State -eq [System.Windows.Forms.DrawItemState]::Selected) { 
-        [System.Drawing.SolidBrush]::new($ColorBtnHover) 
-    } else { 
-        [System.Drawing.SolidBrush]::new($ColorBg) 
-    }
-    $e.Graphics.FillRectangle($brush, $newBounds)
-    
-    # Draw Text
-    $textBrush = [System.Drawing.SolidBrush]::new($ColorText)
-    $format = [System.Drawing.StringFormat]::new()
-    $format.Alignment = [System.Drawing.StringAlignment]::Center
-    $format.LineAlignment = [System.Drawing.StringAlignment]::Center
-    $e.Graphics.DrawString($tabPage.Text, $e.Font, $textBrush, $newBounds, $format)
 })
 
-# --- OUTPUT LOG ---
+# --- HEADER (TOP BAR) ---
+ $HeaderPanel = New-Object System.Windows.Forms.Panel
+ $HeaderPanel.Height = 60
+ $HeaderPanel.Dock = "Top"
+ $HeaderPanel.BackColor = $ColorHeader
+ $Form.Controls.Add($HeaderPanel)
+
+ $TitleLabel = New-Object System.Windows.Forms.Label
+ $TitleLabel.Text = "Tesla Launcher"
+ $TitleLabel.Font = New-Object System.Drawing.Font("Segoe UI", 14, [System.Drawing.FontStyle]::Bold)
+ $TitleLabel.ForeColor = $ColorText
+ $TitleLabel.Location = New-Object System.Drawing.Point(20, 15)
+ $TitleLabel.AutoSize = $true
+ $HeaderPanel.Controls.Add($TitleLabel)
+
+ $CloseBtn = New-Object System.Windows.Forms.Button
+ $CloseBtn.Text = "✕"
+ $CloseBtn.Size = New-Object System.Drawing.Size(40, 40)
+ $CloseBtn.Location = New-Object System.Drawing.Point($Form.Width - 50, 10)
+ $CloseBtn.BackColor = $ColorSidebar
+ $CloseBtn.ForeColor = [System.Drawing.Color]::White
+ $CloseBtn.FlatStyle = "Flat"
+ $CloseBtn.Font = New-Object System.Drawing.Font("Segoe UI", 12)
+ $CloseBtn.Cursor = [System.Windows.Forms.Cursors]::Hand
+ $CloseBtn.Add_Click({ $Form.Close() })
+ $HeaderPanel.Controls.Add($CloseBtn)
+
+# --- SIDEBAR (LEFT) ---
+ $SidebarPanel = New-Object System.Windows.Forms.Panel
+ $SidebarPanel.Width = 220
+ $SidebarPanel.Dock = "Left"
+ $SidebarPanel.BackColor = $ColorSidebar
+ $SidebarPanel.Padding = New-Object System.Windows.Forms.Padding(10, 70, 10, 10) # Padding top to avoid header
+ $Form.Controls.Add($SidebarPanel)
+
+# --- MAIN CONTENT (RIGHT) ---
+ $MainPanel = New-Object System.Windows.Forms.Panel
+ $MainPanel.Dock = "Fill"
+ $MainPanel.Padding = New-Object System.Windows.Forms.Padding(20, 70, 20, 20) # Padding top
+ $Form.Controls.Add($MainPanel)
+
+# FlowPanel for Tools
+ $ToolsFlowPanel = New-Object System.Windows.Forms.FlowLayoutPanel
+ $ToolsFlowPanel.Dock = "Fill"
+ $ToolsFlowPanel.FlowDirection = "TopDown"
+ $ToolsFlowPanel.AutoScroll = $true
+ $ToolsFlowPanel.WrapContents = $false
+ $ToolsFlowPanel.BackColor = $ColorWindowBg
+ $MainPanel.Controls.Add($ToolsFlowPanel)
+
+# Log Output at Bottom
  $OutputLog = New-Object System.Windows.Forms.TextBox
+ $OutputLog.Height = 150
+ $OutputLog.Dock = "Bottom"
  $OutputLog.Multiline = $true
  $OutputLog.ScrollBars = "Vertical"
  $OutputLog.ReadOnly = $true
  $OutputLog.BackColor = $ColorLogBg
  $OutputLog.ForeColor = $ColorLogText
  $OutputLog.Font = New-Object System.Drawing.Font("Consolas", 9)
- $OutputLog.Dock = "Fill"
- $OutputLog.Text = "System Ready..."
  $OutputLog.BorderStyle = "None"
- $SplitContainer.Panel2.Controls.Add($OutputLog)
+ $OutputLog.Text = "System Ready..."
+ $MainPanel.Controls.Add($OutputLog)
 
 function Write-Log {
     param([string]$message)
@@ -192,109 +181,100 @@ function Write-Log {
     $OutputLog.ScrollToCaret()
 }
 
-# --- SETUP TABS ---
- $TabPanels = @{}
- $Categories = @("Orbdiff", "Spokwn", "RedLotus", "Tonynoh", "Praiselily", "Others", "Webs")
+# --- SETUP SIDEBAR BUTTONS (CATEGORIES) ---
+ $Categories = @("Orbdiff", "Spokwn", "RedLotus", "Tonynoh", "Praiselily", "Others")
+ $SidebarButtons = @{}
 
+ $yPos = 0
 foreach ($Cat in $Categories) {
-    $TabPage = New-Object System.Windows.Forms.TabPage
-    $TabPage.Text = $Cat
-    $TabPage.BackColor = $ColorPanel 
-    $TabPage.ForeColor = $ColorText   
+    $Btn = New-Object System.Windows.Forms.Button
+    $Btn.Text = $Cat
+    $Btn.Width = 200
+    $Btn.Height = 40
+    $Btn.Top = $yPos
+    $Btn.Left = 10
+    $Btn.FlatStyle = "Flat"
+    $Btn.BackColor = $ColorBtn
+    $Btn.ForeColor = $ColorText
+    $Btn.Font = New-Object System.Drawing.Font("Segoe UI", 10)
+    $Btn.TextAlign = "MiddleLeft"
+    $Btn.Padding = New-Object System.Windows.Forms.Padding(15, 0, 0, 0)
+    $Btn.Cursor = [System.Windows.Forms.Cursors]::Hand
     
-    $FlowPanel = New-Object System.Windows.Forms.FlowLayoutPanel
-    $FlowPanel.Dock = "Fill"
-    $FlowPanel.FlowDirection = "TopDown"
-    $FlowPanel.AutoScroll = $true
-    $FlowPanel.WrapContents = $false 
-    $FlowPanel.Padding = New-Object System.Windows.Forms.Padding(15)
-    $FlowPanel.BackColor = $ColorPanel
-    
-    $TabPage.Controls.Add($FlowPanel)
-    $TabControl.TabPages.Add($TabPage)
-    $TabPanels[$Cat] = $FlowPanel
-}
+    # Store reference
+    $SidebarButtons[$Cat] = $Btn
 
-# --- GENERATE BUTTONS ---
-foreach ($Tool in $ToolData) {
-    $Panel = $TabPanels[$Tool.Category]
-    
-    if ($Panel) {
-        $Btn = New-Object System.Windows.Forms.Button
-        $Btn.Text = $Tool.Name
-        $Btn.Width = 480
-        $Btn.Height = 50 
+    # Click Event: Load tools
+    $Btn.Add_Click({
+        # Reset all sidebar buttons color
+        foreach ($b in $SidebarButtons.Values) { $b.BackColor = $ColorBtn }
+        # Highlight clicked button
+        $This.BackColor = $ColorBtnHover
         
-        $Btn.BackColor = $ColorBtn
-        $Btn.ForeColor = $ColorText
-        $Btn.Font = New-Object System.Drawing.Font("Segoe UI", 11, [System.Drawing.FontStyle]::Bold) 
-        $Btn.TextAlign = "MiddleCenter" 
-        $Btn.FlatStyle = "Flat"
-        $Btn.FlatAppearance.BorderSize = 0
-        $Btn.Cursor = [System.Windows.Forms.Cursors]::Hand
-        $Btn.Margin = New-Object System.Windows.Forms.Padding(0, 0, 0, 8)
+        # Clear main panel
+        $ToolsFlowPanel.Controls.Clear()
+        
+        # Load Tools
+        $CatName = $This.Text
+        $Tools = $ToolData | Where-Object { $_.Category -eq $CatName }
+        
+        foreach ($Tool in $Tools) {
+            $ToolBtn = New-Object System.Windows.Forms.Button
+            $ToolBtn.Text = $Tool.Name
+            $ToolBtn.Width = 700
+            $ToolBtn.Height = 50
+            $ToolBtn.BackColor = $ColorBtn
+            $ToolBtn.ForeColor = $ColorText
+            $ToolBtn.Font = New-Object System.Drawing.Font("Segoe UI", 11)
+            $ToolBtn.FlatStyle = "Flat"
+            $ToolBtn.TextAlign = "MiddleCenter"
+            $ToolBtn.Cursor = [System.Windows.Forms.Cursors]::Hand
+            $ToolBtn.Margin = New-Object System.Windows.Forms.Padding(0, 0, 0, 10)
 
-        $Btn.Add_MouseEnter({ $This.BackColor = $ColorBtnHover })
-        $Btn.Add_MouseLeave({ $This.BackColor = $ColorBtn })
+            # Hover effect for Tool Buttons
+            $ToolBtn.Add_MouseEnter({ $This.BackColor = $ColorBtnHover })
+            $ToolBtn.Add_MouseLeave({ $This.BackColor = $ColorBtn })
 
-        $Btn.Add_Click({
-            $ToolName = $This.Text
-            $ToolDataItem = $ToolData | Where-Object { $_.Name -eq $ToolName }
-            
-            Write-Log "Checking: $ToolName..."
-
-            if ($ToolDataItem.Type -eq "Cmd") {
-                Start-Process powershell -ArgumentList "-NoProfile -ExecutionPolicy Bypass -Command `"$($ToolDataItem.Command)`""
-            }
-            elseif ($ToolDataItem.Type -eq "Web") {
-                Start-Process $ToolDataItem.URL
-            }
-            elseif ($ToolDataItem.Type -eq "GitHub") {
-                $PageUrl = $ToolDataItem.URL
-                $TempPath = "$env:TEMP\$ToolName.exe"
+            # Logic
+            $ToolBtn.Add_Click({
+                $TName = $This.Text
+                $TData = $ToolData | Where-Object { $_.Name -eq $TName }
+                Write-Log "Launching: $TName..."
                 
-                if (Test-Path $TempPath) {
-                    Write-Log "Found in cache."
-                    Start-Process $TempPath
+                if ($TData.Type -eq "Cmd") {
+                    Start-Process powershell -ArgumentList "-NoProfile -ExecutionPolicy Bypass -Command `"$($TData.Command)`""
                 }
-                else {
-                    Write-Log "Finding download link..."
-                    $DirectLink = Get-GitHubExeUrl -ReleaseUrl $PageUrl
-                    
-                    if ($DirectLink) {
+                elseif ($TData.Type -eq "Web") {
+                    Start-Process $TData.URL
+                }
+                elseif ($TData.Type -eq "GitHub") {
+                    $TempPath = "$env:TEMP\$TName.exe"
+                    if (Test-Path $TempPath) {
+                        Start-Process $TempPath
+                    } else {
                         Write-Log "Downloading..."
-                        try {
-                            $ProgressPreference = 'SilentlyContinue'
-                            Invoke-WebRequest -Uri $DirectLink -OutFile $TempPath -UseBasicParsing -ErrorAction Stop
-                            $ProgressPreference = 'Continue'
-                            
-                            Write-Log "Running..."
-                            Start-Process $TempPath
-                        }
-                        catch {
-                            $ProgressPreference = 'Continue'
-                            Write-Log "Download failed. Opening page..."
-                            Start-Process $PageUrl
-                        }
-                    }
-                    else {
-                        Write-Log "Could not find .exe file."
-                        Start-Process $PageUrl
+                        $Link = Get-GitHubExeUrl -ReleaseUrl $TData.URL
+                        if ($Link) {
+                            try {
+                                $ProgressPreference = 'SilentlyContinue'
+                                Invoke-WebRequest -Uri $Link -OutFile $TempPath -UseBasicParsing
+                                $ProgressPreference = 'Continue'
+                                Start-Process $TempPath
+                            } catch { Start-Process $TData.URL }
+                        } else { Start-Process $TData.URL }
                     }
                 }
-            }
-        })
-
-        $Panel.Controls.Add($Btn)
-    }
+            })
+            $ToolsFlowPanel.Controls.Add($ToolBtn)
+        }
+    })
+    
+    $SidebarPanel.Controls.Add($Btn)
+    $yPos += 50
 }
 
-# --- WEBS TAB ---
- $WebsPanel = $TabPanels["Webs"]
- $Label = New-Object System.Windows.Forms.Label
- $Label.Text = "No web tools added."
- $Label.ForeColor = [System.Drawing.Color]::Gray
- $WebsPanel.Controls.Add($Label)
+# Select first category by default
+ $SidebarButtons["Orbdiff"].PerformClick()
 
 # --- SHOW GUI ---
 [void]$Form.ShowDialog()

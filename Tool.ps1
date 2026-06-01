@@ -7,11 +7,10 @@ Add-Type -Name User32 -Namespace Win32 -MemberDefinition @"
 "@
 
 # --- COLORS (DISCORD / DARK THEME) ---
- $ColorWindowBg     = [System.Drawing.Color]::FromArgb(54, 57, 63)    # Discord Dark
- $ColorTabBg        = [System.Drawing.Color]::FromArgb(47, 49, 54)
- $ColorTabSelected  = [System.Drawing.Color]::FromArgb(66, 69, 73)    # Slightly Lighter
- $ColorBtn          = [System.Drawing.Color]::FromArgb(78, 80, 85)    # Dark Grey Button
- $ColorBtnHover     = [System.Drawing.Color]::FromArgb(88, 101, 242)  # Blurple
+ $ColorWindowBg     = [System.Drawing.Color]::FromArgb(54, 57, 63)    
+ $ColorTabBg        = [System.Drawing.Color]::FromArgb(47, 49, 54)    
+ $ColorBtn          = [System.Drawing.Color]::FromArgb(71, 74, 80)    
+ $ColorBtnHover     = [System.Drawing.Color]::FromArgb(88, 101, 242)  
  $ColorText         = [System.Drawing.Color]::White
  $ColorLogBg        = [System.Drawing.Color]::Black
  $ColorLogText      = [System.Drawing.Color]::LimeGreen
@@ -95,13 +94,13 @@ function Get-GitHubExeUrl {
 # --- CREATE FORM ---
  $Form = New-Object System.Windows.Forms.Form
  $Form.Text = "ScreenShare Tool"
- $Form.Size = New-Object System.Drawing.Size(1000, 700)
+ $Form.Size = New-Object System.Drawing.Size(1100, 750)
  $Form.StartPosition = "CenterScreen"
  $Form.BackColor = $ColorWindowBg
  $Form.FormBorderStyle = "None"
  $Form.TopLevel = $true
 
-# Draggable Window
+# Draggable
  $Form.Add_MouseDown({
     if ($_.Button -eq [System.Windows.Forms.MouseButtons]::Left) {
         [Win32.User32]::ReleaseCapture()
@@ -111,24 +110,23 @@ function Get-GitHubExeUrl {
 
 # --- HEADER (TOP) ---
  $HeaderPanel = New-Object System.Windows.Forms.Panel
- $HeaderPanel.Height = 45
+ $HeaderPanel.Height = 40
  $HeaderPanel.Dock = "Top"
  $HeaderPanel.BackColor = $ColorTabBg
  $Form.Controls.Add($HeaderPanel)
 
  $TitleLabel = New-Object System.Windows.Forms.Label
  $TitleLabel.Text = "ScreenShare Tool (discord.gg/cfnmHrqP3K)"
- $TitleLabel.Font = New-Object System.Drawing.Font("Segoe UI", 12, [System.Drawing.FontStyle]::Bold)
+ $TitleLabel.Font = New-Object System.Drawing.Font("Segoe UI", 11, [System.Drawing.FontStyle]::Bold)
  $TitleLabel.ForeColor = [System.Drawing.Color]::White
- $TitleLabel.Location = New-Object System.Drawing.Point(15, 10)
+ $TitleLabel.Location = New-Object System.Drawing.Point(10, 10)
  $TitleLabel.AutoSize = $true
  $HeaderPanel.Controls.Add($TitleLabel)
 
-# Window Controls
  $CloseBtn = New-Object System.Windows.Forms.Button
  $CloseBtn.Text = "✕"
  $CloseBtn.Size = New-Object System.Drawing.Size(30, 30)
- $CloseBtn.Location = New-Object System.Drawing.Point(955, 7)
+ $CloseBtn.Location = New-Object System.Drawing.Point(1055, 5)
  $CloseBtn.BackColor = [System.Drawing.Color]::Transparent
  $CloseBtn.ForeColor = [System.Drawing.Color]::White
  $CloseBtn.FlatStyle = "Flat"
@@ -140,7 +138,7 @@ function Get-GitHubExeUrl {
  $MinBtn = New-Object System.Windows.Forms.Button
  $MinBtn.Text = "—"
  $MinBtn.Size = New-Object System.Drawing.Size(30, 30)
- $MinBtn.Location = New-Object System.Drawing.Point(920, 7)
+ $MinBtn.Location = New-Object System.Drawing.Point(1020, 5)
  $MinBtn.BackColor = [System.Drawing.Color]::Transparent
  $MinBtn.ForeColor = [System.Drawing.Color]::White
  $MinBtn.FlatStyle = "Flat"
@@ -149,23 +147,29 @@ function Get-GitHubExeUrl {
  $MinBtn.Add_Click({ $Form.WindowState = "Minimized" })
  $HeaderPanel.Controls.Add($MinBtn)
 
-# --- MAIN CONTENT AREA ---
- $MainPanel = New-Object System.Windows.Forms.Panel
- $MainPanel.Dock = "Fill"
- $MainPanel.BackColor = $ColorWindowBg
- $Form.Controls.Add($MainPanel)
+# --- SPLIT CONTAINER (Main Layout) ---
+# Panel 1: Tab Content (Top/Right). Panel 2: Log (Bottom).
+ $SplitContainer = New-Object System.Windows.Forms.SplitContainer
+ $SplitContainer.Dock = "Fill"
+ $SplitContainer.SplitterDistance = 550 # 550px for tabs, rest for log
+ $SplitContainer.Panel2MinSize = 100
+ $Form.Controls.Add($SplitContainer)
 
-# --- TAB CONTROL (NAVIGATION) ---
+# --- PANEL 1: TAB CONTENT ---
+ $TabPanel = $SplitContainer.Panel1
+ $TabPanel.BackColor = $ColorWindowBg
+
  $TabControl = New-Object System.Windows.Forms.TabControl
- $TabControl.Dock = "Top"
+ $TabControl.Dock = "Fill"
  $TabControl.BackColor = $ColorWindowBg
- $TabControl.Height = 40
- $MainPanel.Controls.Add($TabControl)
+ $TabPanel.Controls.Add($TabControl)
 
-# --- LOG PANEL (BOTTOM) ---
+# --- PANEL 2: LOG OUTPUT ---
+ $LogPanel = $SplitContainer.Panel2
+ $LogPanel.BackColor = $ColorLogBg
+
  $OutputLog = New-Object System.Windows.Forms.TextBox
- $OutputLog.Height = 100
- $OutputLog.Dock = "Bottom"
+ $OutputLog.Dock = "Fill"
  $OutputLog.Multiline = $true
  $OutputLog.ScrollBars = "Vertical"
  $OutputLog.ReadOnly = $true
@@ -174,7 +178,7 @@ function Get-GitHubExeUrl {
  $OutputLog.Font = New-Object System.Drawing.Font("Consolas", 9)
  $OutputLog.BorderStyle = "None"
  $OutputLog.Text = "Ready..."
- $MainPanel.Controls.Add($OutputLog)
+ $LogPanel.Controls.Add($OutputLog)
 
 function Write-Log {
     param([string]$message)
@@ -183,13 +187,7 @@ function Write-Log {
     $OutputLog.ScrollToCaret()
 }
 
-# --- CONTENT PANEL (FILLS REMAINING SPACE) ---
- $ContentPanel = New-Object System.Windows.Forms.Panel
- $ContentPanel.Dock = "Fill"
- $ContentPanel.Padding = New-Object System.Windows.Forms.Padding(20)
- $MainPanel.Controls.Add($ContentPanel)
-
-# --- GENERATE TABS AND CONTENT ---
+# --- GENERATE TABS ---
  $Categories = @("Orbdiff", "Spokwn", "RedLotus", "Tonynoh", "Praiselily", "Others")
 
 foreach ($Cat in $Categories) {
@@ -197,41 +195,43 @@ foreach ($Cat in $Categories) {
     $TabPage.Text = $Cat
     $TabPage.BackColor = $ColorWindowBg
     $TabPage.BorderStyle = "None"
+    $TabPage.Padding = New-Object System.Windows.Forms.Padding(20)
     $TabControl.TabPages.Add($TabPage)
 
-    # 1. Description Label (Like "BAM forensic")
+    # 1. Description Label
     $DescLabel = New-Object System.Windows.Forms.Label
-    $DescLabel.Text = "Forensic Analysis Tools & Utilities - Select a tool below to download."
-    $DescLabel.Font = New-Object System.Drawing.Font("Segoe UI", 10)
-    $DescLabel.ForeColor = [System.Drawing.Color]::FromArgb(180, 180, 180)
+    $DescLabel.Text = "Forensic Analysis Tools - Click a button to download."
+    $DescLabel.Font = New-Object System.Drawing.Font("Segoe UI", 11, [System.Drawing.FontStyle]::Bold)
+    $DescLabel.ForeColor = [System.Drawing.Color]::White
     $DescLabel.Dock = "Top"
-    $DescLabel.Height = 30
-    $DescLabel.Padding = New-Object System.Windows.Forms.Padding(0, 0, 0, 10)
+    $DescLabel.Height = 40
+    $DescLabel.Padding = New-Object System.Windows.Forms.Padding(0, 10, 0, 20)
     $TabPage.Controls.Add($DescLabel)
 
-    # 2. Flow Panel (Grid Layout)
+    # 2. Flow Panel (Grid)
     $ToolsFlowPanel = New-Object System.Windows.Forms.FlowLayoutPanel
     $ToolsFlowPanel.Dock = "Fill"
-    $ToolsFlowPanel.FlowDirection = "LeftToRight" # Horizontal first
-    $ToolsFlowPanel.WrapContents = $true # Then wrap down (Grid)
+    $ToolsFlowPanel.FlowDirection = "LeftToRight"
+    $ToolsFlowPanel.WrapContents = $true
     $ToolsFlowPanel.AutoScroll = $true
-    $ToolsFlowPanel.BackColor = $ColorWindowBg
+    $ToolsFlowPanel.BackColor = $ColorWindowBg # Ensure visibility
     $TabPage.Controls.Add($ToolsFlowPanel)
 
-    # Add Buttons to Grid
+    # Add Buttons
     $Tools = $ToolData | Where-Object { $_.Category -eq $Cat }
     foreach ($Tool in $Tools) {
         $ToolBtn = New-Object System.Windows.Forms.Button
         $ToolBtn.Text = $Tool.Name
-        $ToolBtn.Width = 160  # Fixed width for grid look
-        $ToolBtn.Height = 100 # Fixed height (Tall buttons)
+        # Larger buttons for Grid Look
+        $ToolBtn.Width = 180
+        $ToolBtn.Height = 90
         $ToolBtn.BackColor = $ColorBtn
         $ToolBtn.ForeColor = $ColorText
         $ToolBtn.Font = New-Object System.Drawing.Font("Segoe UI", 9.5)
         $ToolBtn.FlatStyle = "Flat"
         $ToolBtn.TextAlign = "MiddleCenter"
         $ToolBtn.Cursor = [System.Windows.Forms.Cursors]::Hand
-        $ToolBtn.Margin = New-Object System.Windows.Forms.Padding(10)
+        $ToolBtn.Margin = New-Object System.Windows.Forms.Padding(15)
 
         $ToolBtn.Add_MouseEnter({ $This.BackColor = $ColorBtnHover })
         $ToolBtn.Add_MouseLeave({ $This.BackColor = $ColorBtn })

@@ -6,15 +6,15 @@ Add-Type -Name User32 -Namespace Win32 -MemberDefinition @"
 [DllImport("user32.dll")] public static extern int SendMessage(IntPtr hWnd, int Msg, int wParam, int lParam);
 "@
 
-# --- DEFINE COLORS (TESLA THEME) ---
- $ColorWindowBg     = [System.Drawing.Color]::FromArgb(12, 16, 22)    
- $ColorSidebar      = [System.Drawing.Color]::FromArgb(22, 27, 34)    
- $ColorHeader       = [System.Drawing.Color]::FromArgb(16, 20, 26)    
- $ColorBtn          = [System.Drawing.Color]::FromArgb(33, 38, 46)    
- $ColorBtnHover     = [System.Drawing.Color]::FromArgb(56, 163, 255)  
+# --- DEFINE COLORS (MODERN DARK) ---
+ $ColorWindowBg     = [System.Drawing.Color]::FromArgb(30, 30, 30)    
+ $ColorSidebar      = [System.Drawing.Color]::FromArgb(37, 37, 38)    
+ $ColorHeader       = [System.Drawing.Color]::FromArgb(43, 43, 43)    
+ $ColorBtn          = [System.Drawing.Color]::FromArgb(51, 51, 51)    
+ $ColorBtnHover     = [System.Drawing.Color]::FromArgb(0, 122, 204)  # VS Code Blue
  $ColorText         = [System.Drawing.Color]::White
  $ColorLogBg        = [System.Drawing.Color]::Black
- $ColorLogText      = [System.Drawing.Color]::FromArgb(50, 255, 50)   
+ $ColorLogText      = [System.Drawing.Color]::FromArgb(0, 255, 127)   
 
 # --- DEFINE ALL TOOLS ---
  $ToolData = @(
@@ -94,7 +94,7 @@ function Get-GitHubExeUrl {
 
 # --- CREATE FORM ---
  $Form = New-Object System.Windows.Forms.Form
- $Form.Text = "Tesla Launcher"
+ $Form.Text = "Tesla Launcher v2"
  $Form.Size = New-Object System.Drawing.Size(1000, 650)
  $Form.StartPosition = "CenterScreen"
  $Form.BackColor = $ColorWindowBg
@@ -111,31 +111,43 @@ function Get-GitHubExeUrl {
 
 # --- HEADER (TOP BAR) ---
  $HeaderPanel = New-Object System.Windows.Forms.Panel
- $HeaderPanel.Height = 60
+ $HeaderPanel.Height = 50
  $HeaderPanel.Dock = "Top"
  $HeaderPanel.BackColor = $ColorHeader
  $Form.Controls.Add($HeaderPanel)
 
  $TitleLabel = New-Object System.Windows.Forms.Label
  $TitleLabel.Text = "Tesla Launcher"
- $TitleLabel.Font = New-Object System.Drawing.Font("Segoe UI", 16, [System.Drawing.FontStyle]::Bold)
+ $TitleLabel.Font = New-Object System.Drawing.Font("Segoe UI", 14, [System.Drawing.FontStyle]::Bold)
  $TitleLabel.ForeColor = [System.Drawing.Color]::White
- $TitleLabel.Location = New-Object System.Drawing.Point(20, 15)
+ $TitleLabel.Location = New-Object System.Drawing.Point(20, 12)
  $TitleLabel.AutoSize = $true
  $HeaderPanel.Controls.Add($TitleLabel)
 
+# Window Controls (Minimize and Close)
  $CloseBtn = New-Object System.Windows.Forms.Button
  $CloseBtn.Text = "✕"
  $CloseBtn.Size = New-Object System.Drawing.Size(40, 40)
-# FIXED: Hardcoded X position to avoid calculation error
- $CloseBtn.Location = New-Object System.Drawing.Point(950, 10) 
- $CloseBtn.BackColor = [System.Drawing.Color]::FromArgb(40, 40, 40)
+ $CloseBtn.Location = New-Object System.Drawing.Point(950, 5)
+ $CloseBtn.BackColor = [System.Drawing.Color]::Transparent
  $CloseBtn.ForeColor = [System.Drawing.Color]::White
  $CloseBtn.FlatStyle = "Flat"
  $CloseBtn.Font = New-Object System.Drawing.Font("Segoe UI", 12)
  $CloseBtn.Cursor = [System.Windows.Forms.Cursors]::Hand
  $CloseBtn.Add_Click({ $Form.Close() })
  $HeaderPanel.Controls.Add($CloseBtn)
+
+ $MinBtn = New-Object System.Windows.Forms.Button
+ $MinBtn.Text = "—"
+ $MinBtn.Size = New-Object System.Drawing.Size(40, 40)
+ $MinBtn.Location = New-Object System.Drawing.Point(910, 5)
+ $MinBtn.BackColor = [System.Drawing.Color]::Transparent
+ $MinBtn.ForeColor = [System.Drawing.Color]::White
+ $MinBtn.FlatStyle = "Flat"
+ $MinBtn.Font = New-Object System.Drawing.Font("Segoe UI", 16)
+ $MinBtn.Cursor = [System.Windows.Forms.Cursors]::Hand
+ $MinBtn.Add_Click({ $Form.WindowState = "Minimized" })
+ $HeaderPanel.Controls.Add($MinBtn)
 
 # --- SIDEBAR (LEFT) ---
  $SidebarPanel = New-Object System.Windows.Forms.Panel
@@ -149,10 +161,10 @@ function Get-GitHubExeUrl {
  $MainPanel = New-Object System.Windows.Forms.Panel
  $MainPanel.Dock = "Fill"
  $MainPanel.BackColor = $ColorWindowBg
- $MainPanel.Padding = New-Object System.Windows.Forms.Padding(20)
+ $MainPanel.Padding = New-Object System.Windows.Forms.Padding(40, 20, 40, 20)
  $Form.Controls.Add($MainPanel)
 
-# --- LOG OUTPUT (BOTTOM OF MAIN PANEL) ---
+# --- LOG OUTPUT (BOTTOM) ---
  $OutputLog = New-Object System.Windows.Forms.TextBox
  $OutputLog.Height = 120
  $OutputLog.Dock = "Bottom"
@@ -173,7 +185,7 @@ function Write-Log {
     $OutputLog.ScrollToCaret()
 }
 
-# --- TOOLS FLOW PANEL (FILLS REST OF MAIN PANEL) ---
+# --- TOOLS FLOW PANEL ---
  $ToolsFlowPanel = New-Object System.Windows.Forms.FlowLayoutPanel
  $ToolsFlowPanel.Dock = "Fill"
  $ToolsFlowPanel.FlowDirection = "TopDown"
@@ -190,31 +202,30 @@ function Write-Log {
 foreach ($Cat in $Categories) {
     $Btn = New-Object System.Windows.Forms.Button
     $Btn.Text = $Cat
-    $Btn.Width = 200
-    $Btn.Height = 40
+    $Btn.Width = 200 # Full width of sidebar
+    $Btn.Height = 45
     $Btn.Top = $yPos
     $Btn.Left = 0
     $Btn.FlatStyle = "Flat"
     $Btn.BackColor = $ColorBtn
     $Btn.ForeColor = $ColorText
-    $Btn.Font = New-Object System.Drawing.Font("Segoe UI", 11)
+    $Btn.Font = New-Object System.Drawing.Font("Segoe UI", 10.5)
     $Btn.TextAlign = "MiddleLeft"
-    $Btn.Padding = New-Object System.Windows.Forms.Padding(15, 0, 0, 0)
+    $Btn.Padding = New-Object System.Windows.Forms.Padding(20, 0, 0, 0)
     $Btn.Cursor = [System.Windows.Forms.Cursors]::Hand
     
     $SidebarButtons[$Cat] = $Btn
 
     $Btn.Add_Click({
-        # Reset colors
         foreach ($b in $SidebarButtons.Values) { 
             $b.BackColor = $ColorBtn 
             $b.ForeColor = $ColorText
+            $b.Font = New-Object System.Drawing.Font("Segoe UI", 10.5)
         }
-        # Highlight current
         $This.BackColor = $ColorBtnHover
-        $This.ForeColor = [System.Drawing.Color]::Black
+        $This.ForeColor = [System.Drawing.Color]::White
+        $This.Font = New-Object System.Drawing.Font("Segoe UI", 10.5, [System.Drawing.FontStyle]::Bold)
         
-        # Load Tools
         $ToolsFlowPanel.Controls.Clear()
         $CatName = $This.Text
         $Tools = $ToolData | Where-Object { $_.Category -eq $CatName }
@@ -222,19 +233,21 @@ foreach ($Cat in $Categories) {
         foreach ($Tool in $Tools) {
             $ToolBtn = New-Object System.Windows.Forms.Button
             $ToolBtn.Text = $Tool.Name
-            $ToolBtn.Width = 700
-            $ToolBtn.Height = 50
+            
+            # Make buttons narrower to look "Way Centered"
+            $ToolBtn.Width = 600 
+            $ToolBtn.Height = 55
             $ToolBtn.BackColor = $ColorBtn
             $ToolBtn.ForeColor = $ColorText
-            $ToolBtn.Font = New-Object System.Drawing.Font("Segoe UI", 11)
+            $ToolBtn.Font = New-Object System.Drawing.Font("Segoe UI", 11, [System.Drawing.FontStyle]::Bold)
             $ToolBtn.FlatStyle = "Flat"
             $ToolBtn.TextAlign = "MiddleCenter"
             $ToolBtn.Cursor = [System.Windows.Forms.Cursors]::Hand
-            $ToolBtn.Margin = New-Object System.Windows.Forms.Padding(0, 0, 0, 10)
+            $ToolBtn.Margin = New-Object System.Windows.Forms.Padding(0, 0, 0, 15)
             
             # Hover
-            $ToolBtn.Add_MouseEnter({ $This.BackColor = $ColorBtnHover; $This.ForeColor = [System.Drawing.Color]::Black })
-            $ToolBtn.Add_MouseLeave({ $This.BackColor = $ColorBtn; $This.ForeColor = $ColorText })
+            $ToolBtn.Add_MouseEnter({ $This.BackColor = $ColorBtnHover })
+            $ToolBtn.Add_MouseLeave({ $This.BackColor = $ColorBtn })
 
             $ToolBtn.Add_Click({
                 $TName = $This.Text
@@ -268,10 +281,10 @@ foreach ($Cat in $Categories) {
         }
     })
     $SidebarPanel.Controls.Add($Btn)
-    $yPos += 50
+    $yPos += 55
 }
 
-# Load first category safely
+# Load first category
 if ($SidebarButtons["Orbdiff"]) {
     $SidebarButtons["Orbdiff"].PerformClick()
 }

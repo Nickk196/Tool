@@ -3,7 +3,6 @@ Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 
 # --- DEFINE ALL TOOLS ---
-# Type: "SmartDL" (Tries to download .exe from GitHub), "Web" (Opens Browser), "Cmd" (Runs PS Script)
  $ToolData = @(
     # --- ORBDIFF ---
     @{ Name="PrefetchView"; Category="Orbdiff"; Type="SmartDL"; URL="https://github.com/Orbdiff/PrefetchView/releases/tag/v1.6.7" },
@@ -53,38 +52,44 @@ Add-Type -AssemblyName System.Drawing
     @{ Name="RedLotusAltChecker"; Category="RedLotus"; Type="SmartDL"; URL="https://github.com/ItzIceHere/RedLotusAltChecker/releases/tag/RL" },
 
     # --- OTHERS ---
-    # NirSoft and EZ Tools are left as Web because they require complex zip extraction or specific handling
     @{ Name="WinPrefetchView (NirSoft)"; Category="Others"; Type="Web"; URL="https://www.nirsoft.net/utils/win_prefetch_view.html" },
     @{ Name="CompActivityView (NirSoft)"; Category="Others"; Type="Web"; URL="https://www.nirsoft.net/utils/computer_activity_view.html" },
     @{ Name="AmcacheParser (EZ Tools)"; Category="Others"; Type="Web"; URL="https://download.ericzimmermanstools.com/net9/AmcacheParser.zip" },
     @{ Name="SystemInformer"; Category="Others"; Type="Web"; URL="https://www.systeminformer.com/canary" },
     @{ Name="DIE-engine"; Category="Others"; Type="Web"; URL="https://github.com/horsicq/DIE-engine/releases" },
-    
-    # These are PS scripts, handled by Type="Cmd"
     @{ Name="DQRKIS-FUCKER"; Category="Others"; Type="Cmd"; Command="Invoke-Expression (Invoke-RestMethod 'https://raw.githubusercontent.com/cheesecatlol/DQRKIS-FUCKER/refs/heads/main/DqrkisFucker.ps1')" },
     @{ Name="MacroDetector"; Category="Others"; Type="Cmd"; Command="Invoke-Expression (Invoke-RestMethod 'https://raw.githubusercontent.com/Nickk196/MacroDetector/refs/heads/main/MacroDetector.ps1')" }
 )
 
-# --- CREATE THE MAIN FORM ---
+# --- CREATE FORM ---
  $Form = New-Object System.Windows.Forms.Form
  $Form.Text = "Auto Tool Launcher"
- $Form.Size = New-Object System.Drawing.Size(550, 500)
+ $Form.Size = New-Object System.Drawing.Size(600, 500)
  $Form.StartPosition = "CenterScreen"
- $Form.FormBorderStyle = "FixedDialog"
- $Form.MaximizeBox = $false
 
-# --- CREATE THE OUTPUT LOG ---
+# --- CREATE SPLIT CONTAINER (Top: Tabs, Bottom: Log) ---
+ $SplitContainer = New-Object System.Windows.Forms.SplitContainer
+ $SplitContainer.Dock = "Fill"
+ $SplitContainer.SplitterDistance = 400 # Top area height
+ $SplitContainer.Panel2MinSize = 50
+ $Form.Controls.Add($SplitContainer)
+
+# --- CREATE TAB CONTROL (Top Panel) ---
+ $TabControl = New-Object System.Windows.Forms.TabControl
+ $TabControl.Dock = "Fill"
+ $SplitContainer.Panel1.Controls.Add($TabControl)
+
+# --- CREATE OUTPUT LOG (Bottom Panel) ---
  $OutputLog = New-Object System.Windows.Forms.TextBox
  $OutputLog.Multiline = $true
  $OutputLog.ScrollBars = "Vertical"
  $OutputLog.ReadOnly = $true
  $OutputLog.BackColor = [System.Drawing.Color]::Black
  $OutputLog.ForeColor = [System.Drawing.Color]::LimeGreen
- $OutputLog.Font = New-Object System.Drawing.Font("Consolas", 8)
- $OutputLog.Location = New-Object System.Drawing.Point(10, 400)
- $OutputLog.Size = New-Object System.Drawing.Size(510, 50)
- $OutputLog.Text = "Ready..."
- $Form.Controls.Add($OutputLog)
+ $OutputLog.Font = New-Object System.Drawing.Font("Consolas", 9)
+ $OutputLog.Dock = "Fill"
+ $OutputLog.Text = "System Ready..."
+ $SplitContainer.Panel2.Controls.Add($OutputLog)
 
 function Write-Log {
     param([string]$message)
@@ -93,99 +98,91 @@ function Write-Log {
     $OutputLog.ScrollToCaret()
 }
 
-# --- CREATE THE TAB CONTROL ---
- $TabControl = New-Object System.Windows.Forms.TabControl
- $TabControl.Location = New-Object System.Drawing.Point(10, 10)
- $TabControl.Size = New-Object System.Drawing.Size(510, 380)
- $Form.Controls.Add($TabControl)
-
-# Helper to find or create a tab
- $Tabs = @{}
- $TabYPos = @{} # FIX: Keep track of Y position for EACH tab separately
+# --- SETUP TABS AND FLOW LAYOUTS ---
+ $TabPanels = @{} # Stores the FlowLayoutPanel for each category
  $Categories = @("Orbdiff", "Spokwn", "RedLotus", "Tonynoh", "Praiselily", "Others", "Webs")
 
 foreach ($Cat in $Categories) {
-    $Tab = New-Object System.Windows.Forms.TabPage
-    $Tab.Text = $Cat
-    $Tab.BackColor = [System.Drawing.Color]::White
-    $Tab.AutoScroll = $true 
-    $TabControl.TabPages.Add($Tab)
-    $Tabs[$Cat] = $Tab
-    $TabYPos[$Cat] = 10 # Initialize Y position for this tab to 10
+    $TabPage = New-Object System.Windows.Forms.TabPage
+    $TabPage.Text = $Cat
+    $TabPage.BackColor = [System.Drawing.Color]::White
+    
+    # Use FlowLayoutPanel to handle stacking automatically
+    $FlowPanel = New-Object System.Windows.Forms.FlowLayoutPanel
+    $FlowPanel.Dock = "Fill"
+    $FlowPanel.FlowDirection = "TopDown"
+    $FlowPanel.AutoScroll = $true
+    $FlowPanel.WrapContents = $false # Don't wrap buttons to the side
+    $FlowPanel.Padding = New-Object System.Windows.Forms.Padding(10)
+    
+    $TabPage.Controls.Add($FlowPanel)
+    $TabControl.TabPages.Add($TabPage)
+    $TabPanels[$Cat] = $FlowPanel
 }
 
 # --- GENERATE BUTTONS ---
 foreach ($Tool in $ToolData) {
-    $CatTab = $Tabs[$Tool.Category]
-    if (-not $CatTab) { continue }
+    $Panel = $TabPanels[$Tool.Category]
+    
+    if ($Panel) {
+        $Btn = New-Object System.Windows.Forms.Button
+        $Btn.Text = $Tool.Name
+        $Btn.Width = 450 # Fixed width
+        $Btn.Height = 40
+        $Btn.Margin = New-Object System.Windows.Forms.Padding(0, 0, 0, 5) # Small gap between buttons
+        $Btn.FlatStyle = "Flat"
+        $Btn.BackColor = [System.Drawing.Color]::FromArgb(245, 245, 245)
+        $Btn.Cursor = [System.Windows.Forms.Cursors]::Hand
+        $Btn.Font = New-Object System.Drawing.Font("Segoe UI", 9)
 
-    # Get the Y position specific to this category
-    $CurrentY = $TabYPos[$Tool.Category]
+        # Click Logic
+        $Btn.Add_Click({
+            $ToolName = $This.Text
+            $ToolDataItem = $ToolData | Where-Object { $_.Name -eq $ToolName }
+            
+            Write-Log "Launching: $ToolName..."
 
-    $Btn = New-Object System.Windows.Forms.Button
-    $Btn.Text = $Tool.Name
-    $Btn.Width = 460
-    $Btn.Height = 35
-    $Btn.Top = $CurrentY  # Use the specific Y position
-    $Btn.Left = 10
-    $Btn.FlatStyle = "Flat"
-    $Btn.BackColor = [System.Drawing.Color]::FromArgb(240, 240, 240)
-    $Btn.Cursor = [System.Windows.Forms.Cursors]::Hand
-
-    # Add Click Logic
-    $Btn.Add_Click({
-        $ToolName = $This.Text
-        $ToolDataItem = $ToolData | Where-Object { $_.Name -eq $ToolName }
-        
-        Write-Log "Checking: $ToolName..."
-
-        if ($ToolDataItem.Type -eq "Cmd") {
-            Write-Log "Running script..."
-            Start-Process powershell -ArgumentList "-NoProfile -ExecutionPolicy Bypass -Command `"$($ToolDataItem.Command)`""
-        }
-        elseif ($ToolDataItem.Type -eq "Web") {
-            Write-Log "Opening website..."
-            Start-Process $ToolDataItem.URL
-        }
-        elseif ($ToolDataItem.Type -eq "SmartDL") {
-            $PageUrl = $ToolDataItem.URL
-            $DownloadGuess = $PageUrl -replace "/tag/", "/download/"
-            $DownloadGuess += "/" + $ToolName + ".exe"
-            $TempPath = "$env:TEMP\$ToolName.exe"
-
-            if (Test-Path $TempPath) {
-                Write-Log "Found in Temp. Running..."
-                Start-Process $TempPath
+            if ($ToolDataItem.Type -eq "Cmd") {
+                Start-Process powershell -ArgumentList "-NoProfile -ExecutionPolicy Bypass -Command `"$($ToolDataItem.Command)`""
             }
-            else {
-                Write-Log "Attempting download..."
-                try {
-                    Invoke-WebRequest -Uri $DownloadGuess -OutFile $TempPath -UseBasicParsing -ErrorAction Stop
-                    Write-Log "Downloaded successfully. Running..."
+            elseif ($ToolDataItem.Type -eq "Web") {
+                Start-Process $ToolDataItem.URL
+            }
+            elseif ($ToolDataItem.Type -eq "SmartDL") {
+                $PageUrl = $ToolDataItem.URL
+                $DownloadGuess = $PageUrl -replace "/tag/", "/download/"
+                $DownloadGuess += "/" + $ToolName + ".exe"
+                $TempPath = "$env:TEMP\$ToolName.exe"
+
+                if (Test-Path $TempPath) {
+                    Write-Log "Found in Temp. Running..."
                     Start-Process $TempPath
                 }
-                catch {
-                    Write-Log "Auto-download failed."
-                    Write-Log "Opening browser for manual download..."
-                    Start-Process $PageUrl
+                else {
+                    Write-Log "Attempting download..."
+                    try {
+                        Invoke-WebRequest -Uri $DownloadGuess -OutFile $TempPath -UseBasicParsing -ErrorAction Stop
+                        Write-Log "Success. Running..."
+                        Start-Process $TempPath
+                    }
+                    catch {
+                        Write-Log "Download failed. Opening page..."
+                        Start-Process $PageUrl
+                    }
                 }
             }
-        }
-    })
+        })
 
-    $CatTab.Controls.Add($Btn)
-    
-    # Increment the Y position for this specific category
-    $TabYPos[$Tool.Category] = $CurrentY + 40
+        $Panel.Controls.Add($Btn)
+    }
 }
 
-# --- WEBS CATEGORY (Placeholder) ---
- $WebsTab = $Tabs["Webs"]
- $Placeholder = New-Object System.Windows.Forms.Label
- $Placeholder.Text = "No web tools added yet."
- $Placeholder.Location = New-Object System.Drawing.Point(20, 20)
- $Placeholder.ForeColor = [System.Drawing.Color]::Gray
- $WebsTab.Controls.Add($Placeholder)
+# --- WEBS TAB PLACEHOLDER ---
+ $WebsPanel = $TabPanels["Webs"]
+ $Label = New-Object System.Windows.Forms.Label
+ $Label.Text = "Add web tools here."
+ $Label.ForeColor = [System.Drawing.Color]::Gray
+ $WebsPanel.Controls.Add($Label)
 
 # --- SHOW GUI ---
 [void]$Form.ShowDialog()

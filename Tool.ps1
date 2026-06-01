@@ -56,7 +56,7 @@ Add-Type -AssemblyName System.Windows.Forms
 
         <!-- Active Sidebar Button (Red Style) -->
         <Style x:Key="ActiveSidebarBtn" TargetType="Button" BasedOn="{StaticResource SidebarBtn}">
-            <Setter Property="Background" Value="#D92525"/> <!-- Red Background -->
+            <Setter Property="Background" Value="#D92525"/>
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
         </Style>
@@ -160,7 +160,7 @@ Add-Type -AssemblyName System.Windows.Forms
             <Grid Grid.Row="1" Margin="0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="220"/>
-                    <ColumnDefinition Width="1"/> <!-- Separator -->
+                    <ColumnDefinition Width="1"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
@@ -210,7 +210,8 @@ Add-Type -AssemblyName System.Windows.Forms
                             
                             <!-- Status Badge -->
                             <Border HorizontalAlignment="Right" VerticalAlignment="Top" Background="#1A1A1A" BorderBrush="#333" BorderThickness="1" CornerRadius="4" Padding="10,6">
-                                <TextBlock Name="StateChip" Text="IDLE" Foreground="#D92525" FontSize="10" FontWeight="Bold" LetterSpacing="2"/>
+                                <!-- Removed LetterSpacing for compatibility -->
+                                <TextBlock Name="StateChip" Text="IDLE" Foreground="#D92525" FontSize="10" FontWeight="Bold"/>
                             </Border>
                         </Grid>
                     </Border>

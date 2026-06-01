@@ -1,8 +1,3 @@
-I have updated the script to match the visual style of the image you provided (Black/Dark Gray theme, Red accents, "OrbDiff" and "Spokwn" branding, and flat rectangular buttons).
-
-Here is the complete, updated PowerShell script:
-
-```powershell
 Add-Type -AssemblyName PresentationFramework
 Add-Type -AssemblyName System.Windows.Forms
 
@@ -469,18 +464,18 @@ try {
                 $script = @'
 Write-Host "NicToolDownloader" -ForegroundColor Cyan
 Write-Host "==================" -ForegroundColor Cyan
-$dir = "C:\SS"
+ $dir = "C:\SS"
 if (!(Test-Path $dir)) { New-Item -ItemType Directory -Path $dir -Force | Out-Null; Write-Host "[INFO] Created $dir" -ForegroundColor Green }
 else { Write-Host "[INFO] $dir exists" -ForegroundColor Gray }
 Write-Host "[AUTO] Fetching latest System Informer..." -ForegroundColor Cyan
-$siUrl = $null
+ $siUrl = $null
 try {
     $rel   = Invoke-RestMethod "https://api.github.com/repos/winsiderss/systeminformer/releases" -Headers @{Accept="application/vnd.github.v3+json"}
     $asset = $rel[0].assets | Where-Object { $_.name -match "systeminformer-.*-setup\.exe" } | Select-Object -First 1
     if ($asset) { $siUrl = $asset.browser_download_url; Write-Host "[AUTO] $($asset.name)" -ForegroundColor Green }
 } catch { Write-Host "[WARN] GitHub API failed." -ForegroundColor Yellow }
 if (!$siUrl) { $siUrl = "https://github.com/winsiderss/systeminformer/releases/download/v4.0.26144/systeminformer-4.0.26144-setup.exe" }
-$urls = @(
+ $urls = @(
     "https://github.com/Orbdiff/SSTool/releases/download/yay/SSTool.exe",
     "https://github.com/MeowTonynoh/MeowDoomsdayFucker/releases/download/V.1.2/MeowDoomsdayFucker.exe",
     "https://github.com/MeowTonynoh/MeowImportsChecker/releases/download/MeowImportsChecker/MeowImportsChecker.exe",
@@ -527,4 +522,3 @@ Read-Host "Press Enter to exit"
 } catch {
     Write-Error $_.Exception.Message
 }
-```

@@ -6,7 +6,7 @@ Add-Type -Name User32 -Namespace Win32 -MemberDefinition @"
 [DllImport("user32.dll")] public static extern int SendMessage(IntPtr hWnd, int Msg, int wParam, int lParam);
 "@
 
-# --- DEFINE COLORS (TESLA THEME) ---
+# --- DEFINE COLORS---
  $ColorWindowBg     = [System.Drawing.Color]::FromArgb(12, 16, 22)    # Deep Dark
  $ColorSidebar      = [System.Drawing.Color]::FromArgb(22, 27, 34)    # Sidebar
  $ColorHeader       = [System.Drawing.Color]::FromArgb(16, 20, 26)    # Header

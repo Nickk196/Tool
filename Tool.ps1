@@ -11,7 +11,7 @@ Add-Type -Name User32 -Namespace Win32 -MemberDefinition @"
  $ColorSidebar      = [System.Drawing.Color]::FromArgb(22, 27, 34)    
  $ColorHeader       = [System.Drawing.Color]::FromArgb(16, 20, 26)    
  $ColorBtn          = [System.Drawing.Color]::FromArgb(33, 38, 46)    
- $ColorBtnHover     = [System.Drawing.Color]::FromArgb(56, 163, 255)  # Bright Blue Hover
+ $ColorBtnHover     = [System.Drawing.Color]::FromArgb(56, 163, 255)  
  $ColorText         = [System.Drawing.Color]::White
  $ColorLogBg        = [System.Drawing.Color]::Black
  $ColorLogText      = [System.Drawing.Color]::FromArgb(50, 255, 50)   
@@ -127,7 +127,8 @@ function Get-GitHubExeUrl {
  $CloseBtn = New-Object System.Windows.Forms.Button
  $CloseBtn.Text = "✕"
  $CloseBtn.Size = New-Object System.Drawing.Size(40, 40)
- $CloseBtn.Location = New-Object System.Drawing.Point($Form.Width - 50, 10)
+# FIXED: Hardcoded X position to avoid calculation error
+ $CloseBtn.Location = New-Object System.Drawing.Point(950, 10) 
  $CloseBtn.BackColor = [System.Drawing.Color]::FromArgb(40, 40, 40)
  $CloseBtn.ForeColor = [System.Drawing.Color]::White
  $CloseBtn.FlatStyle = "Flat"
@@ -152,7 +153,6 @@ function Get-GitHubExeUrl {
  $Form.Controls.Add($MainPanel)
 
 # --- LOG OUTPUT (BOTTOM OF MAIN PANEL) ---
-# MUST BE ADDED TO MAIN PANEL FIRST
  $OutputLog = New-Object System.Windows.Forms.TextBox
  $OutputLog.Height = 120
  $OutputLog.Dock = "Bottom"
@@ -271,7 +271,9 @@ foreach ($Cat in $Categories) {
     $yPos += 50
 }
 
-# Load first category
- $SidebarButtons["Orbdiff"].PerformClick()
+# Load first category safely
+if ($SidebarButtons["Orbdiff"]) {
+    $SidebarButtons["Orbdiff"].PerformClick()
+}
 
 [void]$Form.ShowDialog()

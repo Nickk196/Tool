@@ -1,6 +1,6 @@
 # ==============================================================================
-# MECZ LAUNCHER v2.6 (ALL BIG TOOLS)
-# Features: All Tools Enlarged, Cat Mascot, Seamless Design
+# MECZ LAUNCHER v2.7 (ALL BIG TOOLS - COMPATIBILITY FIX)
+# Features: All Tools Enlarged, Flat Cat Mascot, Seamless Design
 # Author: mecz.exe
 # ==============================================================================
 
@@ -70,7 +70,7 @@ Add-Type -Name User32 -Namespace Win32 -MemberDefinition @"
 )
 
 # ==============================================================================
-# XAML UI (SEAMLESS + SIDEBAR CAT)
+# XAML UI (SEAMLESS + SIDEBAR CAT - FIXED)
 # ==============================================================================
 
 [xml]$xaml = @"
@@ -93,7 +93,7 @@ Add-Type -Name User32 -Namespace Win32 -MemberDefinition @"
     <Window.Resources>
         <!-- Midnight Theme -->
         <SolidColorBrush x:Key="MainBg" Color="#0D0613"/>
-        <ColorBrush x:Key="SidebarBg" Color="#160B24"/>
+        <SolidColorBrush x:Key="SidebarBg" Color="#160B24"/>
         <SolidColorBrush x:Key="CardBg" Color="#1F0F30"/>
         <SolidColorBrush x:Key="Accent" Color="#9D4EDD"/>
         <SolidColorBrush x:Key="TextMain" Color="#F3E5F5"/>
@@ -215,12 +215,8 @@ Add-Type -Name User32 -Namespace Win32 -MemberDefinition @"
                     <!-- Sidebar -->
                     <StackPanel Grid.Column="0" Background="{StaticResource SidebarBg}">
                         
-                        <!-- THE CAT -->
-                        <TextBlock Text="🐈" FontSize="80" HorizontalAlignment="Center" Foreground="{StaticResource Accent}" Margin="0,10,0,10">
-                             <TextBlock.Effect>
-                                <DropShadowEffect Color="#9D4EDD" BlurRadius="15" ShadowDepth="0"/>
-                             </TextBlock.Effect>
-                        </TextBlock>
+                        <!-- THE CAT (NO EFFECT TO FIX PARSER) -->
+                        <TextBlock Text="🐈" FontSize="80" HorizontalAlignment="Center" Foreground="{StaticResource Accent}" Margin="0,10,0,10"/>
 
                         <!-- Section: Main -->
                         <TextBlock Text="SYSTEM" FontSize="10" Foreground="{StaticResource TextMuted}" FontWeight="Bold" Margin="12,15,12,8"/>
@@ -232,7 +228,7 @@ Add-Type -Name User32 -Namespace Win32 -MemberDefinition @"
                         <Button x:Name="DiscordBtn" Content="Discord: mecz.exe" Style="{StaticResource SocialBtn}" Background="{StaticResource DiscordColor}" Foreground="White"/>
                         <Button x:Name="GithubBtn" Content="GitHub: Nickk196" Style="{StaticResource SocialBtn}" Background="{StaticResource GithubColor}" Foreground="White"/>
                         
-                        <TextBlock Text="v2.6 | All Big" FontSize="10" Foreground="#555" Margin="12,40,12,15" HorizontalAlignment="Center"/>
+                        <TextBlock Text="v2.7 | All Big" FontSize="10" Foreground="#555" Margin="12,40,12,15" HorizontalAlignment="Center"/>
                     </StackPanel>
 
                     <!-- Main Panel -->
@@ -384,7 +380,6 @@ foreach ($Cat in $Categories) {
         $Btn.Foreground = "#F3E5F5"
         
         # --- UNIVERSAL BIG SIZE ---
-        # Removed the "if" check. Now every tool is this size.
         $Btn.Width = 260
         $Btn.Height = 80
         $Btn.FontSize = 14
@@ -508,7 +503,7 @@ foreach ($Cat in $Categories) {
     }
 })
 
-Write-Log "Mecz Launcher v2.6 initialized."
+Write-Log "Mecz Launcher v2.7 initialized."
 Write-Host "Mecz Launcher loaded. ALL TOOLS ARE BIG!"
 
  $window.ShowDialog() | Out-Null

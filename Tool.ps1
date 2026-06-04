@@ -1,6 +1,6 @@
 # ==============================================================================
-# MECZ LAUNCHER v2.2 (MIDNIGHT GLASS DESIGN - RESTORED)
-# Features: Enter Key = Meow, Midnight Glass Design
+# MECZ LAUNCHER v2.3 (SEAMLESS DESIGN - NO LINES/BOXES)
+# Features: Seamless Interface, Enter Key = Meow
 # Author: mecz.exe
 # ==============================================================================
 
@@ -70,7 +70,7 @@ Add-Type -Name User32 -Namespace Win32 -MemberDefinition @"
 )
 
 # ==============================================================================
-# XAML UI (MIDNIGHT GLASS DESIGN)
+# XAML UI (SEAMLESS DESIGN - NO LINES/BOXES)
 # ==============================================================================
 
 [xml]$xaml = @"
@@ -96,7 +96,6 @@ Add-Type -Name User32 -Namespace Win32 -MemberDefinition @"
         <SolidColorBrush x:Key="SidebarBg" Color="#160B24"/>
         <SolidColorBrush x:Key="CardBg" Color="#1F0F30"/>
         <SolidColorBrush x:Key="Accent" Color="#9D4EDD"/>
-        <SolidColorBrush x:Key="AccentHover" Color="#C77DFF"/>
         <SolidColorBrush x:Key="TextMain" Color="#F3E5F5"/>
         <SolidColorBrush x:Key="TextMuted" Color="#B39DDB"/>
         <SolidColorBrush x:Key="ConsoleBg" Color="#050309"/>
@@ -107,23 +106,22 @@ Add-Type -Name User32 -Namespace Win32 -MemberDefinition @"
         <SolidColorBrush x:Key="GithubColor" Color="#24292F"/>
 
         <Style x:Key="BaseButton" TargetType="Button">
-            <Setter Property="Background" Value="{StaticResource CardBg}"/>
+            <Setter Property="Background" Value="Transparent"/>
             <Setter Property="Foreground" Value="{StaticResource TextMain}"/>
             <Setter Property="FontSize" Value="13"/>
             <Setter Property="FontWeight" Value="Medium"/>
             <Setter Property="Height" Value="42"/>
             <Setter Property="Margin" Value="0,0,0,8"/>
             <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}" CornerRadius="6" Padding="15,0">
+                        <Border Background="{TemplateBinding Background}" Padding="15,0">
                             <ContentPresenter HorizontalAlignment="Left" VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="{StaticResource Accent}"/>
+                                <Setter Property="Background" Value="#1F0F30"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -160,7 +158,7 @@ Add-Type -Name User32 -Namespace Win32 -MemberDefinition @"
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}" CornerRadius="4">
+                        <Border Background="{TemplateBinding Background}">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
@@ -176,8 +174,8 @@ Add-Type -Name User32 -Namespace Win32 -MemberDefinition @"
     </Window.Resources>
 
     <Grid>
-        <!-- Main Window Border with Shadow -->
-        <Border CornerRadius="10" Background="{StaticResource MainBg}" BorderBrush="{StaticResource Accent}" BorderThickness="1">
+        <!-- Main Window Background (No Border) -->
+        <Border Background="{StaticResource MainBg}">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="45"/>
@@ -185,7 +183,7 @@ Add-Type -Name User32 -Namespace Win32 -MemberDefinition @"
                 </Grid.RowDefinitions>
 
                 <!-- Header -->
-                <Border Grid.Row="0" Background="{StaticResource SidebarBg}" CornerRadius="9,9,0,0">
+                <Border Grid.Row="0" Background="{StaticResource SidebarBg}">
                     <Grid Margin="20,0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
@@ -193,7 +191,6 @@ Add-Type -Name User32 -Namespace Win32 -MemberDefinition @"
                         </Grid.ColumnDefinitions>
 
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <!-- REMOVED LetterSpacing, added Margin to second TextBlock for spacing -->
                             <TextBlock Text="MECZ" FontSize="16" FontWeight="Bold" Foreground="{StaticResource Accent}"/>
                             <TextBlock Text="LAUNCHER" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextMain}" Margin="8,0,0,0"/>
                         </StackPanel>
@@ -208,33 +205,27 @@ Add-Type -Name User32 -Namespace Win32 -MemberDefinition @"
                 </Border>
 
                 <!-- Content -->
-                <Grid Grid.Row="1" Margin="15">
+                <Grid Grid.Row="1" Margin="20,20,20,20">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="200"/>
-                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="20"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
-                    <!-- Sidebar -->
-                    <Border Grid.Column="0" Background="{StaticResource SidebarBg}" CornerRadius="8" Padding="12">
-                        <StackPanel>
-                            <!-- Section: Main -->
-                            <TextBlock Text="SYSTEM" FontSize="10" Foreground="{StaticResource TextMuted}" FontWeight="Bold" Margin="0,0,0,8"/>
-                            <Button x:Name="OpenFolderBtn" Content="Open Folder" Style="{StaticResource BaseButton}"/>
-                            <Button x:Name="ClearCacheBtn" Content="Clear Cache" Style="{StaticResource BaseButton}"/>
-                            
-                            <Border Height="1" Background="#33000000" Margin="0,12,0,12"/>
-
-                            <!-- Section: Social -->
-                            <TextBlock Text="CONNECT" FontSize="10" Foreground="{StaticResource TextMuted}" FontWeight="Bold" Margin="0,0,0,8"/>
-                            <Button x:Name="DiscordBtn" Content="Discord: mecz.exe" Style="{StaticResource SocialBtn}" Background="{StaticResource DiscordColor}" Foreground="White"/>
-                            <Button x:Name="GithubBtn" Content="GitHub: Nickk196" Style="{StaticResource SocialBtn}" Background="{StaticResource GithubColor}" Foreground="White"/>
-                            
-                            <Border Height="1" Background="#33000000" Margin="0,12,0,12"/>
-                            
-                            <TextBlock Text="v2.2 | Midnight Build" FontSize="10" Foreground="#555" HorizontalAlignment="Center"/>
-                        </StackPanel>
-                    </Border>
+                    <!-- Sidebar (No Border, just background) -->
+                    <StackPanel Grid.Column="0" Background="{StaticResource SidebarBg}" Padding="12,0">
+                        <!-- Section: Main -->
+                        <TextBlock Text="SYSTEM" FontSize="10" Foreground="{StaticResource TextMuted}" FontWeight="Bold" Margin="0,15,0,8"/>
+                        <Button x:Name="OpenFolderBtn" Content="Open Folder" Style="{StaticResource BaseButton}"/>
+                        <Button x:Name="ClearCacheBtn" Content="Clear Cache" Style="{StaticResource BaseButton}"/>
+                        
+                        <!-- Section: Social (Margin replaces separator line) -->
+                        <TextBlock Text="CONNECT" FontSize="10" Foreground="{StaticResource TextMuted}" FontWeight="Bold" Margin="0,20,0,8"/>
+                        <Button x:Name="DiscordBtn" Content="Discord: mecz.exe" Style="{StaticResource SocialBtn}" Background="{StaticResource DiscordColor}" Foreground="White"/>
+                        <Button x:Name="GithubBtn" Content="GitHub: Nickk196" Style="{StaticResource SocialBtn}" Background="{StaticResource GithubColor}" Foreground="White"/>
+                        
+                        <TextBlock Text="v2.3 | Seamless" FontSize="10" Foreground="#555" Margin="0,40,0,15" HorizontalAlignment="Center"/>
+                    </StackPanel>
 
                     <!-- Main Panel -->
                     <Grid Grid.Column="2">
@@ -246,8 +237,8 @@ Add-Type -Name User32 -Namespace Win32 -MemberDefinition @"
                             <RowDefinition Height="150"/>
                         </Grid.RowDefinitions>
 
-                        <!-- Status -->
-                        <Border Grid.Row="0" Background="{StaticResource CardBg}" CornerRadius="6" Padding="15,10">
+                        <!-- Status (No Border) -->
+                        <Border Grid.Row="0" Background="{StaticResource CardBg}" Padding="15,10">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
@@ -261,15 +252,15 @@ Add-Type -Name User32 -Namespace Win32 -MemberDefinition @"
                             </Grid>
                         </Border>
 
-                        <!-- Tools -->
-                        <Border Grid.Row="2" Background="#0D0613" CornerRadius="6" BorderBrush="{StaticResource Accent}" BorderThickness="1" Padding="2">
+                        <!-- Tools (No Border) -->
+                        <Border Grid.Row="2" Background="#0D0613" Padding="2">
                             <TabControl x:Name="ToolsTab" Background="Transparent" BorderThickness="0">
                                 <TabControl.Resources>
                                     <Style TargetType="TabItem">
                                         <Setter Property="Template">
                                             <Setter.Value>
                                                 <ControlTemplate TargetType="TabItem">
-                                                    <Border Name="Border" Background="Transparent" Margin="4,4,4,0" Padding="12,6" CornerRadius="4,4,0,0">
+                                                    <Border Name="Border" Background="Transparent" Margin="4,4,4,0" Padding="12,6">
                                                         <ContentPresenter ContentSource="Header" VerticalAlignment="Center"/>
                                                     </Border>
                                                     <ControlTemplate.Triggers>
@@ -289,8 +280,8 @@ Add-Type -Name User32 -Namespace Win32 -MemberDefinition @"
                             </TabControl>
                         </Border>
 
-                        <!-- Console -->
-                        <Border Grid.Row="4" Background="{StaticResource ConsoleBg}" CornerRadius="6" BorderBrush="#333" BorderThickness="1" Padding="10">
+                        <!-- Console (No Border) -->
+                        <Border Grid.Row="4" Background="{StaticResource ConsoleBg}" Padding="10">
                             <Grid>
                                 <TextBlock Text="TERMINAL" FontSize="9" Foreground="#555" Margin="0,0,0,5"/>
                                 <TextBox x:Name="LogBox" 
@@ -396,7 +387,7 @@ foreach ($Cat in $Categories) {
         $Setter.Property = [System.Windows.Controls.Control]::TemplateProperty
         $Setter.Value = [Windows.Markup.XamlReader]::Parse("
             <ControlTemplate xmlns='http://schemas.microsoft.com/winfx/2006/xaml/presentation' TargetType='Button'>
-                <Border Background='{TemplateBinding Background}' CornerRadius='4' BorderThickness='1' BorderBrush='#33000000'>
+                <Border Background='{TemplateBinding Background}' CornerRadius='4'>
                     <ContentPresenter HorizontalAlignment='Center' VerticalAlignment='Center'/>
                 </Border>
                 <ControlTemplate.Triggers>
@@ -508,7 +499,7 @@ foreach ($Cat in $Categories) {
     }
 })
 
-Write-Log "Mecz Launcher v2.2 initialized."
+Write-Log "Mecz Launcher v2.3 initialized."
 Write-Host "Mecz Launcher loaded. Press Enter in the launcher to Meow!"
 
  $window.ShowDialog() | Out-Null

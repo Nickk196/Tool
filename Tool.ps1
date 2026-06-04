@@ -1,6 +1,6 @@
 # ==============================================================================
-# MECZ LAUNCHER v2.4 (BIG TOOLS + CAT)
-# Features: BAM Tools Expanded, Holographic Cat, Seamless Design
+# MECZ LAUNCHER v2.5 (BIG BAM + VISIBLE CAT)
+# Features: Giant BAM Tools, Visible Cat Mascot, Seamless Design
 # Author: mecz.exe
 # ==============================================================================
 
@@ -70,7 +70,7 @@ Add-Type -Name User32 -Namespace Win32 -MemberDefinition @"
 )
 
 # ==============================================================================
-# XAML UI (SEAMLESS + CAT)
+# XAML UI (SEAMLESS + SIDEBAR CAT)
 # ==============================================================================
 
 [xml]$xaml = @"
@@ -214,6 +214,14 @@ Add-Type -Name User32 -Namespace Win32 -MemberDefinition @"
 
                     <!-- Sidebar -->
                     <StackPanel Grid.Column="0" Background="{StaticResource SidebarBg}">
+                        
+                        <!-- THE CAT -->
+                        <TextBlock Text="🐈" FontSize="80" HorizontalAlignment="Center" Foreground="{StaticResource Accent}" Margin="0,10,0,10">
+                             <TextBlock.Effect>
+                                <DropShadowEffect Color="#9D4EDD" BlurRadius="15" ShadowDepth="0"/>
+                             </TextBlock.Effect>
+                        </TextBlock>
+
                         <!-- Section: Main -->
                         <TextBlock Text="SYSTEM" FontSize="10" Foreground="{StaticResource TextMuted}" FontWeight="Bold" Margin="12,15,12,8"/>
                         <Button x:Name="OpenFolderBtn" Content="Open Folder" Style="{StaticResource BaseButton}"/>
@@ -224,7 +232,7 @@ Add-Type -Name User32 -Namespace Win32 -MemberDefinition @"
                         <Button x:Name="DiscordBtn" Content="Discord: mecz.exe" Style="{StaticResource SocialBtn}" Background="{StaticResource DiscordColor}" Foreground="White"/>
                         <Button x:Name="GithubBtn" Content="GitHub: Nickk196" Style="{StaticResource SocialBtn}" Background="{StaticResource GithubColor}" Foreground="White"/>
                         
-                        <TextBlock Text="v2.4 | Cat Update" FontSize="10" Foreground="#555" Margin="12,40,12,15" HorizontalAlignment="Center"/>
+                        <TextBlock Text="v2.5 | Big Cat" FontSize="10" Foreground="#555" Margin="12,40,12,15" HorizontalAlignment="Center"/>
                     </StackPanel>
 
                     <!-- Main Panel -->
@@ -326,30 +334,6 @@ Add-Type -Name User32 -Namespace Win32 -MemberDefinition @"
  $LogBox = $window.FindName("LogBox")
  $ToolsTab = $window.FindName("ToolsTab")
 
-# --- ADD THE CAT ---
-# We create a TextBlock manually in code for the Cat to avoid XAML parsing errors on some systems
- $CatMascot = New-Object System.Windows.Controls.TextBlock
- $CatMascot.Text = "🐈"
- $CatMascot.FontSize = 180
- $CatMascot.Foreground = "#9D4EDD"
- $CatMascot.Opacity = 0.15
- $CatMascot.HorizontalAlignment = "Right"
- $CatMascot.VerticalAlignment = "Bottom"
- $CatMascot.Margin = "0,0,-60,-60"
-
-# Add Neon Glow Effect to the Cat
- $glow = New-Object System.Windows.Media.Effects.DropShadowEffect
- $glow.Color = "#9D4EDD"
- $glow.BlurRadius = 40
- $glow.ShadowDepth = 0
- $CatMascot.Effect = $glow
-
-# Add the Cat to the Window's main Grid (Grid.Row=1, Grid.Column=2)
- $MainGrid = $window.Content.Children[0] # The outer Border
- $InnerGrid = $MainGrid.Child # The Grid inside the Border
- $MainContentGrid = $InnerGrid.Children[1].Children[1] # Grid.Column="2" (Main Content)
- $MainContentGrid.Children.Add($CatMascot) | Out-Null
-
 function Write-Log {
     param([string]$msg)
     $time = Get-Date -Format "HH:mm:ss"
@@ -399,13 +383,13 @@ foreach ($Cat in $Categories) {
         $Btn.Background = "#1F0F30"
         $Btn.Foreground = "#F3E5F5"
         
-        # --- DYNAMIC SIZING FOR BAM TOOLS ---
+        # --- DYNAMIC SIZING FOR BAM TOOLS (MASSIVE UPDATE) ---
         if ($Tool.Name -match "BAM") {
-            $Btn.Width = 300
-            $Btn.Height = 80
-            $Btn.FontSize = 16
+            $Btn.Width = 450  # Wide
+            $Btn.Height = 90  # Tall
+            $Btn.FontSize = 18
             $Btn.FontWeight = "Bold"
-            $Btn.Margin = "10"
+            $Btn.Margin = "12"
         } else {
             $Btn.Width = 140
             $Btn.Height = 50
@@ -531,7 +515,7 @@ foreach ($Cat in $Categories) {
     }
 })
 
-Write-Log "Mecz Launcher v2.4 initialized."
-Write-Host "Mecz Launcher loaded. BAM tools are bigger!"
+Write-Log "Mecz Launcher v2.5 initialized."
+Write-Host "Mecz Launcher loaded. BAM tools are GIANT now!"
 
  $window.ShowDialog() | Out-Null

@@ -1,13 +1,13 @@
 # ==============================================================================
-# MECZ LAUNCHER
-# Clean, Traced-Free, Customized for mecz.exe
+# MECZ LAUNCHER v2.1
+# Features: New Social Buttons, Midnight Glass Design
+# Author: mecz.exe
 # ==============================================================================
 
 Add-Type -AssemblyName PresentationFramework
 Add-Type -AssemblyName PresentationCore
 Add-Type -AssemblyName WindowsBase
 Add-Type -AssemblyName System.Xaml
-Add-Type -AssemblyName System.IO.Compression.FileSystem
 
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
@@ -17,24 +17,12 @@ Add-Type -Name User32 -Namespace Win32 -MemberDefinition @"
 [DllImport("user32.dll")] public static extern int SendMessage(IntPtr hWnd, int Msg, int wParam, int lParam);
 "@
 
-# --- CONFIGURATION ---
  $userDir    = [Environment]::GetFolderPath("UserProfile")
  $downloads  = Join-Path $userDir "Downloads"
  $installDir = Join-Path $downloads "Mecz-Tools"
- $version    = "2.0"
 
- $announcementTitle = "Welcome to Mecz Launcher"
- $announcementMessage = @"
-Welcome to the Mecz Launcher.
-
-Developed by mecz.exe (GitHub: Nickk196).
-
-A clean, streamlined interface for forensic tools.
-"@
-
-# --- TOOL DATA ---
+# --- TOOL DATA (Same as before) ---
  $ToolData = @(
-    # --- ORBDIFF ---
     @{ Name="PrefetchView"; Category="Orbdiff"; Type="GitHub"; URL="https://github.com/Orbdiff/PrefetchView/releases/tag/v1.6.7" },
     @{ Name="BAMReveal"; Category="Orbdiff"; Type="GitHub"; URL="https://github.com/Orbdiff/BAMReveal/releases/tag/v1.3.1" },
     @{ Name="StringsParser"; Category="Orbdiff"; Type="GitHub"; URL="https://github.com/Orbdiff/StringsParser/releases/tag/v1.0" },
@@ -47,8 +35,6 @@ A clean, streamlined interface for forensic tools.
     @{ Name="PFTrace"; Category="Orbdiff"; Type="GitHub"; URL="https://github.com/Orbdiff/PFTrace/releases/tag/v1.0.1" },
     @{ Name="CheckDeletedUSN"; Category="Orbdiff"; Type="GitHub"; URL="https://github.com/Orbdiff/CheckDeletedUSN/releases/tag/v0.2.1" },
     @{ Name="JARParser"; Category="Orbdiff"; Type="GitHub"; URL="https://github.com/Orbdiff/JARParser/releases/tag/v1.2" },
-
-    # --- SPOKWN ---
     @{ Name="BAM-parser"; Category="Spokwn"; Type="GitHub"; URL="https://github.com/spokwn/BAM-parser/releases/tag/v1.2.9" },
     @{ Name="PathsParser"; Category="Spokwn"; Type="GitHub"; URL="https://github.com/spokwn/PathsParser/releases/tag/v1.2" },
     @{ Name="JournalTrace"; Category="Spokwn"; Type="GitHub"; URL="https://github.com/spokwn/JournalTrace/releases/tag/1.2" },
@@ -59,15 +45,11 @@ A clean, streamlined interface for forensic tools.
     @{ Name="process-parser"; Category="Spokwn"; Type="GitHub"; URL="https://github.com/spokwn/process-parser/releases/tag/v0.5.5" },
     @{ Name="prefetch-parser"; Category="Spokwn"; Type="GitHub"; URL="https://github.com/spokwn/prefetch-parser/releases/tag/v1.5.5" },
     @{ Name="ActivitiesCache"; Category="Spokwn"; Type="GitHub"; URL="https://github.com/spokwn/ActivitiesCache-execution/releases/tag/v0.6.5" },
-
-    # --- TONYNOH (MEOW) ---
     @{ Name="MeowDoomsdayFucker"; Category="Tonynoh"; Type="GitHub"; URL="https://github.com/MeowTonynoh/MeowDoomsdayFucker/releases/tag/V.1.2" },
     @{ Name="MeowModAnalyzer"; Category="Tonynoh"; Type="Cmd"; Command="Invoke-Expression (Invoke-RestMethod 'https://raw.githubusercontent.com/MeowTonynoh/MeowModAnalyzer/main/MeowModAnalyzer.ps1')" },
     @{ Name="MeowResolver"; Category="Tonynoh"; Type="GitHub"; URL="https://github.com/MeowTonynoh/MeowResolver/releases/tag/MeowResolver" },
     @{ Name="MeowNovowareFucker"; Category="Tonynoh"; Type="GitHub"; URL="https://github.com/MeowTonynoh/MeowNovowareFucker/releases/tag/V1" },
     @{ Name="MeowImportsChecker"; Category="Tonynoh"; Type="GitHub"; URL="https://github.com/MeowTonynoh/MeowImportsChecker/releases/tag/MeowImportsChecker" },
-
-    # --- PRAISELILY ---
     @{ Name="PSHunter"; Category="Praiselily"; Type="GitHub"; URL="https://github.com/praiselily/PSHunter/releases/tag/Built" },
     @{ Name="AltDetector"; Category="Praiselily"; Type="GitHub"; URL="https://github.com/praiselily/AltDetector/releases/tag/Detector" },
     @{ Name="HotspotLogs"; Category="Praiselily"; Type="Cmd"; Command="iwr https://raw.githubusercontent.com/praiselily/WeHateFakers/refs/heads/main/HotspotLogs.ps1 | iex" },
@@ -75,13 +57,9 @@ A clean, streamlined interface for forensic tools.
     @{ Name="HarddiskConverter"; Category="Praiselily"; Type="Cmd"; Command="Invoke-Expression (Invoke-RestMethod https://raw.githubusercontent.com/praiselily/lilith-ps/refs/heads/main/HarddiskConverter.ps1)" },
     @{ Name="Services"; Category="Praiselily"; Type="Cmd"; Command="Invoke-Expression (Invoke-RestMethod 'https://raw.githubusercontent.com/praiselily/lilith-ps/refs/heads/main/Services.ps1')" },
     @{ Name="Signed-Scheduled-Tasks"; Category="Praiselily"; Type="Cmd"; Command="Invoke-Expression (Invoke-RestMethod 'https://raw.githubusercontent.com/praiselily/lilith-ps/refs/heads/main/Signed-Scheduled-Tasks.ps1')" },
-
-    # --- REDLOTUS ---
     @{ Name="RedLotus-Mod-Analyzer"; Category="RedLotus"; Type="GitHub"; URL="https://github.com/ItzIceHere/RedLotus-Mod-Analyzer/releases/tag/RL" },
     @{ Name="RedLotus-Task-Sentinel"; Category="RedLotus"; Type="GitHub"; URL="https://github.com/ItzIceHere/RedLotus-Task-Sentinel/releases/tag/RL" },
     @{ Name="RedLotusAltChecker"; Category="RedLotus"; Type="GitHub"; URL="https://github.com/ItzIceHere/RedLotusAltChecker/releases/tag/RL" },
-
-    # --- OTHERS ---
     @{ Name="WinPrefetchView (NirSoft)"; Category="Others"; Type="Web"; URL="https://www.nirsoft.net/utils/win_prefetch_view.html" },
     @{ Name="CompActivityView (NirSoft)"; Category="Others"; Type="Web"; URL="https://www.nirsoft.net/utils/computer_activity_view.html" },
     @{ Name="AmcacheParser (EZ Tools)"; Category="Others"; Type="Web"; URL="https://download.ericzimmermanstools.com/net9/AmcacheParser.zip" },
@@ -92,7 +70,7 @@ A clean, streamlined interface for forensic tools.
 )
 
 # ==============================================================================
-# XAML UI (CLEANER DESIGN - MECZ BRANDING)
+# XAML UI (MIDNIGHT GLASS DESIGN)
 # ==============================================================================
 
 [xml]$xaml = @"
@@ -112,34 +90,39 @@ A clean, streamlined interface for forensic tools.
     FontFamily="Segoe UI">
 
     <Window.Resources>
-        <!-- Mecz Theme (Clean Purple) -->
-        <SolidColorBrush x:Key="WindowBackground" Color="#12091F"/>
-        <SolidColorBrush x:Key="SidebarBackground" Color="#1A0E2E"/>
-        <SolidColorBrush x:Key="PrimaryButton" Color="#7B2CBF"/>
-        <SolidColorBrush x:Key="PrimaryButtonHover" Color="#9D4EDD"/>
-        <SolidColorBrush x:Key="CardBackground" Color="#240046"/>
-        <SolidColorBrush x:Key="BorderBrush" Color="#5A189A"/>
-        <SolidColorBrush x:Key="TextMain" Color="#FFFFFF"/>
-        <SolidColorBrush x:Key="TextSub" Color="#E0AAFF"/>
+        <!-- Midnight Theme -->
+        <SolidColorBrush x:Key="MainBg" Color="#0D0613"/>
+        <SolidColorBrush x:Key="SidebarBg" Color="#160B24"/>
+        <SolidColorBrush x:Key="CardBg" Color="#1F0F30"/>
+        <SolidColorBrush x:Key="Accent" Color="#9D4EDD"/>
+        <SolidColorBrush x:Key="AccentHover" Color="#C77DFF"/>
+        <SolidColorBrush x:Key="TextMain" Color="#F3E5F5"/>
+        <SolidColorBrush x:Key="TextMuted" Color="#B39DDB"/>
+        <SolidColorBrush x:Key="ConsoleBg" Color="#050309"/>
 
-        <Style x:Key="CleanButtonStyle" TargetType="Button">
-            <Setter Property="Background" Value="{StaticResource CardBackground}"/>
+        <!-- Discord Blurple -->
+        <SolidColorBrush x:Key="DiscordColor" Color="#5865F2"/>
+        <!-- GitHub Dark -->
+        <SolidColorBrush x:Key="GithubColor" Color="#24292F"/>
+
+        <Style x:Key="BaseButton" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource CardBg}"/>
             <Setter Property="Foreground" Value="{StaticResource TextMain}"/>
-            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontSize" Value="13"/>
             <Setter Property="FontWeight" Value="Medium"/>
-            <Setter Property="Height" Value="50"/>
-            <Setter Property="Margin" Value="0,0,0,10"/>
+            <Setter Property="Height" Value="42"/>
+            <Setter Property="Margin" Value="0,0,0,8"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}" CornerRadius="8" Padding="15,0">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="6" Padding="15,0">
                             <ContentPresenter HorizontalAlignment="Left" VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="{StaticResource PrimaryButton}"/>
+                                <Setter Property="Background" Value="{StaticResource Accent}"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -147,20 +130,42 @@ A clean, streamlined interface for forensic tools.
             </Setter>
         </Style>
 
-        <Style x:Key="WindowBtnStyle" TargetType="Button">
+        <Style x:Key="SocialBtn" TargetType="Button" BasedOn="{StaticResource BaseButton}">
+            <Setter Property="Height" Value="36"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="4" Padding="10,0">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Opacity" Value="0.8"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="TitleBarButton" TargetType="Button">
             <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="{StaticResource TextMuted}"/>
+            <Setter Property="Width" Value="40"/>
+            <Setter Property="Height" Value="30"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}" CornerRadius="5" Padding="8">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="4">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
                                 <Setter Property="Background" Value="#33FFFFFF"/>
+                                <Setter Property="Foreground" Value="White"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -170,15 +175,16 @@ A clean, streamlined interface for forensic tools.
     </Window.Resources>
 
     <Grid>
-        <Border CornerRadius="16" Background="{StaticResource WindowBackground}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1">
+        <!-- Main Window Border with Shadow -->
+        <Border CornerRadius="10" Background="{StaticResource MainBg}" BorderBrush="{StaticResource Accent}" BorderThickness="1">
             <Grid>
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="50"/>
+                    <RowDefinition Height="45"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
                 <!-- Header -->
-                <Border Grid.Row="0" Background="{StaticResource SidebarBackground}" CornerRadius="16,16,0,0">
+                <Border Grid.Row="0" Background="{StaticResource SidebarBg}" CornerRadius="9,9,0,0">
                     <Grid Margin="20,0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
@@ -186,86 +192,91 @@ A clean, streamlined interface for forensic tools.
                         </Grid.ColumnDefinitions>
 
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <TextBlock Text="Mecz" FontSize="20" FontWeight="Bold" Foreground="{StaticResource PrimaryButtonHover}"/>
-                            <TextBlock Text=" Launcher" FontSize="20" FontWeight="SemiBold" Foreground="{StaticResource TextMain}" Margin="5,0,0,0"/>
-                            <TextBlock Text=" | by mecz.exe" FontSize="12" Foreground="{StaticResource TextSub}" Margin="15,0,0,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="MECZ" FontSize="16" FontWeight="Bold" Foreground="{StaticResource Accent}" LetterSpacing="2"/>
+                            <TextBlock Text="LAUNCHER" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextMain}" Margin="8,0,0,0" LetterSpacing="2"/>
                         </StackPanel>
 
-                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                            <Button x:Name="InfoBtn" Content="?" Style="{StaticResource WindowBtnStyle}" Margin="0,0,5,0" Width="30"/>
-                            <Button x:Name="MinBtn" Content="—" Style="{StaticResource WindowBtnStyle}" Width="30"/>
-                            <Button x:Name="CloseBtn" Content="✕" Style="{StaticResource WindowBtnStyle}" Width="30"/>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal">
+                            <Button x:Name="DiscordHeaderBtn" Style="{StaticResource TitleBarButton}" Content="D" Foreground="{StaticResource DiscordColor}"/>
+                            <Button x:Name="GithubHeaderBtn" Style="{StaticResource TitleBarButton}" Content="G" Foreground="White"/>
+                            <Button x:Name="MinBtn" Style="{StaticResource TitleBarButton}" Content="—"/>
+                            <Button x:Name="CloseBtn" Style="{StaticResource TitleBarButton}" Content="✕"/>
                         </StackPanel>
                     </Grid>
                 </Border>
 
-                <!-- Main Body -->
-                <Grid Grid.Row="1" Margin="20">
+                <!-- Content -->
+                <Grid Grid.Row="1" Margin="15">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="220"/>
-                        <ColumnDefinition Width="15"/>
+                        <ColumnDefinition Width="200"/>
+                        <ColumnDefinition Width="10"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
                     <!-- Sidebar -->
-                    <Border Grid.Column="0" Background="{StaticResource SidebarBackground}" CornerRadius="12" Padding="15">
+                    <Border Grid.Column="0" Background="{StaticResource SidebarBg}" CornerRadius="8" Padding="12">
                         <StackPanel>
-                            <TextBlock Text="Menu" FontSize="12" Foreground="{StaticResource TextSub}" Margin="0,0,0,10"/>
+                            <!-- Section: Main -->
+                            <TextBlock Text="SYSTEM" FontSize="10" Foreground="{StaticResource TextMuted}" FontWeight="Bold" Margin="0,0,0,8"/>
+                            <Button x:Name="OpenFolderBtn" Content="Open Folder" Style="{StaticResource BaseButton}"/>
+                            <Button x:Name="ClearCacheBtn" Content="Clear Cache" Style="{StaticResource BaseButton}"/>
                             
-                            <Button x:Name="OpenFolderBtn" Content="Open Folder" Style="{StaticResource CleanButtonStyle}"/>
-                            <Button x:Name="ClearCacheBtn" Content="Clear Cache" Style="{StaticResource CleanButtonStyle}"/>
+                            <Border Height="1" Background="#33000000" Margin="0,12,0,12"/>
+
+                            <!-- Section: Social -->
+                            <TextBlock Text="CONNECT" FontSize="10" Foreground="{StaticResource TextMuted}" FontWeight="Bold" Margin="0,0,0,8"/>
+                            <Button x:Name="DiscordBtn" Content="Discord: mecz.exe" Style="{StaticResource SocialBtn}" Background="{StaticResource DiscordColor}" Foreground="White"/>
+                            <Button x:Name="GithubBtn" Content="GitHub: Nickk196" Style="{StaticResource SocialBtn}" Background="{StaticResource GithubColor}" Foreground="White"/>
                             
-                            <Border Height="1" Background="{StaticResource BorderBrush}" Margin="0,10"/>
+                            <Border Height="1" Background="#33000000" Margin="0,12,0,12"/>
                             
-                            <TextBlock Text="About" FontSize="12" Foreground="{StaticResource TextSub}" Margin="0,0,0,10" TextWrapping="Wrap"/>
-                            <TextBlock Text="GitHub: Nickk196" FontSize="11" Foreground="Gray" TextWrapping="Wrap" Margin="0,0,0,5"/>
-                            <TextBlock Text="Discord: mecz.exe" FontSize="11" Foreground="Gray" TextWrapping="Wrap"/>
+                            <TextBlock Text="v2.1 | Midnight Build" FontSize="10" Foreground="#555" HorizontalAlignment="Center"/>
                         </StackPanel>
                     </Border>
 
-                    <!-- Content -->
+                    <!-- Main Panel -->
                     <Grid Grid.Column="2">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="15"/>
+                            <RowDefinition Height="12"/>
                             <RowDefinition Height="*"/>
-                            <RowDefinition Height="15"/>
-                            <RowDefinition Height="180"/>
+                            <RowDefinition Height="12"/>
+                            <RowDefinition Height="150"/>
                         </Grid.RowDefinitions>
 
-                        <!-- Top Status -->
-                        <Border Grid.Row="0" Background="{StaticResource CardBackground}" CornerRadius="10" Padding="20">
+                        <!-- Status -->
+                        <Border Grid.Row="0" Background="{StaticResource CardBg}" CornerRadius="6" Padding="15,10">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
-                                <StackPanel>
-                                    <TextBlock x:Name="StatusTitle" Text="Ready" FontSize="24" FontWeight="SemiBold" Foreground="White"/>
-                                    <TextBlock x:Name="StatusSub" Text="Select a tool to launch." FontSize="13" Foreground="{StaticResource TextSub}" Margin="0,5,0,0"/>
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock x:Name="StatusTitle" Text="Ready" FontSize="18" FontWeight="Medium" Foreground="{StaticResource TextMain}"/>
+                                    <TextBlock x:Name="StatusSub" Text="Select a tool to begin" FontSize="11" Foreground="{StaticResource TextMuted}"/>
                                 </StackPanel>
-                                <Border Grid.Column="1" Background="{StaticResource PrimaryButton}" Width="10" Height="40" CornerRadius="5"/>
+                                <Ellipse Grid.Column="1" Width="8" Height="8" Fill="{StaticResource Accent}"/>
                             </Grid>
                         </Border>
 
-                        <!-- Tools Area -->
-                        <Border Grid.Row="2" Background="#0F001A" CornerRadius="10" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" Padding="5">
+                        <!-- Tools -->
+                        <Border Grid.Row="2" Background="#0D0613" CornerRadius="6" BorderBrush="{StaticResource Accent}" BorderThickness="1" Padding="2">
                             <TabControl x:Name="ToolsTab" Background="Transparent" BorderThickness="0">
                                 <TabControl.Resources>
                                     <Style TargetType="TabItem">
                                         <Setter Property="Template">
                                             <Setter.Value>
                                                 <ControlTemplate TargetType="TabItem">
-                                                    <Border Name="Border" Background="Transparent" Margin="5,5,5,0" Padding="10,5" CornerRadius="5,5,0,0">
-                                                        <ContentPresenter x:Name="ContentSite" ContentSource="Header" VerticalAlignment="Center"/>
+                                                    <Border Name="Border" Background="Transparent" Margin="4,4,4,0" Padding="12,6" CornerRadius="4,4,0,0">
+                                                        <ContentPresenter ContentSource="Header" VerticalAlignment="Center"/>
                                                     </Border>
                                                     <ControlTemplate.Triggers>
                                                         <Trigger Property="IsSelected" Value="True">
-                                                            <Setter TargetName="Border" Property="Background" Value="{StaticResource PrimaryButton}"/>
+                                                            <Setter TargetName="Border" Property="Background" Value="{StaticResource Accent}"/>
                                                             <Setter Property="Foreground" Value="White"/>
                                                         </Trigger>
                                                         <Trigger Property="IsSelected" Value="False">
-                                                            <Setter Property="Foreground" Value="{StaticResource TextSub}"/>
+                                                            <Setter Property="Foreground" Value="{StaticResource TextMuted}"/>
                                                         </Trigger>
                                                     </ControlTemplate.Triggers>
                                                 </ControlTemplate>
@@ -276,43 +287,26 @@ A clean, streamlined interface for forensic tools.
                             </TabControl>
                         </Border>
 
-                        <!-- Log -->
-                        <Border Grid.Row="4" Background="#050208" CornerRadius="10" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" Padding="15">
+                        <!-- Console -->
+                        <Border Grid.Row="4" Background="{StaticResource ConsoleBg}" CornerRadius="6" BorderBrush="#333" BorderThickness="1" Padding="10">
                             <Grid>
-                                <TextBlock Text="CONSOLE" FontSize="10" Foreground="Gray" Margin="0,0,0,5"/>
+                                <TextBlock Text="TERMINAL" FontSize="9" Foreground="#555" Margin="0,0,0,5"/>
                                 <TextBox x:Name="LogBox" 
                                          Background="Transparent" 
-                                         Foreground="#00FF00" 
+                                         Foreground="#9D4EDD" 
                                          BorderThickness="0" 
                                          FontFamily="Consolas" 
-                                         FontSize="12" 
+                                         FontSize="11" 
                                          IsReadOnly="True" 
                                          VerticalScrollBarVisibility="Auto"
                                          TextWrapping="Wrap"
                                          Padding="0,0,0,5"/>
                             </Grid>
                         </Border>
-
                     </Grid>
                 </Grid>
             </Grid>
         </Border>
-
-        <!-- Info Overlay -->
-        <Grid x:Name="InfoPanel" Visibility="Collapsed" Background="#AA000000">
-            <Border Width="400" Background="{StaticResource WindowBackground}" CornerRadius="10" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" Padding="20" HorizontalAlignment="Center" VerticalAlignment="Center">
-                <StackPanel>
-                    <TextBlock Text="About Mecz Launcher" FontSize="18" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center"/>
-                    <TextBlock Text="v2.0" FontSize="12" Foreground="Gray" HorizontalAlignment="Center" Margin="0,5,0,20"/>
-                    
-                    <TextBlock Text="Developer: mecz.exe" Foreground="White" Margin="0,5"/>
-                    <TextBlock Text="GitHub: Nickk196" Foreground="White" Margin="0,5"/>
-                    <TextBlock Text="Discord: mecz.exe" Foreground="White" Margin="0,5,20,0"/>
-                    
-                    <Button Content="Close" Style="{StaticResource CleanButtonStyle}" HorizontalAlignment="Center" Margin="0,10,0,0" x:Name="CloseInfoBtn"/>
-                </StackPanel>
-            </Border>
-        </Grid>
     </Grid>
 </Window>
 "@
@@ -327,15 +321,17 @@ A clean, streamlined interface for forensic tools.
 # Find Elements
  $OpenFolderBtn = $window.FindName("OpenFolderBtn")
  $ClearCacheBtn = $window.FindName("ClearCacheBtn")
- $InfoBtn = $window.FindName("InfoBtn")
+ $DiscordBtn = $window.FindName("DiscordBtn")
+ $GithubBtn = $window.FindName("GithubBtn")
+ $DiscordHeaderBtn = $window.FindName("DiscordHeaderBtn")
+ $GithubHeaderBtn = $window.FindName("GithubHeaderBtn")
+
  $MinBtn = $window.FindName("MinBtn")
  $CloseBtn = $window.FindName("CloseBtn")
- $CloseInfoBtn = $window.FindName("CloseInfoBtn")
 
  $StatusTitle = $window.FindName("StatusTitle")
  $StatusSub = $window.FindName("StatusSub")
  $LogBox = $window.FindName("LogBox")
- $InfoPanel = $window.FindName("InfoPanel")
  $ToolsTab = $window.FindName("ToolsTab")
 
 function Write-Log {
@@ -376,22 +372,21 @@ foreach ($Cat in $Categories) {
     $Scroll.VerticalScrollBarVisibility = "Auto"
     
     $Panel = New-Object System.Windows.Controls.WrapPanel
-    $Panel.Margin = "10"
+    $Panel.Margin = "8"
     
     $Tools = $ToolData | Where-Object { $_.Category -eq $Cat }
     
     foreach ($Tool in $Tools) {
         $Btn = New-Object System.Windows.Controls.Button
         $Btn.Content = $Tool.Name
-        $Btn.Width = 150
-        $Btn.Height = 60
-        $Btn.Margin = "8"
-        $Btn.FontSize = "13"
+        $Btn.Width = 140
+        $Btn.Height = 50
+        $Btn.Margin = "6"
+        $Btn.FontSize = "12"
         $Btn.Cursor = "Hand"
         
-        # Clean Button Template
-        $Btn.Background = "#240046"
-        $Btn.Foreground = "White"
+        $Btn.Background = "#1F0F30"
+        $Btn.Foreground = "#F3E5F5"
         
         $Style = New-Object System.Windows.Style
         $Style.TargetType = [System.Windows.Controls.Button]
@@ -399,12 +394,13 @@ foreach ($Cat in $Categories) {
         $Setter.Property = [System.Windows.Controls.Control]::TemplateProperty
         $Setter.Value = [Windows.Markup.XamlReader]::Parse("
             <ControlTemplate xmlns='http://schemas.microsoft.com/winfx/2006/xaml/presentation' TargetType='Button'>
-                <Border Background='{TemplateBinding Background}' CornerRadius='6'>
+                <Border Background='{TemplateBinding Background}' CornerRadius='4' BorderThickness='1' BorderBrush='#33000000'>
                     <ContentPresenter HorizontalAlignment='Center' VerticalAlignment='Center'/>
                 </Border>
                 <ControlTemplate.Triggers>
                     <Trigger Property='IsMouseOver' Value='True'>
-                        <Setter Property='Background' Value='#7B2CBF'/>
+                        <Setter Property='Background' Value='#9D4EDD'/>
+                        <Setter Property='Foreground' Value='White'/>
                     </Trigger>
                 </ControlTemplate.Triggers>
             </ControlTemplate>
@@ -417,7 +413,6 @@ foreach ($Cat in $Categories) {
             
             Set-Status "Processing" "Launching $TName..."
             
-            # MECZ FEATURE: Meow
             if ($TName -match "Meow") {
                 Write-Log "Meow! 🐱"
             }
@@ -480,19 +475,16 @@ foreach ($Cat in $Categories) {
  $CloseBtn.Add_Click({ $window.Close() })
  $MinBtn.Add_Click({ $window.WindowState = "Minimized" })
 
- $InfoBtn.Add_Click({ 
-    $InfoPanel.Visibility = "Visible" 
-    $InfoPanel.Opacity = 0
-    $anim = New-Object System.Windows.Media.Animation.DoubleAnimation(0, 1, [TimeSpan]::FromMilliseconds(150))
-    $InfoPanel.BeginAnimation([System.Windows.UIElement]::OpacityProperty, $anim)
-})
+ $DiscordBtn.Add_Click({ Start-Process "https://discord.com" }) # Add your specific invite link here
+ $GithubBtn.Add_Click({ Start-Process "https://github.com/Nickk196" })
 
- $CloseInfoBtn.Add_Click({ $InfoPanel.Visibility = "Collapsed" })
+ $DiscordHeaderBtn.Add_Click({ Start-Process "https://discord.com" })
+ $GithubHeaderBtn.Add_Click({ Start-Process "https://github.com/Nickk196" })
 
  $OpenFolderBtn.Add_Click({
     if (!(Test-Path $installDir)) { New-Item -ItemType Directory -Path $installDir | Out-Null }
     Start-Process $installDir
-    Set-Status "Folder" "Opened Mecz Tools directory."
+    Set-Status "Folder" "Opened directory."
 })
 
  $ClearCacheBtn.Add_Click({
@@ -506,7 +498,7 @@ foreach ($Cat in $Categories) {
     }
 })
 
-Write-Log "Mecz Launcher initialized."
+Write-Log "Mecz Launcher v2.1 initialized."
 Write-Log "Welcome, mecz.exe."
 
  $window.ShowDialog() | Out-Null

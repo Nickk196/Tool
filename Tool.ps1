@@ -1,6 +1,6 @@
 # ==============================================================================
-# MECZ LAUNCHER v3.0 (FLAT DESIGN)
-# Features: No Boxes, Flat Interface, Enter Key = Meow
+# MECZ LAUNCHER v2.2 (MIDNIGHT GLASS DESIGN - RESTORED)
+# Features: Enter Key = Meow, Midnight Glass Design
 # Author: mecz.exe
 # ==============================================================================
 
@@ -70,7 +70,7 @@ Add-Type -Name User32 -Namespace Win32 -MemberDefinition @"
 )
 
 # ==============================================================================
-# XAML UI (FLAT DESIGN - NO BOXES)
+# XAML UI (MIDNIGHT GLASS DESIGN)
 # ==============================================================================
 
 [xml]$xaml = @"
@@ -91,11 +91,14 @@ Add-Type -Name User32 -Namespace Win32 -MemberDefinition @"
     FontFamily="Segoe UI">
 
     <Window.Resources>
-        <!-- Flat Theme -->
+        <!-- Midnight Theme -->
         <SolidColorBrush x:Key="MainBg" Color="#0D0613"/>
+        <SolidColorBrush x:Key="SidebarBg" Color="#160B24"/>
+        <SolidColorBrush x:Key="CardBg" Color="#1F0F30"/>
         <SolidColorBrush x:Key="Accent" Color="#9D4EDD"/>
+        <SolidColorBrush x:Key="AccentHover" Color="#C77DFF"/>
         <SolidColorBrush x:Key="TextMain" Color="#F3E5F5"/>
-        <SolidColorBrush x:Key="TextMuted" Color="#776685"/>
+        <SolidColorBrush x:Key="TextMuted" Color="#B39DDB"/>
         <SolidColorBrush x:Key="ConsoleBg" Color="#050309"/>
 
         <!-- Discord Blurple -->
@@ -103,24 +106,24 @@ Add-Type -Name User32 -Namespace Win32 -MemberDefinition @"
         <!-- GitHub Dark -->
         <SolidColorBrush x:Key="GithubColor" Color="#24292F"/>
 
-        <Style x:Key="FlatButton" TargetType="Button">
-            <Setter Property="Background" Value="Transparent"/>
+        <Style x:Key="BaseButton" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource CardBg}"/>
             <Setter Property="Foreground" Value="{StaticResource TextMain}"/>
             <Setter Property="FontSize" Value="13"/>
             <Setter Property="FontWeight" Value="Medium"/>
-            <Setter Property="Height" Value="40"/>
-            <Setter Property="Margin" Value="0,0,0,5"/>
+            <Setter Property="Height" Value="42"/>
+            <Setter Property="Margin" Value="0,0,0,8"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}" Padding="10,0">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="6" Padding="15,0">
                             <ContentPresenter HorizontalAlignment="Left" VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#1A0E2E"/>
+                                <Setter Property="Background" Value="{StaticResource Accent}"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -128,8 +131,8 @@ Add-Type -Name User32 -Namespace Win32 -MemberDefinition @"
             </Setter>
         </Style>
 
-        <Style x:Key="SocialBtn" TargetType="Button" BasedOn="{StaticResource FlatButton}">
-            <Setter Property="Height" Value="32"/>
+        <Style x:Key="SocialBtn" TargetType="Button" BasedOn="{StaticResource BaseButton}">
+            <Setter Property="Height" Value="36"/>
             <Setter Property="FontSize" Value="12"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="Template">
@@ -157,12 +160,13 @@ Add-Type -Name User32 -Namespace Win32 -MemberDefinition @"
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="4">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#22000000"/>
+                                <Setter Property="Background" Value="#33FFFFFF"/>
+                                <Setter Property="Foreground" Value="White"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -171,118 +175,141 @@ Add-Type -Name User32 -Namespace Win32 -MemberDefinition @"
         </Style>
     </Window.Resources>
 
-    <!-- Main Window Background (No Borders) -->
-    <Border Background="{StaticResource MainBg}">
-        <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="50"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
+    <Grid>
+        <!-- Main Window Border with Shadow -->
+        <Border CornerRadius="10" Background="{StaticResource MainBg}" BorderBrush="{StaticResource Accent}" BorderThickness="1">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="45"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
 
-            <!-- Header (No Background, just text) -->
-            <Grid Grid.Row="0" Margin="20,10">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
+                <!-- Header -->
+                <Border Grid.Row="0" Background="{StaticResource SidebarBg}" CornerRadius="9,9,0,0">
+                    <Grid Margin="20,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
 
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                    <TextBlock Text="MECZ" FontSize="16" FontWeight="Bold" Foreground="{StaticResource Accent}"/>
-                    <TextBlock Text="LAUNCHER" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextMain}" Margin="8,0,0,0"/>
-                </StackPanel>
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <!-- REMOVED LetterSpacing, added Margin to second TextBlock for spacing -->
+                            <TextBlock Text="MECZ" FontSize="16" FontWeight="Bold" Foreground="{StaticResource Accent}"/>
+                            <TextBlock Text="LAUNCHER" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextMain}" Margin="8,0,0,0"/>
+                        </StackPanel>
 
-                <StackPanel Grid.Column="1" Orientation="Horizontal">
-                    <Button x:Name="DiscordHeaderBtn" Style="{StaticResource TitleBarButton}" Content="D" Foreground="{StaticResource DiscordColor}"/>
-                    <Button x:Name="GithubHeaderBtn" Style="{StaticResource TitleBarButton}" Content="G" Foreground="White"/>
-                    <Button x:Name="MinBtn" Style="{StaticResource TitleBarButton}" Content="—"/>
-                    <Button x:Name="CloseBtn" Style="{StaticResource TitleBarButton}" Content="✕"/>
-                </StackPanel>
-            </Grid>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal">
+                            <Button x:Name="DiscordHeaderBtn" Style="{StaticResource TitleBarButton}" Content="D" Foreground="{StaticResource DiscordColor}"/>
+                            <Button x:Name="GithubHeaderBtn" Style="{StaticResource TitleBarButton}" Content="G" Foreground="White"/>
+                            <Button x:Name="MinBtn" Style="{StaticResource TitleBarButton}" Content="—"/>
+                            <Button x:Name="CloseBtn" Style="{StaticResource TitleBarButton}" Content="✕"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
 
-            <!-- Content -->
-            <Grid Grid.Row="1" Margin="20,0,20,20">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="180"/>
-                    <ColumnDefinition Width="20"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
+                <!-- Content -->
+                <Grid Grid.Row="1" Margin="15">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="200"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
 
-                <!-- Sidebar (Flat) -->
-                <StackPanel Grid.Column="0" VerticalAlignment="Top">
-                    <TextBlock Text="MENU" FontSize="10" Foreground="{StaticResource TextMuted}" FontWeight="Bold" Margin="0,0,0,10"/>
-                    
-                    <Button x:Name="OpenFolderBtn" Content="Open Folder" Style="{StaticResource FlatButton}"/>
-                    <Button x:Name="ClearCacheBtn" Content="Clear Cache" Style="{StaticResource FlatButton}"/>
-                    
-                    <TextBlock Text="CONNECT" FontSize="10" Foreground="{StaticResource TextMuted}" FontWeight="Bold" Margin="0,20,0,10"/>
-                    
-                    <Button x:Name="DiscordBtn" Content="Discord: mecz.exe" Style="{StaticResource SocialBtn}" Background="{StaticResource DiscordColor}" Foreground="White"/>
-                    <Button x:Name="GithubBtn" Content="GitHub: Nickk196" Style="{StaticResource SocialBtn}" Background="{StaticResource GithubColor}" Foreground="White"/>
-                    
-                    <TextBlock Text="v3.0 | Flat" FontSize="10" Foreground="#333" Margin="0,40,0,0"/>
-                </StackPanel>
+                    <!-- Sidebar -->
+                    <Border Grid.Column="0" Background="{StaticResource SidebarBg}" CornerRadius="8" Padding="12">
+                        <StackPanel>
+                            <!-- Section: Main -->
+                            <TextBlock Text="SYSTEM" FontSize="10" Foreground="{StaticResource TextMuted}" FontWeight="Bold" Margin="0,0,0,8"/>
+                            <Button x:Name="OpenFolderBtn" Content="Open Folder" Style="{StaticResource BaseButton}"/>
+                            <Button x:Name="ClearCacheBtn" Content="Clear Cache" Style="{StaticResource BaseButton}"/>
+                            
+                            <Border Height="1" Background="#33000000" Margin="0,12,0,12"/>
 
-                <!-- Main Panel -->
-                <Grid Grid.Column="2">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="10"/>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="10"/>
-                        <RowDefinition Height="150"/>
-                    </Grid.RowDefinitions>
+                            <!-- Section: Social -->
+                            <TextBlock Text="CONNECT" FontSize="10" Foreground="{StaticResource TextMuted}" FontWeight="Bold" Margin="0,0,0,8"/>
+                            <Button x:Name="DiscordBtn" Content="Discord: mecz.exe" Style="{StaticResource SocialBtn}" Background="{StaticResource DiscordColor}" Foreground="White"/>
+                            <Button x:Name="GithubBtn" Content="GitHub: Nickk196" Style="{StaticResource SocialBtn}" Background="{StaticResource GithubColor}" Foreground="White"/>
+                            
+                            <Border Height="1" Background="#33000000" Margin="0,12,0,12"/>
+                            
+                            <TextBlock Text="v2.2 | Midnight Build" FontSize="10" Foreground="#555" HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
 
-                    <!-- Status (Flat) -->
-                    <StackPanel Grid.Row="0" Orientation="Horizontal">
-                        <TextBlock x:Name="StatusTitle" Text="Ready" FontSize="18" FontWeight="Medium" Foreground="{StaticResource TextMain}"/>
-                        <TextBlock x:Name="StatusSub" Text="Select a tool to begin" FontSize="11" Foreground="{StaticResource TextMuted}" VerticalAlignment="Center" Margin="15,0,0,0"/>
-                    </StackPanel>
+                    <!-- Main Panel -->
+                    <Grid Grid.Column="2">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="12"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="12"/>
+                            <RowDefinition Height="150"/>
+                        </Grid.RowDefinitions>
 
-                    <!-- Tools (Flat) -->
-                    <TabControl x:Name="ToolsTab" Grid.Row="2" Background="Transparent" BorderThickness="0">
-                        <TabControl.Resources>
-                            <Style TargetType="TabItem">
-                                <Setter Property="Template">
-                                    <Setter.Value>
-                                        <ControlTemplate TargetType="TabItem">
-                                            <Border Name="Border" Background="Transparent" Margin="5,0,5,0" Padding="15,8">
-                                                <ContentPresenter ContentSource="Header" VerticalAlignment="Center"/>
-                                            </Border>
-                                            <ControlTemplate.Triggers>
-                                                <Trigger Property="IsSelected" Value="True">
-                                                    <Setter TargetName="Border" Property="Background" Value="{StaticResource Accent}"/>
-                                                    <Setter Property="Foreground" Value="White"/>
-                                                </Trigger>
-                                                <Trigger Property="IsSelected" Value="False">
-                                                    <Setter Property="Foreground" Value="{StaticResource TextMuted}"/>
-                                                </Trigger>
-                                            </ControlTemplate.Triggers>
-                                        </ControlTemplate>
-                                    </Setter.Value>
-                                </Setter>
-                            </Style>
-                        </TabControl.Resources>
-                    </TabControl>
+                        <!-- Status -->
+                        <Border Grid.Row="0" Background="{StaticResource CardBg}" CornerRadius="6" Padding="15,10">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock x:Name="StatusTitle" Text="Ready" FontSize="18" FontWeight="Medium" Foreground="{StaticResource TextMain}"/>
+                                    <TextBlock x:Name="StatusSub" Text="Select a tool to begin" FontSize="11" Foreground="{StaticResource TextMuted}"/>
+                                </StackPanel>
+                                <Ellipse Grid.Column="1" Width="8" Height="8" Fill="{StaticResource Accent}"/>
+                            </Grid>
+                        </Border>
 
-                    <!-- Console (Flat) -->
-                    <Grid Grid.Row="4" Background="{StaticResource ConsoleBg}">
-                        <TextBlock Text="TERMINAL" FontSize="9" Foreground="#444" Margin="10,5,0,0"/>
-                        <TextBox x:Name="LogBox" 
-                                 Background="Transparent" 
-                                 Foreground="#9D4EDD" 
-                                 BorderThickness="0" 
-                                 FontFamily="Consolas" 
-                                 FontSize="11" 
-                                 IsReadOnly="True" 
-                                 VerticalScrollBarVisibility="Auto"
-                                 TextWrapping="Wrap"
-                                 Padding="10,25,10,10"
-                                 Margin="0"/>
+                        <!-- Tools -->
+                        <Border Grid.Row="2" Background="#0D0613" CornerRadius="6" BorderBrush="{StaticResource Accent}" BorderThickness="1" Padding="2">
+                            <TabControl x:Name="ToolsTab" Background="Transparent" BorderThickness="0">
+                                <TabControl.Resources>
+                                    <Style TargetType="TabItem">
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="TabItem">
+                                                    <Border Name="Border" Background="Transparent" Margin="4,4,4,0" Padding="12,6" CornerRadius="4,4,0,0">
+                                                        <ContentPresenter ContentSource="Header" VerticalAlignment="Center"/>
+                                                    </Border>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsSelected" Value="True">
+                                                            <Setter TargetName="Border" Property="Background" Value="{StaticResource Accent}"/>
+                                                            <Setter Property="Foreground" Value="White"/>
+                                                        </Trigger>
+                                                        <Trigger Property="IsSelected" Value="False">
+                                                            <Setter Property="Foreground" Value="{StaticResource TextMuted}"/>
+                                                        </Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </TabControl.Resources>
+                            </TabControl>
+                        </Border>
+
+                        <!-- Console -->
+                        <Border Grid.Row="4" Background="{StaticResource ConsoleBg}" CornerRadius="6" BorderBrush="#333" BorderThickness="1" Padding="10">
+                            <Grid>
+                                <TextBlock Text="TERMINAL" FontSize="9" Foreground="#555" Margin="0,0,0,5"/>
+                                <TextBox x:Name="LogBox" 
+                                         Background="Transparent" 
+                                         Foreground="#9D4EDD" 
+                                         BorderThickness="0" 
+                                         FontFamily="Consolas" 
+                                         FontSize="11" 
+                                         IsReadOnly="True" 
+                                         VerticalScrollBarVisibility="Auto"
+                                         TextWrapping="Wrap"
+                                         Padding="0,0,0,5"/>
+                            </Grid>
+                        </Border>
                     </Grid>
                 </Grid>
             </Grid>
-        </Grid>
-    </Border>
+        </Border>
+    </Grid>
 </Window>
 "@
 
@@ -347,7 +374,7 @@ foreach ($Cat in $Categories) {
     $Scroll.VerticalScrollBarVisibility = "Auto"
     
     $Panel = New-Object System.Windows.Controls.WrapPanel
-    $Panel.Margin = "10"
+    $Panel.Margin = "8"
     
     $Tools = $ToolData | Where-Object { $_.Category -eq $Cat }
     
@@ -360,7 +387,7 @@ foreach ($Cat in $Categories) {
         $Btn.FontSize = "12"
         $Btn.Cursor = "Hand"
         
-        $Btn.Background = "Transparent"
+        $Btn.Background = "#1F0F30"
         $Btn.Foreground = "#F3E5F5"
         
         $Style = New-Object System.Windows.Style
@@ -369,13 +396,13 @@ foreach ($Cat in $Categories) {
         $Setter.Property = [System.Windows.Controls.Control]::TemplateProperty
         $Setter.Value = [Windows.Markup.XamlReader]::Parse("
             <ControlTemplate xmlns='http://schemas.microsoft.com/winfx/2006/xaml/presentation' TargetType='Button'>
-                <Border Background='{TemplateBinding Background}' Padding='5'>
+                <Border Background='{TemplateBinding Background}' CornerRadius='4' BorderThickness='1' BorderBrush='#33000000'>
                     <ContentPresenter HorizontalAlignment='Center' VerticalAlignment='Center'/>
                 </Border>
                 <ControlTemplate.Triggers>
                     <Trigger Property='IsMouseOver' Value='True'>
-                        <Setter Property='Background' Value='#1A0E2E'/>
-                        <Setter Property='Foreground' Value='#9D4EDD'/>
+                        <Setter Property='Background' Value='#9D4EDD'/>
+                        <Setter Property='Foreground' Value='White'/>
                     </Trigger>
                 </ControlTemplate.Triggers>
             </ControlTemplate>
@@ -481,7 +508,7 @@ foreach ($Cat in $Categories) {
     }
 })
 
-Write-Log "Mecz Launcher v3.0 initialized."
+Write-Log "Mecz Launcher v2.2 initialized."
 Write-Host "Mecz Launcher loaded. Press Enter in the launcher to Meow!"
 
  $window.ShowDialog() | Out-Null

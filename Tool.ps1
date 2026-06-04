@@ -1,6 +1,6 @@
 # ==============================================================================
-# MECZ LAUNCHER v2.3 (SEAMLESS DESIGN - COMPATIBILITY FIX)
-# Features: Seamless Interface, Enter Key = Meow
+# MECZ LAUNCHER v2.4 (BIG TOOLS + CAT)
+# Features: BAM Tools Expanded, Holographic Cat, Seamless Design
 # Author: mecz.exe
 # ==============================================================================
 
@@ -70,7 +70,7 @@ Add-Type -Name User32 -Namespace Win32 -MemberDefinition @"
 )
 
 # ==============================================================================
-# XAML UI (SEAMLESS DESIGN - COMPATIBILITY FIX)
+# XAML UI (SEAMLESS + CAT)
 # ==============================================================================
 
 [xml]$xaml = @"
@@ -212,7 +212,7 @@ Add-Type -Name User32 -Namespace Win32 -MemberDefinition @"
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
-                    <!-- Sidebar (No Padding) -->
+                    <!-- Sidebar -->
                     <StackPanel Grid.Column="0" Background="{StaticResource SidebarBg}">
                         <!-- Section: Main -->
                         <TextBlock Text="SYSTEM" FontSize="10" Foreground="{StaticResource TextMuted}" FontWeight="Bold" Margin="12,15,12,8"/>
@@ -224,7 +224,7 @@ Add-Type -Name User32 -Namespace Win32 -MemberDefinition @"
                         <Button x:Name="DiscordBtn" Content="Discord: mecz.exe" Style="{StaticResource SocialBtn}" Background="{StaticResource DiscordColor}" Foreground="White"/>
                         <Button x:Name="GithubBtn" Content="GitHub: Nickk196" Style="{StaticResource SocialBtn}" Background="{StaticResource GithubColor}" Foreground="White"/>
                         
-                        <TextBlock Text="v2.3 | Seamless" FontSize="10" Foreground="#555" Margin="12,40,12,15" HorizontalAlignment="Center"/>
+                        <TextBlock Text="v2.4 | Cat Update" FontSize="10" Foreground="#555" Margin="12,40,12,15" HorizontalAlignment="Center"/>
                     </StackPanel>
 
                     <!-- Main Panel -->
@@ -237,7 +237,7 @@ Add-Type -Name User32 -Namespace Win32 -MemberDefinition @"
                             <RowDefinition Height="150"/>
                         </Grid.RowDefinitions>
 
-                        <!-- Status (No Padding) -->
+                        <!-- Status -->
                         <Border Grid.Row="0" Background="{StaticResource CardBg}">
                             <Grid Margin="15,10">
                                 <Grid.ColumnDefinitions>
@@ -252,7 +252,7 @@ Add-Type -Name User32 -Namespace Win32 -MemberDefinition @"
                             </Grid>
                         </Border>
 
-                        <!-- Tools (No Padding) -->
+                        <!-- Tools -->
                         <Border Grid.Row="2" Background="#0D0613">
                             <TabControl x:Name="ToolsTab" Background="Transparent" BorderThickness="0">
                                 <TabControl.Resources>
@@ -280,7 +280,7 @@ Add-Type -Name User32 -Namespace Win32 -MemberDefinition @"
                             </TabControl>
                         </Border>
 
-                        <!-- Console (No Padding) -->
+                        <!-- Console -->
                         <Border Grid.Row="4" Background="{StaticResource ConsoleBg}">
                             <Grid Margin="10">
                                 <TextBlock Text="TERMINAL" FontSize="9" Foreground="#555" Margin="0,0,0,5"/>
@@ -325,6 +325,30 @@ Add-Type -Name User32 -Namespace Win32 -MemberDefinition @"
  $StatusSub = $window.FindName("StatusSub")
  $LogBox = $window.FindName("LogBox")
  $ToolsTab = $window.FindName("ToolsTab")
+
+# --- ADD THE CAT ---
+# We create a TextBlock manually in code for the Cat to avoid XAML parsing errors on some systems
+ $CatMascot = New-Object System.Windows.Controls.TextBlock
+ $CatMascot.Text = "🐈"
+ $CatMascot.FontSize = 180
+ $CatMascot.Foreground = "#9D4EDD"
+ $CatMascot.Opacity = 0.15
+ $CatMascot.HorizontalAlignment = "Right"
+ $CatMascot.VerticalAlignment = "Bottom"
+ $CatMascot.Margin = "0,0,-60,-60"
+
+# Add Neon Glow Effect to the Cat
+ $glow = New-Object System.Windows.Media.Effects.DropShadowEffect
+ $glow.Color = "#9D4EDD"
+ $glow.BlurRadius = 40
+ $glow.ShadowDepth = 0
+ $CatMascot.Effect = $glow
+
+# Add the Cat to the Window's main Grid (Grid.Row=1, Grid.Column=2)
+ $MainGrid = $window.Content.Children[0] # The outer Border
+ $InnerGrid = $MainGrid.Child # The Grid inside the Border
+ $MainContentGrid = $InnerGrid.Children[1].Children[1] # Grid.Column="2" (Main Content)
+ $MainContentGrid.Children.Add($CatMascot) | Out-Null
 
 function Write-Log {
     param([string]$msg)
@@ -371,14 +395,23 @@ foreach ($Cat in $Categories) {
     foreach ($Tool in $Tools) {
         $Btn = New-Object System.Windows.Controls.Button
         $Btn.Content = $Tool.Name
-        $Btn.Width = 140
-        $Btn.Height = 50
-        $Btn.Margin = "6"
-        $Btn.FontSize = "12"
         $Btn.Cursor = "Hand"
-        
         $Btn.Background = "#1F0F30"
         $Btn.Foreground = "#F3E5F5"
+        
+        # --- DYNAMIC SIZING FOR BAM TOOLS ---
+        if ($Tool.Name -match "BAM") {
+            $Btn.Width = 300
+            $Btn.Height = 80
+            $Btn.FontSize = 16
+            $Btn.FontWeight = "Bold"
+            $Btn.Margin = "10"
+        } else {
+            $Btn.Width = 140
+            $Btn.Height = 50
+            $Btn.FontSize = "12"
+            $Btn.Margin = "6"
+        }
         
         $Style = New-Object System.Windows.Style
         $Style.TargetType = [System.Windows.Controls.Button]
@@ -498,7 +531,7 @@ foreach ($Cat in $Categories) {
     }
 })
 
-Write-Log "Mecz Launcher v2.3 initialized."
-Write-Host "Mecz Launcher loaded. Press Enter in the launcher to Meow!"
+Write-Log "Mecz Launcher v2.4 initialized."
+Write-Host "Mecz Launcher loaded. BAM tools are bigger!"
 
  $window.ShowDialog() | Out-Null

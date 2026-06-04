@@ -1,6 +1,6 @@
 # ==============================================================================
-# MECZ LAUNCHER v2.1
-# Features: New Social Buttons, Midnight Glass Design
+# MECZ LAUNCHER v2.2 (Fixed)
+# Features: Enter Key = Meow, Midnight Glass Design
 # Author: mecz.exe
 # ==============================================================================
 
@@ -21,7 +21,7 @@ Add-Type -Name User32 -Namespace Win32 -MemberDefinition @"
  $downloads  = Join-Path $userDir "Downloads"
  $installDir = Join-Path $downloads "Mecz-Tools"
 
-# --- TOOL DATA (Same as before) ---
+# --- TOOL DATA ---
  $ToolData = @(
     @{ Name="PrefetchView"; Category="Orbdiff"; Type="GitHub"; URL="https://github.com/Orbdiff/PrefetchView/releases/tag/v1.6.7" },
     @{ Name="BAMReveal"; Category="Orbdiff"; Type="GitHub"; URL="https://github.com/Orbdiff/BAMReveal/releases/tag/v1.3.1" },
@@ -70,7 +70,7 @@ Add-Type -Name User32 -Namespace Win32 -MemberDefinition @"
 )
 
 # ==============================================================================
-# XAML UI (MIDNIGHT GLASS DESIGN)
+# XAML UI (MIDNIGHT GLASS DESIGN - FIXED FOR OLDER .NET)
 # ==============================================================================
 
 [xml]$xaml = @"
@@ -87,6 +87,7 @@ Add-Type -Name User32 -Namespace Win32 -MemberDefinition @"
     WindowStyle="None"
     AllowsTransparency="True"
     Background="Transparent"
+    Focusable="True"
     FontFamily="Segoe UI">
 
     <Window.Resources>
@@ -192,8 +193,9 @@ Add-Type -Name User32 -Namespace Win32 -MemberDefinition @"
                         </Grid.ColumnDefinitions>
 
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <TextBlock Text="MECZ" FontSize="16" FontWeight="Bold" Foreground="{StaticResource Accent}" LetterSpacing="2"/>
-                            <TextBlock Text="LAUNCHER" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextMain}" Margin="8,0,0,0" LetterSpacing="2"/>
+                            <!-- REMOVED LetterSpacing, added Margin to second TextBlock for spacing -->
+                            <TextBlock Text="MECZ" FontSize="16" FontWeight="Bold" Foreground="{StaticResource Accent}"/>
+                            <TextBlock Text="LAUNCHER" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextMain}" Margin="8,0,0,0"/>
                         </StackPanel>
 
                         <StackPanel Grid.Column="1" Orientation="Horizontal">
@@ -230,7 +232,7 @@ Add-Type -Name User32 -Namespace Win32 -MemberDefinition @"
                             
                             <Border Height="1" Background="#33000000" Margin="0,12,0,12"/>
                             
-                            <TextBlock Text="v2.1 | Midnight Build" FontSize="10" Foreground="#555" HorizontalAlignment="Center"/>
+                            <TextBlock Text="v2.2 | Midnight Build" FontSize="10" Foreground="#555" HorizontalAlignment="Center"/>
                         </StackPanel>
                     </Border>
 
@@ -475,7 +477,7 @@ foreach ($Cat in $Categories) {
  $CloseBtn.Add_Click({ $window.Close() })
  $MinBtn.Add_Click({ $window.WindowState = "Minimized" })
 
- $DiscordBtn.Add_Click({ Start-Process "https://discord.com" }) # Add your specific invite link here
+ $DiscordBtn.Add_Click({ Start-Process "https://discord.com" })
  $GithubBtn.Add_Click({ Start-Process "https://github.com/Nickk196" })
 
  $DiscordHeaderBtn.Add_Click({ Start-Process "https://discord.com" })
@@ -498,7 +500,15 @@ foreach ($Cat in $Categories) {
     }
 })
 
-Write-Log "Mecz Launcher v2.1 initialized."
-Write-Log "Welcome, mecz.exe."
+# --- MECZ FEATURE: GLOBAL ENTER KEY ---
+ $window.Add_KeyDown({
+    if ($_.Key -eq "Enter") {
+        Write-Log "Meow! 🐱 (Pressed Enter)"
+        Write-Host "Meow! 🐱"
+    }
+})
+
+Write-Log "Mecz Launcher v2.2 initialized."
+Write-Host "Mecz Launcher loaded. Press Enter in the launcher to Meow!"
 
  $window.ShowDialog() | Out-Null

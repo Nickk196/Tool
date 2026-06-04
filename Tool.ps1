@@ -1,6 +1,6 @@
 # ==============================================================================
-# MECZ LAUNCHER v2.5 (BIG BAM + VISIBLE CAT)
-# Features: Giant BAM Tools, Visible Cat Mascot, Seamless Design
+# MECZ LAUNCHER v2.6 (ALL BIG TOOLS)
+# Features: All Tools Enlarged, Cat Mascot, Seamless Design
 # Author: mecz.exe
 # ==============================================================================
 
@@ -93,7 +93,7 @@ Add-Type -Name User32 -Namespace Win32 -MemberDefinition @"
     <Window.Resources>
         <!-- Midnight Theme -->
         <SolidColorBrush x:Key="MainBg" Color="#0D0613"/>
-        <SolidColorBrush x:Key="SidebarBg" Color="#160B24"/>
+        <ColorBrush x:Key="SidebarBg" Color="#160B24"/>
         <SolidColorBrush x:Key="CardBg" Color="#1F0F30"/>
         <SolidColorBrush x:Key="Accent" Color="#9D4EDD"/>
         <SolidColorBrush x:Key="TextMain" Color="#F3E5F5"/>
@@ -232,7 +232,7 @@ Add-Type -Name User32 -Namespace Win32 -MemberDefinition @"
                         <Button x:Name="DiscordBtn" Content="Discord: mecz.exe" Style="{StaticResource SocialBtn}" Background="{StaticResource DiscordColor}" Foreground="White"/>
                         <Button x:Name="GithubBtn" Content="GitHub: Nickk196" Style="{StaticResource SocialBtn}" Background="{StaticResource GithubColor}" Foreground="White"/>
                         
-                        <TextBlock Text="v2.5 | Big Cat" FontSize="10" Foreground="#555" Margin="12,40,12,15" HorizontalAlignment="Center"/>
+                        <TextBlock Text="v2.6 | All Big" FontSize="10" Foreground="#555" Margin="12,40,12,15" HorizontalAlignment="Center"/>
                     </StackPanel>
 
                     <!-- Main Panel -->
@@ -383,19 +383,12 @@ foreach ($Cat in $Categories) {
         $Btn.Background = "#1F0F30"
         $Btn.Foreground = "#F3E5F5"
         
-        # --- DYNAMIC SIZING FOR BAM TOOLS (MASSIVE UPDATE) ---
-        if ($Tool.Name -match "BAM") {
-            $Btn.Width = 450  # Wide
-            $Btn.Height = 90  # Tall
-            $Btn.FontSize = 18
-            $Btn.FontWeight = "Bold"
-            $Btn.Margin = "12"
-        } else {
-            $Btn.Width = 140
-            $Btn.Height = 50
-            $Btn.FontSize = "12"
-            $Btn.Margin = "6"
-        }
+        # --- UNIVERSAL BIG SIZE ---
+        # Removed the "if" check. Now every tool is this size.
+        $Btn.Width = 260
+        $Btn.Height = 80
+        $Btn.FontSize = 14
+        $Btn.Margin = "12"
         
         $Style = New-Object System.Windows.Style
         $Style.TargetType = [System.Windows.Controls.Button]
@@ -403,7 +396,7 @@ foreach ($Cat in $Categories) {
         $Setter.Property = [System.Windows.Controls.Control]::TemplateProperty
         $Setter.Value = [Windows.Markup.XamlReader]::Parse("
             <ControlTemplate xmlns='http://schemas.microsoft.com/winfx/2006/xaml/presentation' TargetType='Button'>
-                <Border Background='{TemplateBinding Background}' CornerRadius='4'>
+                <Border Background='{TemplateBinding Background}' CornerRadius='6'>
                     <ContentPresenter HorizontalAlignment='Center' VerticalAlignment='Center'/>
                 </Border>
                 <ControlTemplate.Triggers>
@@ -515,7 +508,7 @@ foreach ($Cat in $Categories) {
     }
 })
 
-Write-Log "Mecz Launcher v2.5 initialized."
-Write-Host "Mecz Launcher loaded. BAM tools are GIANT now!"
+Write-Log "Mecz Launcher v2.6 initialized."
+Write-Host "Mecz Launcher loaded. ALL TOOLS ARE BIG!"
 
  $window.ShowDialog() | Out-Null

@@ -1,5 +1,5 @@
 # ==============================================================================
-# MECZ LAUNCHER v2.3 (SEAMLESS DESIGN - NO LINES/BOXES)
+# MECZ LAUNCHER v2.3 (SEAMLESS DESIGN - COMPATIBILITY FIX)
 # Features: Seamless Interface, Enter Key = Meow
 # Author: mecz.exe
 # ==============================================================================
@@ -70,7 +70,7 @@ Add-Type -Name User32 -Namespace Win32 -MemberDefinition @"
 )
 
 # ==============================================================================
-# XAML UI (SEAMLESS DESIGN - NO LINES/BOXES)
+# XAML UI (SEAMLESS DESIGN - COMPATIBILITY FIX)
 # ==============================================================================
 
 [xml]$xaml = @"
@@ -116,8 +116,8 @@ Add-Type -Name User32 -Namespace Win32 -MemberDefinition @"
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}" Padding="15,0">
-                            <ContentPresenter HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                        <Border Background="{TemplateBinding Background}">
+                            <ContentPresenter HorizontalAlignment="Left" VerticalAlignment="Center" Margin="15,0"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
@@ -136,8 +136,8 @@ Add-Type -Name User32 -Namespace Win32 -MemberDefinition @"
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}" CornerRadius="4" Padding="10,0">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        <Border Background="{TemplateBinding Background}" CornerRadius="4">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="10,0"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
@@ -212,19 +212,19 @@ Add-Type -Name User32 -Namespace Win32 -MemberDefinition @"
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
-                    <!-- Sidebar (No Border, just background) -->
-                    <StackPanel Grid.Column="0" Background="{StaticResource SidebarBg}" Padding="12,0">
+                    <!-- Sidebar (No Padding) -->
+                    <StackPanel Grid.Column="0" Background="{StaticResource SidebarBg}">
                         <!-- Section: Main -->
-                        <TextBlock Text="SYSTEM" FontSize="10" Foreground="{StaticResource TextMuted}" FontWeight="Bold" Margin="0,15,0,8"/>
+                        <TextBlock Text="SYSTEM" FontSize="10" Foreground="{StaticResource TextMuted}" FontWeight="Bold" Margin="12,15,12,8"/>
                         <Button x:Name="OpenFolderBtn" Content="Open Folder" Style="{StaticResource BaseButton}"/>
                         <Button x:Name="ClearCacheBtn" Content="Clear Cache" Style="{StaticResource BaseButton}"/>
                         
-                        <!-- Section: Social (Margin replaces separator line) -->
-                        <TextBlock Text="CONNECT" FontSize="10" Foreground="{StaticResource TextMuted}" FontWeight="Bold" Margin="0,20,0,8"/>
+                        <!-- Section: Social -->
+                        <TextBlock Text="CONNECT" FontSize="10" Foreground="{StaticResource TextMuted}" FontWeight="Bold" Margin="12,20,12,8"/>
                         <Button x:Name="DiscordBtn" Content="Discord: mecz.exe" Style="{StaticResource SocialBtn}" Background="{StaticResource DiscordColor}" Foreground="White"/>
                         <Button x:Name="GithubBtn" Content="GitHub: Nickk196" Style="{StaticResource SocialBtn}" Background="{StaticResource GithubColor}" Foreground="White"/>
                         
-                        <TextBlock Text="v2.3 | Seamless" FontSize="10" Foreground="#555" Margin="0,40,0,15" HorizontalAlignment="Center"/>
+                        <TextBlock Text="v2.3 | Seamless" FontSize="10" Foreground="#555" Margin="12,40,12,15" HorizontalAlignment="Center"/>
                     </StackPanel>
 
                     <!-- Main Panel -->
@@ -237,9 +237,9 @@ Add-Type -Name User32 -Namespace Win32 -MemberDefinition @"
                             <RowDefinition Height="150"/>
                         </Grid.RowDefinitions>
 
-                        <!-- Status (No Border) -->
-                        <Border Grid.Row="0" Background="{StaticResource CardBg}" Padding="15,10">
-                            <Grid>
+                        <!-- Status (No Padding) -->
+                        <Border Grid.Row="0" Background="{StaticResource CardBg}">
+                            <Grid Margin="15,10">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
@@ -252,16 +252,16 @@ Add-Type -Name User32 -Namespace Win32 -MemberDefinition @"
                             </Grid>
                         </Border>
 
-                        <!-- Tools (No Border) -->
-                        <Border Grid.Row="2" Background="#0D0613" Padding="2">
+                        <!-- Tools (No Padding) -->
+                        <Border Grid.Row="2" Background="#0D0613">
                             <TabControl x:Name="ToolsTab" Background="Transparent" BorderThickness="0">
                                 <TabControl.Resources>
                                     <Style TargetType="TabItem">
                                         <Setter Property="Template">
                                             <Setter.Value>
                                                 <ControlTemplate TargetType="TabItem">
-                                                    <Border Name="Border" Background="Transparent" Margin="4,4,4,0" Padding="12,6">
-                                                        <ContentPresenter ContentSource="Header" VerticalAlignment="Center"/>
+                                                    <Border Name="Border" Background="Transparent" Margin="4,4,4,0">
+                                                        <ContentPresenter ContentSource="Header" VerticalAlignment="Center" Margin="12,6"/>
                                                     </Border>
                                                     <ControlTemplate.Triggers>
                                                         <Trigger Property="IsSelected" Value="True">
@@ -280,9 +280,9 @@ Add-Type -Name User32 -Namespace Win32 -MemberDefinition @"
                             </TabControl>
                         </Border>
 
-                        <!-- Console (No Border) -->
-                        <Border Grid.Row="4" Background="{StaticResource ConsoleBg}" Padding="10">
-                            <Grid>
+                        <!-- Console (No Padding) -->
+                        <Border Grid.Row="4" Background="{StaticResource ConsoleBg}">
+                            <Grid Margin="10">
                                 <TextBlock Text="TERMINAL" FontSize="9" Foreground="#555" Margin="0,0,0,5"/>
                                 <TextBox x:Name="LogBox" 
                                          Background="Transparent" 
@@ -292,8 +292,7 @@ Add-Type -Name User32 -Namespace Win32 -MemberDefinition @"
                                          FontSize="11" 
                                          IsReadOnly="True" 
                                          VerticalScrollBarVisibility="Auto"
-                                         TextWrapping="Wrap"
-                                         Padding="0,0,0,5"/>
+                                         TextWrapping="Wrap"/>
                             </Grid>
                         </Border>
                     </Grid>

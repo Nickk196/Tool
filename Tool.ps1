@@ -1,15 +1,44 @@
-# Required Assemblies
-Add-Type -AssemblyName PresentationFramework
-Add-Type -AssemblyName System.Windows.Forms
-Add-Type -AssemblyName System.Drawing
+# ==============================================================================
+# NIC LAUNCHER - Forensic Tool Suite
+# Merged from Tesla Launcher Framework & ScreenShare Tool Functionality
+# ==============================================================================
 
-# User32 Import for Window Dragging
+Add-Type -AssemblyName PresentationFramework
+Add-Type -AssemblyName PresentationCore
+Add-Type -AssemblyName WindowsBase
+Add-Type -AssemblyName System.Xaml
+Add-Type -AssemblyName System.IO.Compression.FileSystem
+
+# User32 Import for Draggable Window (kept for compatibility, though WPF uses DragMove mostly)
 Add-Type -Name User32 -Namespace Win32 -MemberDefinition @"
 [DllImport("user32.dll")] public static extern bool ReleaseCapture();
 [DllImport("user32.dll")] public static extern int SendMessage(IntPtr hWnd, int Msg, int wParam, int lParam);
 "@
 
-# --- TOOL DATA (From Script 1) ---
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+
+# --- CONFIGURATION ---
+ $userDir   = [Environment]::GetFolderPath("UserProfile")
+ $downloads = Join-Path $userDir "Downloads"
+ $installDir = Join-Path $downloads "Nic-Tools"
+ $version   = "1.0"
+
+ $announcementTitle = "Welcome to Nic Launcher"
+ $announcementMessage = @"
+Welcome to the Nic Launcher.
+
+This tool provides a streamlined interface to manage and launch forensic analysis tools.
+
+Features:
+• Direct GitHub Integration
+• One-Click Launching
+• Command Execution Support
+• Activity Logging
+
+Select a category from the main panel to get started.
+"@
+
+# --- TOOL DATA (Merged from ScreenShare Tool) ---
  $ToolData = @(
     # --- ORBDIFF ---
     @{ Name="PrefetchView"; Category="Orbdiff"; Type="GitHub"; URL="https://github.com/Orbdiff/PrefetchView/releases/tag/v1.6.7" },
@@ -68,29 +97,15 @@ Add-Type -Name User32 -Namespace Win32 -MemberDefinition @"
     @{ Name="MacroDetector"; Category="Others"; Type="Cmd"; Command="Invoke-Expression (Invoke-RestMethod 'https://raw.githubusercontent.com/Nickk196/MacroDetector/refs/heads/main/MacroDetector.ps1')" }
 )
 
-# --- HELPER FUNCTION ---
-function Get-GitHubExeUrl {
-    param([string]$ReleaseUrl)
-    if ($ReleaseUrl -match "github\.com/([^/]+)/([^/]+)/releases/tag/([^/]+)") {
-        $User = $matches[1]; $Repo = $matches[2]; $Tag = $matches[3]
-        $ApiUrl = "https://api.github.com/repos/$User/$Repo/releases/tags/$Tag"
-        try {
-            $ProgressPreference = 'SilentlyContinue'
-            $Response = Invoke-RestMethod -Uri $ApiUrl -ErrorAction Stop
-            $ProgressPreference = 'Continue'
-            $Asset = $Response.assets | Where-Object { $_.name -like "*.exe" } | Select-Object -First 1
-            if ($Asset) { return $Asset.browser_download_url }
-        } catch { }
-    }
-    return $null
-}
+# ==============================================================================
+# XAML UI (PURPLE THEME - "NIC" BRANDING)
+# ==============================================================================
 
-# --- XAML GUI (PURPLE THEME) ---
 [xml]$xaml = @"
 <Window
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    Title="ScreenShare Tool"
+    Title="Nic Launcher"
     Width="1320"
     Height="830"
     MinWidth="1320"
@@ -104,45 +119,41 @@ function Get-GitHubExeUrl {
     Opacity="1">
 
     <Window.Resources>
-        <!-- Purple Background -->
+        <!-- Purple Theme Brushes -->
         <LinearGradientBrush x:Key="WindowBackground" StartPoint="0,0" EndPoint="1,1">
-            <GradientStop Color="#1a0b2e" Offset="0"/>
-            <GradientStop Color="#2d1b4e" Offset="0.5"/>
-            <GradientStop Color="#1a0b2e" Offset="1"/>
+            <GradientStop Color="#140021" Offset="0"/>
+            <GradientStop Color="#1B0B2E" Offset="0.5"/>
+            <GradientStop Color="#0F001A" Offset="1"/>
         </LinearGradientBrush>
 
-        <!-- Darker Sidebar -->
         <LinearGradientBrush x:Key="SidebarBackground" StartPoint="0,0" EndPoint="0,1">
-            <GradientStop Color="#120921" Offset="0"/>
-            <GradientStop Color="#1a0e2e" Offset="1"/>
+            <GradientStop Color="#1E0033" Offset="0"/>
+            <GradientStop Color="#240046" Offset="1"/>
         </LinearGradientBrush>
 
-        <!-- Purple Primary Button -->
         <LinearGradientBrush x:Key="PrimaryButtonBrush" StartPoint="0,0" EndPoint="1,1">
-            <GradientStop Color="#d980fa" Offset="0"/>
-            <GradientStop Color="#9980fa" Offset="1"/>
+            <GradientStop Color="#9D4EDD" Offset="0"/>
+            <GradientStop Color="#7B2CBF" Offset="1"/>
         </LinearGradientBrush>
 
-        <!-- Purple Danger Button -->
         <LinearGradientBrush x:Key="DangerButtonBrush" StartPoint="0,0" EndPoint="1,1">
-            <GradientStop Color="#574b90" Offset="0"/>
-            <GradientStop Color="#303952" Offset="1"/>
+            <GradientStop Color="#560BAD" Offset="0"/>
+            <GradientStop Color="#3C096C" Offset="1"/>
         </LinearGradientBrush>
 
-        <!-- Neutral Button -->
         <LinearGradientBrush x:Key="NeutralButtonBrush" StartPoint="0,0" EndPoint="1,1">
-            <GradientStop Color="#3c1a5b" Offset="0"/>
-            <GradientStop Color="#2e1245" Offset="1"/>
+            <GradientStop Color="#3C096C" Offset="0"/>
+            <GradientStop Color="#240046" Offset="1"/>
         </LinearGradientBrush>
 
-        <!-- Card Background -->
         <LinearGradientBrush x:Key="CardBackground" StartPoint="0,0" EndPoint="1,1">
-            <GradientStop Color="#241038" Offset="0"/>
-            <GradientStop Color="#1a0b2e" Offset="1"/>
+            <GradientStop Color="#240046" Offset="0"/>
+            <GradientStop Color="#10002B" Offset="1"/>
         </LinearGradientBrush>
 
-        <SolidColorBrush x:Key="BorderBrushSoft" Color="#5b2c6f"/>
+        <SolidColorBrush x:Key="BorderBrushSoft" Color="#5A189A"/>
 
+        <!-- Button Styles -->
         <Style x:Key="ActionButtonStyle" TargetType="Button">
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="FontSize" Value="15"/>
@@ -158,10 +169,10 @@ function Get-GitHubExeUrl {
                         <Border x:Name="Root"
                                 Background="{TemplateBinding Background}"
                                 CornerRadius="17"
-                                BorderBrush="#6a2c91"
+                                BorderBrush="#7B2CBF"
                                 BorderThickness="1">
                             <Border.Effect>
-                                <DropShadowEffect BlurRadius="18" ShadowDepth="0" Opacity="0.3" Color="#6a2c91"/>
+                                <DropShadowEffect BlurRadius="18" ShadowDepth="0" Opacity="0.22" Color="#9D4EDD"/>
                             </Border.Effect>
 
                             <Grid Margin="16,0,16,0">
@@ -195,7 +206,7 @@ function Get-GitHubExeUrl {
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
                                 <Setter TargetName="Root" Property="Opacity" Value="0.9"/>
-                                <Setter TargetName="Root" Property="BorderBrush" Value="#d980fa"/>
+                                <Setter TargetName="Root" Property="BorderBrush" Value="#E0AAFF"/>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
                                 <Setter TargetName="Root" Property="Opacity" Value="0.75"/>
@@ -245,38 +256,12 @@ function Get-GitHubExeUrl {
             <Setter Property="BorderBrush" Value="{StaticResource BorderBrushSoft}"/>
             <Setter Property="BorderThickness" Value="1"/>
         </Style>
-        
-        <!-- TabItem Style -->
-        <Style TargetType="TabItem">
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="TabItem">
-                        <Grid>
-                            <Border Name="Border" Margin="0,0,0,-1" Background="Transparent" BorderBrush="Transparent" BorderThickness="1,1,1,0" CornerRadius="10,10,0,0">
-                                <ContentPresenter x:Name="ContentSite" VerticalAlignment="Center" HorizontalAlignment="Center" ContentSource="Header" Margin="15,10"/>
-                            </Border>
-                        </Grid>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsSelected" Value="True">
-                                <Setter TargetName="Border" Property="Background" Value="#4b2c75"/>
-                                <Setter TargetName="Border" Property="BorderBrush" Value="#6a2c91"/>
-                                <Setter Property="Foreground" Value="White"/>
-                            </Trigger>
-                            <Trigger Property="IsSelected" Value="False">
-                                <Setter TargetName="Border" Property="Background" Value="Transparent"/>
-                                <Setter Property="Foreground" Value="#a39eb5"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
     </Window.Resources>
 
     <Grid>
-        <Border CornerRadius="24" Background="{StaticResource WindowBackground}" BorderBrush="#4b2c75" BorderThickness="1">
+        <Border CornerRadius="24" Background="{StaticResource WindowBackground}" BorderBrush="#5A189A" BorderThickness="1">
             <Border.Effect>
-                <DropShadowEffect BlurRadius="30" ShadowDepth="0" Opacity="0.5" Color="#2e1245"/>
+                <DropShadowEffect BlurRadius="30" ShadowDepth="0" Opacity="0.45" Color="#10002B"/>
             </Border.Effect>
 
             <Grid>
@@ -285,12 +270,12 @@ function Get-GitHubExeUrl {
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
-                <!-- Decorative Blobs -->
-                <Ellipse Width="560" Height="560" Fill="#d980fa" Opacity="0.05" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-190,-180,0,0"/>
-                <Ellipse Width="430" Height="430" Fill="#9980fa" Opacity="0.05" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,-120,-130"/>
+                <!-- Decorative Purple Blobs -->
+                <Ellipse Width="560" Height="560" Fill="#9D4EDD" Opacity="0.05" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-190,-180,0,0"/>
+                <Ellipse Width="430" Height="430" Fill="#7B2CBF" Opacity="0.05" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,-120,-130"/>
 
                 <!-- Header -->
-                <Border Grid.Row="0" Background="#120921" CornerRadius="24,24,0,0" BorderBrush="#4b2c75" BorderThickness="0,0,0,1">
+                <Border Grid.Row="0" Background="#10002B" CornerRadius="24,24,0,0" BorderBrush="#3C096C" BorderThickness="0,0,0,1">
                     <Grid Margin="18,0,18,0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
@@ -299,23 +284,24 @@ function Get-GitHubExeUrl {
                         </Grid.ColumnDefinitions>
 
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <Border Width="40" Height="40" CornerRadius="13" Background="#2e1245" BorderBrush="#6a2c91" BorderThickness="1">
-                                <TextBlock Text="S" FontSize="20" FontWeight="Bold" Foreground="#d980fa" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <Border Width="40" Height="40" CornerRadius="13" Background="#240046" BorderBrush="#7B2CBF" BorderThickness="1">
+                                <TextBlock Text="N" FontSize="20" FontWeight="Bold" Foreground="#E0AAFF" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
                             <StackPanel Margin="12,0,0,0" VerticalAlignment="Center">
-                                <TextBlock Text="ScreenShare Tool" FontSize="18" FontWeight="SemiBold" Foreground="White"/>
-                                <TextBlock Text="Forensic Analysis Kit" FontSize="11" Foreground="#a39eb5" Margin="0,2,0,0"/>
+                                <TextBlock Text="Nic Launcher" FontSize="18" FontWeight="SemiBold" Foreground="White"/>
+                                <TextBlock Text="Nic Forensic Tools" FontSize="11" Foreground="#C77DFF" Margin="0,2,0,0"/>
                             </StackPanel>
                         </StackPanel>
 
                         <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                            <Button x:Name="InfoButtonTop" Content="ⓘ" Style="{StaticResource SmallWindowButtonStyle}" Background="#240046"/>
                             <Button x:Name="MinButton" Content="—" Style="{StaticResource SmallWindowButtonStyle}"/>
-                            <Button x:Name="CloseButton" Content="✕" Style="{StaticResource SmallWindowButtonStyle}" Background="#571f1f"/>
+                            <Button x:Name="CloseButton" Content="✕" Style="{StaticResource SmallWindowButtonStyle}" Background="#3C096C"/>
                         </StackPanel>
                     </Grid>
                 </Border>
 
-                <!-- Main Content -->
+                <!-- Main Content Area -->
                 <Grid Grid.Row="1" Margin="20">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="280"/>
@@ -324,115 +310,248 @@ function Get-GitHubExeUrl {
                     </Grid.ColumnDefinitions>
 
                     <!-- Sidebar -->
-                    <Border Grid.Column="0" Background="{StaticResource SidebarBackground}" CornerRadius="22" BorderBrush="#4b2c75" BorderThickness="1" Padding="20">
+                    <Border Grid.Column="0" Background="{StaticResource SidebarBackground}" CornerRadius="22" BorderBrush="#5A189A" BorderThickness="1" Padding="20">
                         <StackPanel>
-                            <TextBlock Text="Quick Actions" FontSize="16" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,15"/>
+                            <TextBlock Text="Control Center" FontSize="24" FontWeight="SemiBold" Foreground="White"/>
+                            <TextBlock Text="Manage your forensic toolkit." TextWrapping="Wrap" Margin="0,8,0,0" Foreground="#E0AAFF" FontSize="13"/>
                             
-                            <Button x:Name="OpenFolderButton" Tag="&#xE838;" Content="Open Install Folder" Style="{StaticResource ActionButtonStyle}" Background="#2e1245"/>
+                            <Button x:Name="OpenFolderButton" Tag="&#xE838;" Content="Open Tool Folder" Style="{StaticResource ActionButtonStyle}" Background="#3C096C" Margin="0,20,0,0"/>
                             
-                            <Button x:Name="DiscordButton" Tag="&#xE8F2;" Content="Join Discord" Style="{StaticResource ActionButtonStyle}" Background="#2e1245"/>
+                            <Button x:Name="ClearCacheButton" Tag="&#xE74D;" Content="Clear Downloads" Style="{StaticResource ActionButtonStyle}" Background="#240046"/>
+
+                            <Button x:Name="ExitButton" Tag="&#xE8BB;" Content="Exit Launcher" Style="{StaticResource ActionButtonStyle}" Background="#10002B" Margin="0,20,0,0"/>
                             
-                            <Button x:Name="ExitButton" Tag="&#xE8BB;" Content="Exit Launcher" Style="{StaticResource ActionButtonStyle}" Background="#120921" Margin="0,20,0,0"/>
-                            
-                            <Border Background="#1a0e2e" CornerRadius="18" Padding="16" BorderBrush="#4b2c75" BorderThickness="1">
+                            <Border Background="#10002B" CornerRadius="18" Padding="16" BorderBrush="#5A189A" BorderThickness="1">
                                 <StackPanel>
-                                    <TextBlock Text="Current Status" FontSize="12" Foreground="#a39eb5"/>
-                                    <TextBlock x:Name="StatusTextSmall" Margin="0,5,0,0" TextWrapping="Wrap" Foreground="#d980fa" FontSize="13" Text="Ready"/>
+                                    <TextBlock Text="Install Path" FontSize="12" Foreground="#C77DFF"/>
+                                    <TextBlock x:Name="LocationText" Margin="0,8,0,0" TextWrapping="Wrap" Foreground="White" FontSize="13"/>
+                                    <TextBlock x:Name="VersionText" Text="Version 1.0" Foreground="#E0AAFF" FontSize="12" Margin="0,10,0,0" FontWeight="Bold"/>
                                 </StackPanel>
                             </Border>
                         </StackPanel>
                     </Border>
 
-                    <!-- Content Area -->
+                    <!-- Tool Panel (Right Side) -->
                     <Grid Grid.Column="2">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="16"/>
                             <RowDefinition Height="*"/>
+                            <RowDefinition Height="16"/>
+                            <RowDefinition Height="200"/>
                         </Grid.RowDefinitions>
 
-                        <!-- Top Status Card -->
-                        <Border Grid.Row="0" Style="{StaticResource CardBorderStyle}" Margin="0,0,0,15">
+                        <!-- Status Card -->
+                        <Border Grid.Row="0" Style="{StaticResource CardBorderStyle}">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
                                 <StackPanel>
-                                    <TextBlock x:Name="StatusTitle" Text="Ready to Work" FontSize="24" FontWeight="SemiBold" Foreground="White"/>
-                                    <TextBlock x:Name="SubStatusText" Text="Select a tool category below to begin analysis." Margin="0,5,0,0" FontSize="13" Foreground="#a39eb5"/>
+                                    <TextBlock x:Name="StatusText" Text="Ready" FontSize="30" FontWeight="SemiBold" Foreground="White"/>
+                                    <TextBlock x:Name="SubStatusText" Text="Select a category to begin." Margin="0,8,0,0" FontSize="14" Foreground="#E0AAFF"/>
                                 </StackPanel>
-                                <Border Grid.Column="1" Width="40" Height="40" CornerRadius="12" Background="#3c1a5b">
-                                    <TextBlock Text="&#xE8F7;" FontFamily="Segoe MDL2 Assets" FontSize="18" Foreground="#d980fa" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                <Border Grid.Column="1" Width="40" Height="40" CornerRadius="12" Background="#240046">
+                                    <TextBlock Text="&#xE8F7;" FontFamily="Segoe MDL2 Assets" FontSize="18" Foreground="#9D4EDD" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </Border>
                             </Grid>
                         </Border>
 
-                        <!-- Tools Tab Control -->
-                        <Border Grid.Row="1" Background="#1a0b2e" CornerRadius="15" BorderBrush="#4b2c75" BorderThickness="1" Padding="10">
+                        <!-- TOOLS TAB CONTROL (Middle) -->
+                        <Border Grid.Row="2" Background="#10002B" CornerRadius="15" BorderBrush="#5A189A" BorderThickness="1" Padding="5">
                             <TabControl x:Name="ToolsTabControl" Background="Transparent" BorderThickness="0">
+                                <TabControl.Resources>
+                                    <Style TargetType="TabItem">
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="TabItem">
+                                                    <Grid>
+                                                        <Border Name="Border" Margin="5,5,5,0" Background="Transparent" BorderBrush="Transparent" BorderThickness="1,1,1,0" CornerRadius="8,8,0,0" Padding="15,10">
+                                                            <ContentPresenter x:Name="ContentSite" VerticalAlignment="Center" HorizontalAlignment="Center" ContentSource="Header" RecognizesAccessKey="True"/>
+                                                        </Border>
+                                                    </Grid>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsSelected" Value="True">
+                                                            <Setter Property="Panel.ZIndex" Value="100" />
+                                                            <Setter TargetName="Border" Property="Background" Value="#3C096C" />
+                                                            <Setter TargetName="Border" Property="BorderBrush" Value="#9D4EDD" />
+                                                            <Setter Property="Foreground" Value="White"/>
+                                                        </Trigger>
+                                                        <Trigger Property="IsSelected" Value="False">
+                                                            <Setter Property="Foreground" Value="#C77DFF"/>
+                                                        </Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </TabControl.Resources>
                                 <!-- Tabs will be injected here via PowerShell -->
                             </TabControl>
+                        </Border>
+
+                        <!-- Activity Console (Bottom) -->
+                        <Border Grid.Row="4" Style="{StaticResource CardBorderStyle}">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="16"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                
+                                <TextBlock Text="Activity Console" FontSize="22" FontWeight="SemiBold" Foreground="White"/>
+                                
+                                <Border Grid.Row="2"
+                                        CornerRadius="18"
+                                        Background="#0F001A"
+                                        BorderBrush="#3C096C"
+                                        BorderThickness="1"
+                                        Padding="14">
+                                    <TextBox x:Name="ActivityBox"
+                                             Background="Transparent"
+                                             Foreground="#E0AAFF"
+                                             BorderThickness="0"
+                                             FontFamily="Consolas"
+                                             FontSize="13"
+                                             IsReadOnly="True"
+                                             VerticalScrollBarVisibility="Auto"
+                                             TextWrapping="Wrap"
+                                             AcceptsReturn="True"/>
+                                </Border>
+                            </Grid>
                         </Border>
                     </Grid>
                 </Grid>
             </Grid>
         </Border>
+
+        <!-- Info Overlay (Recycled from Tesla) -->
+        <Grid x:Name="InfoRoot" Visibility="Collapsed" Opacity="0" Background="#A0000000">
+            <Border Width="620" Padding="24" CornerRadius="22" Background="#10002B" BorderBrush="#5A189A" BorderThickness="1" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Border.Effect>
+                    <DropShadowEffect BlurRadius="30" ShadowDepth="0" Opacity="0.35" Color="#10002B"/>
+                </Border.Effect>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="18"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="20"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Border Width="44" Height="44" CornerRadius="14" Background="#240046" BorderBrush="#7B2CBF" BorderThickness="1">
+                            <TextBlock Text="N" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="21" FontWeight="Bold" Foreground="#E0AAFF"/>
+                        </Border>
+                        <StackPanel Grid.Column="1" Margin="14,0,0,0">
+                            <TextBlock Text="About Nic Launcher" FontSize="22" FontWeight="SemiBold" Foreground="White"/>
+                            <TextBlock Text="Nic Forensic Tools Information" Foreground="#C77DFF" FontSize="12" Margin="0,4,0,0"/>
+                        </StackPanel>
+                        <Button x:Name="InfoCloseButton" Grid.Column="2" Content="✕" Width="34" Height="34" Style="{StaticResource SmallWindowButtonStyle}" Background="#3C096C"/>
+                    </Grid>
+                    <StackPanel Grid.Row="2">
+                        <Border CornerRadius="16" Background="#0F001A" BorderBrush="#5A189A" BorderThickness="1" Padding="16">
+                            <TextBlock TextWrapping="Wrap" Foreground="#E0AAFF" FontSize="13">
+Nic Launcher v1.0
+
+A forged tool combining the Tesla UI framework with ScreenShare functionality.
+For support or issues, please contact the administrator.
+
+Permission is required for use.
+                            </TextBlock>
+                        </Border>
+                    </StackPanel>
+                    <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button x:Name="InfoOkButton" Content="Close" Style="{StaticResource ActionButtonStyle}" Background="{StaticResource PrimaryButtonBrush}" Width="140" Margin="0"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
     </Grid>
 </Window>
 "@
 
-# --- PARSE XAML AND BUILD UI ---
- $reader = (New-Object System.Xml.XmlNodeReader $xaml) 
- $Window = [Windows.Markup.XamlReader]::Load($reader)
+# ==============================================================================
+# LOGIC & INITIALIZATION
+# ==============================================================================
+
+# Load XAML
+ $reader = New-Object System.Xml.XmlNodeReader $xaml
+ $window = [Windows.Markup.XamlReader]::Load($reader)
 
 # Find Elements
- $BtnClose = $Window.FindName("CloseButton")
- $BtnMin = $Window.FindName("MinButton")
- $BtnOpenFolder = $Window.FindName("OpenFolderButton")
- $BtnDiscord = $Window.FindName("DiscordButton")
- $BtnExit = $Window.FindName("ExitButton")
- $StatusTitle = $Window.FindName("StatusTitle")
- $SubStatus = $Window.FindName("SubStatusText")
- $StatusSmall = $Window.FindName("StatusTextSmall")
- $TabControl = $Window.FindName("ToolsTabControl")
+ $OpenFolderButton = $window.FindName("OpenFolderButton")
+ $ClearCacheButton = $window.FindName("ClearCacheButton")
+ $ExitButton       = $window.FindName("ExitButton")
+ $CloseButton      = $window.FindName("CloseButton")
+ $MinButton        = $window.FindName("MinButton")
+ $InfoButtonTop    = $window.FindName("InfoButtonTop")
 
-# --- EVENT HANDLERS ---
+ $StatusText       = $window.FindName("StatusText")
+ $SubStatusText    = $window.FindName("SubStatusText")
+ $LocationText     = $window.FindName("LocationText")
+ $ActivityBox      = $window.FindName("ActivityBox")
+ $TabControl       = $window.FindName("ToolsTabControl")
 
-# Window Dragging
- $Window.Add_MouseDown({
-    if ($_.Button -eq [System.Windows.Forms.MouseButtons]::Left) {
-        [Win32.User32]::ReleaseCapture()
-        [Win32.User32]::SendMessage((New-Object System.Windows.Interop.WindowInteropHelper($Window)).Handle, 0x0112, 0xF012, 0)
-    }
-})
+ $InfoRoot         = $window.FindName("InfoRoot")
+ $InfoCloseButton  = $window.FindName("InfoCloseButton")
+ $InfoOkButton     = $window.FindName("InfoOkButton")
 
-# Button Clicks
- $BtnClose.Add_Click({ $Window.Close() })
- $BtnMin.Add_Click({ $Window.WindowState = "Minimized" })
- $BtnExit.Add_Click({ $Window.Close() })
- $BtnOpenFolder.Add_Click({ Start-Process $env:TEMP })
- $BtnDiscord.Add_Click({ Start-Process "https://discord.gg/cfnmHrqP3K" })
+# Set Paths
+ $LocationText.Text = $installDir
 
-# Update Status Helper
-function Set-Status {
-    param($Title, $Sub)
-    $StatusTitle.Text = $Title
-    $SubStatus.Text = $Sub
-    $StatusSmall.Text = $Title
+# UI Helpers
+function Refresh-Ui {
+    $window.Dispatcher.Invoke([Action]{}, [System.Windows.Threading.DispatcherPriority]::Background)
 }
 
-# --- DYNAMIC TAB GENERATION ---
+function Write-Activity {
+    param([string]$Text)
+    $timestamp = Get-Date -Format "HH:mm:ss"
+    $ActivityBox.AppendText("[$timestamp] $Text`r`n")
+    $ActivityBox.ScrollToEnd()
+    Refresh-Ui
+}
 
+function Set-UiStatus {
+    param([string]$Title, [string]$Sub)
+    $StatusText.Text = $Title
+    $SubStatusText.Text = $Sub
+    Refresh-Ui
+}
+
+function Get-GitHubExeUrl {
+    param([string]$ReleaseUrl)
+    if ($ReleaseUrl -match "github\.com/([^/]+)/([^/]+)/releases/tag/([^/]+)") {
+        $User = $matches[1]; $Repo = $matches[2]; $Tag = $matches[3]
+        $ApiUrl = "https://api.github.com/repos/$User/$Repo/releases/tags/$Tag"
+        try {
+            $ProgressPreference = 'SilentlyContinue'
+            $Response = Invoke-RestMethod -Uri $ApiUrl -ErrorAction Stop
+            $ProgressPreference = 'Continue'
+            $Asset = $Response.assets | Where-Object { $_.name -like "*.exe" } | Select-Object -First 1
+            if ($Asset) { return $Asset.browser_download_url }
+        } catch { Write-Activity "API Error for $Repo" }
+    }
+    return $null
+}
+
+# --- GENERATE TOOLS TABS ---
  $Categories = @("Orbdiff", "Spokwn", "RedLotus", "Tonynoh", "Praiselily", "Others")
 
 foreach ($Cat in $Categories) {
     $TabItem = New-Object System.Windows.Controls.TabItem
     $TabItem.Header = $Cat
     
-    # Scrollable Grid for Buttons
+    # Scrollable Grid
     $ScrollViewer = New-Object System.Windows.Controls.ScrollViewer
     $ScrollViewer.VerticalScrollBarVisibility = "Auto"
-    $ScrollViewer.HorizontalScrollBarVisibility = "Disabled"
     
     $WrapPanel = New-Object System.Windows.Controls.WrapPanel
     $WrapPanel.Margin = "10"
@@ -442,86 +561,95 @@ foreach ($Cat in $Categories) {
     foreach ($Tool in $Tools) {
         $Btn = New-Object System.Windows.Controls.Button
         $Btn.Content = $Tool.Name
-        $Btn.Width = 180
-        $Btn.Height = 80
-        $Btn.Margin = "10"
+        $Btn.Width = 160
+        $Btn.Height = 70
+        $Btn.Margin = "8"
         $Btn.FontSize = "13"
         $Btn.FontWeight = "SemiBold"
         $Btn.Cursor = "Hand"
         
-        # Purple Button Style for Tool Grid
-        $Btn.Background = "#241038"
+        # Style definition for dynamic buttons
+        $Btn.Background = "#240046"
         $Btn.Foreground = "White"
-        $Btn.BorderBrush = "#5b2c6f"
-        $Btn.BorderThickness = "1"
         
-        # Add Rounded Corners via Template
+        # Template
         $Style = New-Object System.Windows.Style
         $Style.TargetType = [System.Windows.Controls.Button]
         $Setter = New-Object System.Windows.Setter
         $Setter.Property = [System.Windows.Controls.Control]::TemplateProperty
         $Setter.Value = [Windows.Markup.XamlReader]::Parse("
             <ControlTemplate xmlns='http://schemas.microsoft.com/winfx/2006/xaml/presentation' TargetType='Button'>
-                <Border Background='{TemplateBinding Background}' BorderBrush='{TemplateBinding BorderBrush}' BorderThickness='{TemplateBinding BorderThickness}' CornerRadius='10'>
+                <Border Background='{TemplateBinding Background}' CornerRadius='10' BorderThickness='1' BorderBrush='#5A189A'>
                     <ContentPresenter HorizontalAlignment='Center' VerticalAlignment='Center'/>
                     <Border.Effect>
-                        <DropShadowEffect BlurRadius='10' ShadowDepth='0' Opacity='0.2' Color='Purple'/>
+                        <DropShadowEffect BlurRadius='5' ShadowDepth='0' Opacity='0.2' Color='Purple'/>
                     </Border.Effect>
                 </Border>
                 <ControlTemplate.Triggers>
                     <Trigger Property='IsMouseOver' Value='True'>
-                        <Setter Property='Background' Value='#4b2c75'/>
-                        <Setter Property='BorderBrush' Value='#d980fa'/>
-                    </Trigger>
-                    <Trigger Property='IsPressed' Value='True'>
-                        <Setter Property='Background' Value='#3c1a5b'/>
+                        <Setter Property='Background' Value='#5A189A'/>
                     </Trigger>
                 </ControlTemplate.Triggers>
             </ControlTemplate>
         ")
         $Btn.Style = $Style
         
-        # Click Event
+        # Click Logic
         $Btn.Add_Click({
             $TName = $_.Source.Content
             $TData = $ToolData | Where-Object { $_.Name -eq $TName }
             
-            Set-Status -Title "Launching: $TName" -Sub "Processing request..."
+            Set-UiStatus -Title "Processing..." -Sub "Handling request for $TName"
+            Write-Activity "Starting: $TName"
             
             if ($TData.Type -eq "Cmd") {
+                Set-UiStatus -Title "Running Script" -Sub "Executing PowerShell command..."
                 try {
                     Start-Process powershell -ArgumentList "-NoProfile -ExecutionPolicy Bypass -Command `"$($TData.Command)`"" -WindowStyle Normal
-                    Set-Status -Title "Launched" -Sub "Command script executed."
+                    Set-UiStatus -Title "Success" -Sub "Script executed."
+                    Write-Activity "Successfully launched script for $TName"
                 } catch {
-                    Set-Status -Title "Error" -Sub "Failed to launch command."
+                    Set-UiStatus -Title "Error" -Sub "Failed to launch command."
+                    Write-Activity "Error: $_"
                 }
             }
             elseif ($TData.Type -eq "Web") {
+                Set-UiStatus -Title "Opening Browser" -Sub "Navigating to website..."
                 Start-Process $TData.URL
-                Set-Status -Title "Opening Browser" -Sub "Navigating to source."
+                Set-UiStatus -Title "Ready" -Sub "Website opened."
+                Write-Activity "Opened web link for $TName"
             }
             elseif ($TData.Type -eq "GitHub") {
                 $TempPath = "$env:TEMP\$($TName).exe"
+                
+                # Check if already downloaded
                 if (Test-Path $TempPath) {
+                    Set-UiStatus -Title "Launching" -Sub "Using cached local file."
+                    Write-Activity "Found local file for $TName"
                     Start-Process $TempPath
-                    Set-Status -Title "Running" -Sub "Started existing local file."
+                    Set-UiStatus -Title "Ready" -Sub "Tool launched."
                 } else {
-                    Set-Status -Title "Downloading" -Sub "Fetching latest release from GitHub..."
+                    Set-UiStatus -Title "Downloading" -Sub "Fetching from GitHub..."
+                    Write-Activity "Downloading $TName..."
                     $Link = Get-GitHubExeUrl -ReleaseUrl $TData.URL
+                    
                     if ($Link) {
                         try {
                             $ProgressPreference = 'SilentlyContinue'
                             Invoke-WebRequest -Uri $Link -OutFile $TempPath -UseBasicParsing
                             $ProgressPreference = 'Continue'
+                            Set-UiStatus -Title "Launching" -Sub "Download complete."
                             Start-Process $TempPath
-                            Set-Status -Title "Success" -Sub "Downloaded and launched."
+                            Write-Activity "Downloaded and launched $TName"
                         } catch {
-                            Set-Status -Title "Download Error" -Sub "Falling back to browser..."
+                            Set-UiStatus -Title "Error" -Sub "Download failed."
+                            Write-Activity "Download failed for $TName. Opening release page..."
                             Start-Sleep -Seconds 1
                             Start-Process $TData.URL
                         }
                     } else {
-                        Set-Status -Title "Asset Error" -Sub "Could not find .exe, opening page..."
+                        Set-UiStatus -Title "Error" -Sub "Could not find exe."
+                        Write-Activity "No EXE found in release. Opening page..."
                         Start-Sleep -Seconds 1
                         Start-Process $TData.URL
                     }
@@ -537,5 +665,60 @@ foreach ($Cat in $Categories) {
     $TabControl.Items.Add($TabItem) | Out-Null
 }
 
-# --- SHOW GUI ---
- $Window.ShowDialog() | Out-Null
+# --- EVENT HANDLERS ---
+ $window.Add_MouseLeftButtonDown({
+    try { $window.DragMove() } catch {}
+})
+
+ $CloseButton.Add_Click({ $window.Close() })
+ $MinButton.Add_Click({ $window.WindowState = "Minimized" })
+ $ExitButton.Add_Click({ $window.Close() })
+
+ $InfoButtonTop.Add_Click({
+    $InfoRoot.Visibility = "Visible"
+    $InfoRoot.Opacity = 0
+    $anim = New-Object System.Windows.Media.Animation.DoubleAnimation(0, 1, [TimeSpan]::FromMilliseconds(200))
+    $InfoRoot.BeginAnimation([System.Windows.UIElement]::OpacityProperty, $anim)
+})
+
+ $InfoCloseButton.Add_Click({
+    $InfoRoot.Visibility = "Collapsed"
+})
+ $InfoOkButton.Add_Click({
+    $InfoRoot.Visibility = "Collapsed"
+})
+
+ $OpenFolderButton.Add_Click({
+    if (!(Test-Path $installDir)) { New-Item -ItemType Directory -Path $installDir | Out-Null }
+    Start-Process $installDir
+    Set-UiStatus -Title "Folder Opened" -Sub "Viewing $installDir"
+})
+
+ $ClearCacheButton.Add_Click({
+    $cacheDir = $env:TEMP
+    $files = Get-ChildItem -Path $cacheDir -Filter "*.exe" | Where-Object { $_.Name -match "Prefetch|BAM|Doomsday|Meow|PSHunter" } # Simple heuristic
+    
+    if ($files) {
+        $count = ($files | Measure-Object).Count
+        $files | Remove-Item -Force -ErrorAction SilentlyContinue
+        Write-Activity "Cleared $count temporary tool files."
+        Set-UiStatus -Title "Cache Cleared" -Sub "Removed $count temporary files."
+    } else {
+        Write-Activity "No temporary files found."
+        Set-UiStatus -Title "Clean" -Sub "No temporary files found."
+    }
+})
+
+# --- STARTUP ---
+Write-Activity "Nic Launcher initialized."
+Set-UiStatus -Title "Ready" -Sub "Select a category to begin."
+
+# Show Announcement (Simple popup logic similar to Tesla)
+ $window.Add_ContentRendered({
+    # Using a simple message box for the announcement to save space, or you can implement the full popup grid
+    # For this merge, we'll keep it simple in the log.
+    Write-Activity "Welcome to Nic Launcher!"
+    Write-Activity "New tools available in Orbdiff and Spokwn categories."
+})
+
+ $window.ShowDialog() | Out-Null

@@ -1,6 +1,6 @@
 # ==============================================================================
-# MECZ LAUNCHER v3.0 (AUTO-EXTRACT + DUAL DOWNLOAD FIX)
-# Features: Auto-unzips tools, Fixes NirSoft blocking, Flat Cat Mascot
+# MECZ LAUNCHER v3.1 (CURL ENGINE FIX)
+# Features: Uses curl.exe for NirSoft, Auto-Extract, Flat Cat Mascot
 # Author: mecz.exe
 # ==============================================================================
 
@@ -258,7 +258,7 @@ Add-Type -Name User32 -Namespace Win32 -MemberDefinition @"
                         <Button x:Name="DiscordBtn" Content="Discord: mecz.exe" Style="{StaticResource SocialBtn}" Background="{StaticResource DiscordColor}" Foreground="White"/>
                         <Button x:Name="GithubBtn" Content="GitHub: Nickk196" Style="{StaticResource SocialBtn}" Background="{StaticResource GithubColor}" Foreground="White"/>
                         
-                        <TextBlock Text="v3.0 | Auto-Extract" FontSize="10" Foreground="#555" Margin="12,40,12,15" HorizontalAlignment="Center"/>
+                        <TextBlock Text="v3.1 | cURL Engine" FontSize="10" Foreground="#555" Margin="12,40,12,15" HorizontalAlignment="Center"/>
                     </StackPanel>
 
                     <!-- Main Panel -->
@@ -461,7 +461,7 @@ foreach ($Cat in $Categories) {
                 Write-Log "Opened browser for $TName"
             }
             elseif ($TData.Type -eq "DirectDownload") {
-                # Logic for NirSoft/Zimmerman - AUTO EXTRACT
+                # Logic for NirSoft/Zimmerman - AUTO EXTRACT + CURL
                 if (!(Test-Path $installDir)) { New-Item -ItemType Directory -Path $installDir | Out-Null }
                 
                 # 1. Setup Paths
@@ -478,38 +478,44 @@ foreach ($Cat in $Categories) {
                     return
                 }
 
-                # 3. Download Logic (Robust)
+                # 3. Download Logic (USING CURL)
                 $DownloadSuccess = $false
                 if (!(Test-Path $ZipPath)) {
-                    Write-Log "Downloading from: $($TData.URL)"
-                    try {
-                        # METHOD 1: Invoke-WebRequest with spoofed headers
-                        $UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-                        $ProgressPreference = 'SilentlyContinue'
-                        Invoke-WebRequest -Uri $TData.URL -OutFile $ZipPath -UserAgent $UserAgent -UseBasicParsing
-                        $ProgressPreference = 'Continue'
-                        
-                        # Check if file is valid ( > 1kb)
-                        if ((Get-Item $ZipPath).Length -gt 1024) {
-                            $DownloadSuccess = $true
-                        } else {
-                            Remove-Item $ZipPath -Force -ErrorAction SilentlyContinue
-                            throw "File too small (blocked)"
-                        }
-                    } catch {
-                        Write-Log "Method 1 failed: Trying Method 2..."
+                    Write-Log "Downloading via cURL..."
+                    $ua = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+                    
+                    # Check if curl exists (Standard on Win10/11)
+                    if (Get-Command curl -ErrorAction SilentlyContinue) {
                         try {
-                            # METHOD 2: WebClient (Failsafe for strict blocks)
-                            $WebClient = New-Object System.Net.WebClient
-                            $WebClient.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
-                            $WebClient.DownloadFile($TData.URL, $ZipPath)
-                            
-                            if ((Get-Item $ZipPath).Length -gt 1024) {
-                                $DownloadSuccess = $true
+                            # Run curl with User-Agent and output path
+                            $process = Start-Process "curl.exe" -ArgumentList "-L", "-A", $ua, "-o", "`"$ZipPath`"", "`"$($TData.URL)`"" -Wait -WindowStyle Hidden -PassThru
+                            if ($process.ExitCode -eq 0) {
+                                # Check file size again to ensure it's not a 403 HTML page
+                                if ((Get-Item $ZipPath -ErrorAction SilentlyContinue).Length -gt 1024) {
+                                    $DownloadSuccess = $true
+                                } else {
+                                    Write-Log "cURL downloaded empty/blocked file."
+                                    Remove-Item $ZipPath -Force -ErrorAction SilentlyContinue
+                                }
+                            } else {
+                                Write-Log "cURL exited with error code: $($process.ExitCode)"
                             }
                         } catch {
-                            Write-Log "Download failed completely."
+                            Write-Log "cURL execution failed."
                         }
+                    } else {
+                        Write-Log "cURL not found. Please use Windows 10/11."
+                    }
+
+                    # FALLBACK if curl failed or didn't exist
+                    if (-not $DownloadSuccess -and !(Test-Path $ZipPath)) {
+                         Write-Log "Trying WebClient Fallback..."
+                         try {
+                            $wc = New-Object System.Net.WebClient
+                            $wc.Headers.Add("User-Agent", $ua)
+                            $wc.DownloadFile($TData.URL, $ZipPath)
+                            if ((Get-Item $ZipPath).Length -gt 1024) { $DownloadSuccess = $true }
+                         } catch { Write-Log "WebClient failed." }
                     }
                 } else {
                     $DownloadSuccess = $true
@@ -545,6 +551,7 @@ foreach ($Cat in $Categories) {
                 } else {
                     Set-Status "Error" "Could not download."
                     Write-Log "Critical Error: File not found or empty."
+                    Write-Log "Tip: If this persists, NirSoft may have blocked your IP temporarily."
                 }
             }
             elseif ($TData.Type -eq "GitHub") {
@@ -620,7 +627,7 @@ foreach ($Cat in $Categories) {
    }
 })
 
-Write-Log "Mecz Launcher v3.0 initialized."
-Write-Host "Mecz Launcher loaded. Auto-Extract enabled."
+Write-Log "Mecz Launcher v3.1 initialized."
+Write-Host "Mecz Launcher loaded. cURL Engine active."
 
  $window.ShowDialog() | Out-Null

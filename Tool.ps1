@@ -1,6 +1,6 @@
 # ==============================================================================
-# MECZ LAUNCHER v2.9 (NIRSOFT FIX - USER AGENT SPOOF)
-# Features: All Tools Enlarged, Flat Cat Mascot, Fixed NirSoft Downloads
+# MECZ LAUNCHER v3.0 (AUTO-EXTRACT + DUAL DOWNLOAD FIX)
+# Features: Auto-unzips tools, Fixes NirSoft blocking, Flat Cat Mascot
 # Author: mecz.exe
 # ==============================================================================
 
@@ -70,7 +70,7 @@ Add-Type -Name User32 -Namespace Win32 -MemberDefinition @"
     @{ Name="RedLotus-Task-Sentinel"; Category="RedLotus"; Type="GitHub"; URL="https://github.com/ItzIceHere/RedLotus-Task-Sentinel/releases/tag/RL" },
     @{ Name="RedLotusAltChecker"; Category="RedLotus"; Type="GitHub"; URL="https://github.com/ItzIceHere/RedLotusAltChecker/releases/tag/RL" },
 
-    # --- NIRSOFT (Direct Download) ---
+    # --- NIRSOFT (Direct Download - Auto Extract) ---
     @{ Name="ExecutedProgramsList"; Category="NirSoft"; Type="DirectDownload"; URL="https://www.nirsoft.net/utils/executed_programs_list.zip" },
     @{ Name="WinPrefetchView"; Category="NirSoft"; Type="DirectDownload"; URL="https://www.nirsoft.net/utils/win_prefetch_view.zip" },
     @{ Name="UserAssistView"; Category="NirSoft"; Type="DirectDownload"; URL="https://www.nirsoft.net/utils/userassist_view.zip" },
@@ -83,7 +83,7 @@ Add-Type -Name User32 -Namespace Win32 -MemberDefinition @"
     @{ Name="BrowsingHistoryView"; Category="NirSoft"; Type="DirectDownload"; URL="https://www.nirsoft.net/utils/browsing_history_view.zip" },
     @{ Name="NetworkUsageView"; Category="NirSoft"; Type="DirectDownload"; URL="https://www.nirsoft.net/utils/network_usage_view.zip" },
 
-    # --- ZIMMERMAN (Direct Download) ---
+    # --- ZIMMERMAN (Direct Download - Auto Extract) ---
     @{ Name="JumpListExplorer"; Category="Zimmerman"; Type="DirectDownload"; URL="https://download.ericzimmermanstools.com/net9/JumpListExplorer.zip" },
     @{ Name="BStrings"; Category="Zimmerman"; Type="DirectDownload"; URL="https://download.ericzimmermanstools.com/net9/bstrings.zip" },
     @{ Name="PECmd"; Category="Zimmerman"; Type="DirectDownload"; URL="https://download.ericzimmermanstools.com/net9/PECmd.zip" },
@@ -258,7 +258,7 @@ Add-Type -Name User32 -Namespace Win32 -MemberDefinition @"
                         <Button x:Name="DiscordBtn" Content="Discord: mecz.exe" Style="{StaticResource SocialBtn}" Background="{StaticResource DiscordColor}" Foreground="White"/>
                         <Button x:Name="GithubBtn" Content="GitHub: Nickk196" Style="{StaticResource SocialBtn}" Background="{StaticResource GithubColor}" Foreground="White"/>
                         
-                        <TextBlock Text="v2.9 | NirSoft Fixed" FontSize="10" Foreground="#555" Margin="12,40,12,15" HorizontalAlignment="Center"/>
+                        <TextBlock Text="v3.0 | Auto-Extract" FontSize="10" Foreground="#555" Margin="12,40,12,15" HorizontalAlignment="Center"/>
                     </StackPanel>
 
                     <!-- Main Panel -->
@@ -461,33 +461,90 @@ foreach ($Cat in $Categories) {
                 Write-Log "Opened browser for $TName"
             }
             elseif ($TData.Type -eq "DirectDownload") {
-                # Logic for NirSoft/Zimmerman direct downloads
+                # Logic for NirSoft/Zimmerman - AUTO EXTRACT
                 if (!(Test-Path $installDir)) { New-Item -ItemType Directory -Path $installDir | Out-Null }
                 
+                # 1. Setup Paths
                 $FileName = $TData.URL.Substring($TData.URL.LastIndexOf("/") + 1)
-                $LocalPath = Join-Path $installDir $FileName
+                $ZipPath = Join-Path $installDir $FileName
+                $ExtractPath = Join-Path $installDir $TName
                 
-                if (Test-Path $LocalPath) {
-                    Start-Process $LocalPath
-                    Set-Status "Launched" "Using local file."
-                    Write-Log "Launched $TName (Local)"
-                } else {
-                    Set-Status "Downloading" "Downloading $FileName..."
+                # 2. Check if EXE already exists in extracted folder
+                $ExistingExe = Get-ChildItem $ExtractPath -Filter "*.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
+                if ($ExistingExe) {
+                    Start-Process $ExistingExe.FullName
+                    Set-Status "Launched" "Running existing tool."
+                    Write-Log "Launched $TName (Existing)"
+                    return
+                }
+
+                # 3. Download Logic (Robust)
+                $DownloadSuccess = $false
+                if (!(Test-Path $ZipPath)) {
                     Write-Log "Downloading from: $($TData.URL)"
                     try {
-                        $ProgressPreference = 'SilentlyContinue'
-                        # --- FIX: SPOOF USER AGENT TO BYPASS NIRSOFT BLOCK ---
+                        # METHOD 1: Invoke-WebRequest with spoofed headers
                         $UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-                        Invoke-WebRequest -Uri $TData.URL -OutFile $LocalPath -UserAgent $UserAgent -UseBasicParsing
+                        $ProgressPreference = 'SilentlyContinue'
+                        Invoke-WebRequest -Uri $TData.URL -OutFile $ZipPath -UserAgent $UserAgent -UseBasicParsing
                         $ProgressPreference = 'Continue'
                         
-                        Start-Process $LocalPath
-                        Set-Status "Success" "Download complete."
-                        Write-Log "Downloaded $TName successfully."
+                        # Check if file is valid ( > 1kb)
+                        if ((Get-Item $ZipPath).Length -gt 1024) {
+                            $DownloadSuccess = $true
+                        } else {
+                            Remove-Item $ZipPath -Force -ErrorAction SilentlyContinue
+                            throw "File too small (blocked)"
+                        }
                     } catch {
-                        Set-Status "Error" "Download failed."
-                        Write-Log "Error downloading $TName"
+                        Write-Log "Method 1 failed: Trying Method 2..."
+                        try {
+                            # METHOD 2: WebClient (Failsafe for strict blocks)
+                            $WebClient = New-Object System.Net.WebClient
+                            $WebClient.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
+                            $WebClient.DownloadFile($TData.URL, $ZipPath)
+                            
+                            if ((Get-Item $ZipPath).Length -gt 1024) {
+                                $DownloadSuccess = $true
+                            }
+                        } catch {
+                            Write-Log "Download failed completely."
+                        }
                     }
+                } else {
+                    $DownloadSuccess = $true
+                }
+
+                # 4. Extract and Run
+                if ($DownloadSuccess -and (Test-Path $ZipPath)) {
+                    try {
+                        Write-Log "Extracting $TName..."
+                        # Create folder if not exists
+                        if (!(Test-Path $ExtractPath)) { New-Item -ItemType Directory -Path $ExtractPath | Out-Null }
+                        
+                        # Extract
+                        Expand-Archive -Path $ZipPath -DestinationPath $ExtractPath -Force -ErrorAction Stop
+                        
+                        # Find EXE
+                        $ExeFile = Get-ChildItem $ExtractPath -Filter "*.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
+                        
+                        if ($ExeFile) {
+                            Start-Process $ExeFile.FullName
+                            Set-Status "Success" "Tool extracted & running."
+                            Write-Log "Success: Launched $($ExeFile.Name)"
+                        } else {
+                            # No exe found? Just open the folder
+                            Start-Process $ExtractPath
+                            Write-Log "No EXE found, opened folder."
+                        }
+                    } catch {
+                        Write-Log "Extraction Error: $_"
+                        # Fallback: Open the Zip file itself
+                        Start-Process $ZipPath
+                    }
+                } else {
+                    Set-Status "Error" "Could not download."
+                    Write-Log "Critical Error: File not found or empty."
                 }
             }
             elseif ($TData.Type -eq "GitHub") {
@@ -563,7 +620,7 @@ foreach ($Cat in $Categories) {
    }
 })
 
-Write-Log "Mecz Launcher v2.9 initialized."
-Write-Host "Mecz Launcher loaded. NirSoft download fixed!"
+Write-Log "Mecz Launcher v3.0 initialized."
+Write-Host "Mecz Launcher loaded. Auto-Extract enabled."
 
  $window.ShowDialog() | Out-Null

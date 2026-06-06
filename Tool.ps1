@@ -1,6 +1,6 @@
 # ==============================================================================
-# MECZ LAUNCHER v2.7 (ALL BIG TOOLS - COMPATIBILITY FIX)
-# Features: All Tools Enlarged, Flat Cat Mascot, Seamless Design
+# MECZ LAUNCHER v2.8 (NIRSOFT + ZIMMERMAN ADDITION)
+# Features: All Tools Enlarged, Flat Cat Mascot, Direct Download Support
 # Author: mecz.exe
 # ==============================================================================
 
@@ -23,6 +23,7 @@ Add-Type -Name User32 -Namespace Win32 -MemberDefinition @"
 
 # --- TOOL DATA ---
  $ToolData = @(
+    # --- ORBDIFF ---
     @{ Name="PrefetchView"; Category="Orbdiff"; Type="GitHub"; URL="https://github.com/Orbdiff/PrefetchView/releases/tag/v1.6.7" },
     @{ Name="BAMReveal"; Category="Orbdiff"; Type="GitHub"; URL="https://github.com/Orbdiff/BAMReveal/releases/tag/v1.3.1" },
     @{ Name="StringsParser"; Category="Orbdiff"; Type="GitHub"; URL="https://github.com/Orbdiff/StringsParser/releases/tag/v1.0" },
@@ -35,6 +36,8 @@ Add-Type -Name User32 -Namespace Win32 -MemberDefinition @"
     @{ Name="PFTrace"; Category="Orbdiff"; Type="GitHub"; URL="https://github.com/Orbdiff/PFTrace/releases/tag/v1.0.1" },
     @{ Name="CheckDeletedUSN"; Category="Orbdiff"; Type="GitHub"; URL="https://github.com/Orbdiff/CheckDeletedUSN/releases/tag/v0.2.1" },
     @{ Name="JARParser"; Category="Orbdiff"; Type="GitHub"; URL="https://github.com/Orbdiff/JARParser/releases/tag/v1.2" },
+
+    # --- SPOKWN ---
     @{ Name="BAM-parser"; Category="Spokwn"; Type="GitHub"; URL="https://github.com/spokwn/BAM-parser/releases/tag/v1.2.9" },
     @{ Name="PathsParser"; Category="Spokwn"; Type="GitHub"; URL="https://github.com/spokwn/PathsParser/releases/tag/v1.2" },
     @{ Name="JournalTrace"; Category="Spokwn"; Type="GitHub"; URL="https://github.com/spokwn/JournalTrace/releases/tag/1.2" },
@@ -45,11 +48,15 @@ Add-Type -Name User32 -Namespace Win32 -MemberDefinition @"
     @{ Name="process-parser"; Category="Spokwn"; Type="GitHub"; URL="https://github.com/spokwn/process-parser/releases/tag/v0.5.5" },
     @{ Name="prefetch-parser"; Category="Spokwn"; Type="GitHub"; URL="https://github.com/spokwn/prefetch-parser/releases/tag/v1.5.5" },
     @{ Name="ActivitiesCache"; Category="Spokwn"; Type="GitHub"; URL="https://github.com/spokwn/ActivitiesCache-execution/releases/tag/v0.6.5" },
+
+    # --- TONYNOH ---
     @{ Name="MeowDoomsdayFucker"; Category="Tonynoh"; Type="GitHub"; URL="https://github.com/MeowTonynoh/MeowDoomsdayFucker/releases/tag/V.1.2" },
     @{ Name="MeowModAnalyzer"; Category="Tonynoh"; Type="Cmd"; Command="Invoke-Expression (Invoke-RestMethod 'https://raw.githubusercontent.com/MeowTonynoh/MeowModAnalyzer/main/MeowModAnalyzer.ps1')" },
     @{ Name="MeowResolver"; Category="Tonynoh"; Type="GitHub"; URL="https://github.com/MeowTonynoh/MeowResolver/releases/tag/MeowResolver" },
     @{ Name="MeowNovowareFucker"; Category="Tonynoh"; Type="GitHub"; URL="https://github.com/MeowTonynoh/MeowNovowareFucker/releases/tag/V1" },
     @{ Name="MeowImportsChecker"; Category="Tonynoh"; Type="GitHub"; URL="https://github.com/MeowTonynoh/MeowImportsChecker/releases/tag/MeowImportsChecker" },
+
+    # --- PRAISELILY ---
     @{ Name="PSHunter"; Category="Praiselily"; Type="GitHub"; URL="https://github.com/praiselily/PSHunter/releases/tag/Built" },
     @{ Name="AltDetector"; Category="Praiselily"; Type="GitHub"; URL="https://github.com/praiselily/AltDetector/releases/tag/Detector" },
     @{ Name="HotspotLogs"; Category="Praiselily"; Type="Cmd"; Command="iwr https://raw.githubusercontent.com/praiselily/WeHateFakers/refs/heads/main/HotspotLogs.ps1 | iex" },
@@ -57,12 +64,35 @@ Add-Type -Name User32 -Namespace Win32 -MemberDefinition @"
     @{ Name="HarddiskConverter"; Category="Praiselily"; Type="Cmd"; Command="Invoke-Expression (Invoke-RestMethod https://raw.githubusercontent.com/praiselily/lilith-ps/refs/heads/main/HarddiskConverter.ps1)" },
     @{ Name="Services"; Category="Praiselily"; Type="Cmd"; Command="Invoke-Expression (Invoke-RestMethod 'https://raw.githubusercontent.com/praiselily/lilith-ps/refs/heads/main/Services.ps1')" },
     @{ Name="Signed-Scheduled-Tasks"; Category="Praiselily"; Type="Cmd"; Command="Invoke-Expression (Invoke-RestMethod 'https://raw.githubusercontent.com/praiselily/lilith-ps/refs/heads/main/Signed-Scheduled-Tasks.ps1')" },
+
+    # --- REDLOTUS ---
     @{ Name="RedLotus-Mod-Analyzer"; Category="RedLotus"; Type="GitHub"; URL="https://github.com/ItzIceHere/RedLotus-Mod-Analyzer/releases/tag/RL" },
     @{ Name="RedLotus-Task-Sentinel"; Category="RedLotus"; Type="GitHub"; URL="https://github.com/ItzIceHere/RedLotus-Task-Sentinel/releases/tag/RL" },
     @{ Name="RedLotusAltChecker"; Category="RedLotus"; Type="GitHub"; URL="https://github.com/ItzIceHere/RedLotusAltChecker/releases/tag/RL" },
-    @{ Name="WinPrefetchView (NirSoft)"; Category="Others"; Type="Web"; URL="https://www.nirsoft.net/utils/win_prefetch_view.html" },
-    @{ Name="CompActivityView (NirSoft)"; Category="Others"; Type="Web"; URL="https://www.nirsoft.net/utils/computer_activity_view.html" },
-    @{ Name="AmcacheParser (EZ Tools)"; Category="Others"; Type="Web"; URL="https://download.ericzimmermanstools.com/net9/AmcacheParser.zip" },
+
+    # --- NIRSOFT (Direct Download) ---
+    @{ Name="ExecutedProgramsList"; Category="NirSoft"; Type="DirectDownload"; URL="https://www.nirsoft.net/utils/executed_programs_list.zip" },
+    @{ Name="WinPrefetchView"; Category="NirSoft"; Type="DirectDownload"; URL="https://www.nirsoft.net/utils/win_prefetch_view.zip" },
+    @{ Name="UserAssistView"; Category="NirSoft"; Type="DirectDownload"; URL="https://www.nirsoft.net/utils/userassist_view.zip" },
+    @{ Name="RegScanner"; Category="NirSoft"; Type="DirectDownload"; URL="https://www.nirsoft.net/utils/regscanner.zip" },
+    @{ Name="LoadedDllView"; Category="NirSoft"; Type="DirectDownload"; URL="https://www.nirsoft.net/utils/loaded_dll_view.zip" },
+    @{ Name="CompActivityView"; Category="NirSoft"; Type="DirectDownload"; URL="https://www.nirsoft.net/utils/computer_activity_view.zip" },
+    @{ Name="UninstallView"; Category="NirSoft"; Type="DirectDownload"; URL="https://www.nirsoft.net/utils/uninstall_view.zip" },
+    @{ Name="USBDevicesView"; Category="NirSoft"; Type="DirectDownload"; URL="https://www.nirsoft.net/utils/usb_devices_view.zip" },
+    @{ Name="FileActivityWatch"; Category="NirSoft"; Type="DirectDownload"; URL="https://www.nirsoft.net/utils/file_activity_watch.zip" },
+    @{ Name="BrowsingHistoryView"; Category="NirSoft"; Type="DirectDownload"; URL="https://www.nirsoft.net/utils/browsing_history_view.zip" },
+    @{ Name="NetworkUsageView"; Category="NirSoft"; Type="DirectDownload"; URL="https://www.nirsoft.net/utils/network_usage_view.zip" },
+
+    # --- ZIMMERMAN (Direct Download) ---
+    @{ Name="JumpListExplorer"; Category="Zimmerman"; Type="DirectDownload"; URL="https://download.ericzimmermanstools.com/net9/JumpListExplorer.zip" },
+    @{ Name="BStrings"; Category="Zimmerman"; Type="DirectDownload"; URL="https://download.ericzimmermanstools.com/net9/bstrings.zip" },
+    @{ Name="PECmd"; Category="Zimmerman"; Type="DirectDownload"; URL="https://download.ericzimmermanstools.com/net9/PECmd.zip" },
+    @{ Name="RECmd"; Category="Zimmerman"; Type="DirectDownload"; URL="https://download.ericzimmermanstools.com/net9/RECmd.zip" },
+    @{ Name="LECmd"; Category="Zimmerman"; Type="DirectDownload"; URL="https://download.ericzimmermanstools.com/net9/LECmd.zip" },
+    @{ Name="AmcacheParser"; Category="Zimmerman"; Type="DirectDownload"; URL="https://download.ericzimmermanstools.com/net9/AmcacheParser.zip" },
+    @{ Name="AppCompatCacheParser"; Category="Zimmerman"; Type="DirectDownload"; URL="https://download.ericzimmermanstools.com/net9/AppCompatCacheParser.zip" },
+
+    # --- OTHERS ---
     @{ Name="SystemInformer"; Category="Others"; Type="Web"; URL="https://www.systeminformer.com/canary" },
     @{ Name="DIE-engine"; Category="Others"; Type="Web"; URL="https://github.com/horsicq/DIE-engine/releases" },
     @{ Name="DQRKIS-FUCKER"; Category="Others"; Type="Cmd"; Command="Invoke-Expression (Invoke-RestMethod 'https://raw.githubusercontent.com/cheesecatlol/DQRKIS-FUCKER/refs/heads/main/DqrkisFucker.ps1')" },
@@ -70,7 +100,7 @@ Add-Type -Name User32 -Namespace Win32 -MemberDefinition @"
 )
 
 # ==============================================================================
-# XAML UI (SEAMLESS + SIDEBAR CAT - FIXED)
+# XAML UI
 # ==============================================================================
 
 [xml]$xaml = @"
@@ -215,7 +245,7 @@ Add-Type -Name User32 -Namespace Win32 -MemberDefinition @"
                     <!-- Sidebar -->
                     <StackPanel Grid.Column="0" Background="{StaticResource SidebarBg}">
                         
-                        <!-- THE CAT (NO EFFECT TO FIX PARSER) -->
+                        <!-- THE CAT -->
                         <TextBlock Text="🐈" FontSize="80" HorizontalAlignment="Center" Foreground="{StaticResource Accent}" Margin="0,10,0,10"/>
 
                         <!-- Section: Main -->
@@ -228,7 +258,7 @@ Add-Type -Name User32 -Namespace Win32 -MemberDefinition @"
                         <Button x:Name="DiscordBtn" Content="Discord: mecz.exe" Style="{StaticResource SocialBtn}" Background="{StaticResource DiscordColor}" Foreground="White"/>
                         <Button x:Name="GithubBtn" Content="GitHub: Nickk196" Style="{StaticResource SocialBtn}" Background="{StaticResource GithubColor}" Foreground="White"/>
                         
-                        <TextBlock Text="v2.7 | All Big" FontSize="10" Foreground="#555" Margin="12,40,12,15" HorizontalAlignment="Center"/>
+                        <TextBlock Text="v2.8 | Mega Update" FontSize="10" Foreground="#555" Margin="12,40,12,15" HorizontalAlignment="Center"/>
                     </StackPanel>
 
                     <!-- Main Panel -->
@@ -358,7 +388,7 @@ function Get-GitHubExeUrl {
 }
 
 # --- POPULATE TABS ---
- $Categories = @("Orbdiff", "Spokwn", "RedLotus", "Tonynoh", "Praiselily", "Others")
+ $Categories = @("Orbdiff", "Spokwn", "RedLotus", "Tonynoh", "Praiselily", "NirSoft", "Zimmerman", "Others")
 
 foreach ($Cat in $Categories) {
     $Tab = New-Object System.Windows.Controls.TabItem
@@ -430,6 +460,33 @@ foreach ($Cat in $Categories) {
                 Set-Status "Browser" "Opening link."
                 Write-Log "Opened browser for $TName"
             }
+            elseif ($TData.Type -eq "DirectDownload") {
+                # Logic for NirSoft/Zimmerman direct downloads
+                if (!(Test-Path $installDir)) { New-Item -ItemType Directory -Path $installDir | Out-Null }
+                
+                $FileName = $TData.URL.Substring($TData.URL.LastIndexOf("/") + 1)
+                $LocalPath = Join-Path $installDir $FileName
+                
+                if (Test-Path $LocalPath) {
+                    Start-Process $LocalPath
+                    Set-Status "Launched" "Using local file."
+                    Write-Log "Launched $TName (Local)"
+                } else {
+                    Set-Status "Downloading" "Downloading $FileName..."
+                    Write-Log "Downloading from: $($TData.URL)"
+                    try {
+                        $ProgressPreference = 'SilentlyContinue'
+                        Invoke-WebRequest -Uri $TData.URL -OutFile $LocalPath -UseBasicParsing
+                        $ProgressPreference = 'Continue'
+                        Start-Process $LocalPath
+                        Set-Status "Success" "Download complete."
+                        Write-Log "Downloaded $TName successfully."
+                    } catch {
+                        Set-Status "Error" "Download failed."
+                        Write-Log "Error downloading $TName"
+                    }
+                }
+            }
             elseif ($TData.Type -eq "GitHub") {
                 $TempPath = "$env:TEMP\$($TName).exe"
                 if (Test-Path $TempPath) {
@@ -479,31 +536,31 @@ foreach ($Cat in $Categories) {
  $GithubHeaderBtn.Add_Click({ Start-Process "https://github.com/Nickk196" })
 
  $OpenFolderBtn.Add_Click({
-    if (!(Test-Path $installDir)) { New-Item -ItemType Directory -Path $installDir | Out-Null }
-    Start-Process $installDir
-    Set-Status "Folder" "Opened directory."
+   if (!(Test-Path $installDir)) { New-Item -ItemType Directory -Path $installDir | Out-Null }
+   Start-Process $installDir
+   Set-Status "Folder" "Opened directory."
 })
 
  $ClearCacheBtn.Add_Click({
-    $files = Get-ChildItem -Path $env:TEMP -Filter "*.exe" -ErrorAction SilentlyContinue | Where-Object { $_.Name -match "Prefetch|BAM|Meow|PSHunter" }
-    if ($files) {
-        $files | Remove-Item -Force -ErrorAction SilentlyContinue
-        Write-Log "Cleared temporary files."
-        Set-Status "Clean" "Cache cleared."
-    } else {
-        Write-Log "No files to clear."
-    }
+   $files = Get-ChildItem -Path $env:TEMP -Filter "*.exe" -ErrorAction SilentlyContinue | Where-Object { $_.Name -match "Prefetch|BAM|Meow|PSHunter" }
+   if ($files) {
+       $files | Remove-Item -Force -ErrorAction SilentlyContinue
+       Write-Log "Cleared temporary files."
+       Set-Status "Clean" "Cache cleared."
+   } else {
+       Write-Log "No files to clear."
+   }
 })
 
 # --- MECZ FEATURE: GLOBAL ENTER KEY ---
  $window.Add_KeyDown({
-    if ($_.Key -eq "Enter") {
-        Write-Log "Meow! 🐱 (Pressed Enter)"
-        Write-Host "Meow! 🐱"
-    }
+   if ($_.Key -eq "Enter") {
+       Write-Log "Meow! 🐱 (Pressed Enter)"
+       Write-Host "Meow! 🐱"
+   }
 })
 
-Write-Log "Mecz Launcher v2.7 initialized."
-Write-Host "Mecz Launcher loaded. ALL TOOLS ARE BIG!"
+Write-Log "Mecz Launcher v2.8 initialized."
+Write-Host "Mecz Launcher loaded. NirSoft & Zimmerman added!"
 
  $window.ShowDialog() | Out-Null

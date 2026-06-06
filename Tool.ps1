@@ -1,6 +1,6 @@
 # ==============================================================================
-# MECZ LAUNCHER v2.8 (NIRSOFT + ZIMMERMAN ADDITION)
-# Features: All Tools Enlarged, Flat Cat Mascot, Direct Download Support
+# MECZ LAUNCHER v2.9 (NIRSOFT FIX - USER AGENT SPOOF)
+# Features: All Tools Enlarged, Flat Cat Mascot, Fixed NirSoft Downloads
 # Author: mecz.exe
 # ==============================================================================
 
@@ -258,7 +258,7 @@ Add-Type -Name User32 -Namespace Win32 -MemberDefinition @"
                         <Button x:Name="DiscordBtn" Content="Discord: mecz.exe" Style="{StaticResource SocialBtn}" Background="{StaticResource DiscordColor}" Foreground="White"/>
                         <Button x:Name="GithubBtn" Content="GitHub: Nickk196" Style="{StaticResource SocialBtn}" Background="{StaticResource GithubColor}" Foreground="White"/>
                         
-                        <TextBlock Text="v2.8 | Mega Update" FontSize="10" Foreground="#555" Margin="12,40,12,15" HorizontalAlignment="Center"/>
+                        <TextBlock Text="v2.9 | NirSoft Fixed" FontSize="10" Foreground="#555" Margin="12,40,12,15" HorizontalAlignment="Center"/>
                     </StackPanel>
 
                     <!-- Main Panel -->
@@ -476,8 +476,11 @@ foreach ($Cat in $Categories) {
                     Write-Log "Downloading from: $($TData.URL)"
                     try {
                         $ProgressPreference = 'SilentlyContinue'
-                        Invoke-WebRequest -Uri $TData.URL -OutFile $LocalPath -UseBasicParsing
+                        # --- FIX: SPOOF USER AGENT TO BYPASS NIRSOFT BLOCK ---
+                        $UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+                        Invoke-WebRequest -Uri $TData.URL -OutFile $LocalPath -UserAgent $UserAgent -UseBasicParsing
                         $ProgressPreference = 'Continue'
+                        
                         Start-Process $LocalPath
                         Set-Status "Success" "Download complete."
                         Write-Log "Downloaded $TName successfully."
@@ -560,7 +563,7 @@ foreach ($Cat in $Categories) {
    }
 })
 
-Write-Log "Mecz Launcher v2.8 initialized."
-Write-Host "Mecz Launcher loaded. NirSoft & Zimmerman added!"
+Write-Log "Mecz Launcher v2.9 initialized."
+Write-Host "Mecz Launcher loaded. NirSoft download fixed!"
 
  $window.ShowDialog() | Out-Null
